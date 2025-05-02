@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Split from 'react-split';
 import {
   Box,
@@ -16,11 +16,9 @@ import {
   Paper
 } from '@mui/material';
 import {
-  Code as CodeIcon,
   PlayArrow as PlayArrowIcon,
   Description as DescriptionIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import CodeEditor from './components/CodeEditor';
 import ResponsePanel from './components/ResponsePanel';
 import DocumentationPanel from './components/DocumentationPanel';
@@ -34,47 +32,77 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  // Delete this if you dont want text appearing when reloading the page
-  const [code, setCode] = useState<string>(`import requests
-
-url = "https://jsonplaceholder.typicode.com/todos/1"
-
-
-response = requests.get(url)
-
-
-if response.status_code == 200:
-    data = response.json()
-    print("API Response:", data)
-else:
-    print(f"Failed to retrieve data. Status code: {response.status_code}")
-
-
-`);
-    
-    
-  
-  const [response, setResponse] = useState<any>(null);
-  const [showDocs, setShowDocs] = useState<boolean>(false);
-
+  const [code, setCode] = useState(`print("Hello, Pyodide!")`);
+  const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pyodide, setPyodide] = useState<any>(null);
+  const [showDocs, setShowDocs] = useState(false);
+
+  // Load Pyodide on component mount
+  useEffect(() => {
+    async function loadPyodideLib() {
+      try {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js";
+        script.onload = async () => {
+          try {
+            const py = await window.loadPyodide();
+            setPyodide(py);
+            console.log("✅ Pyodide loaded");
+
+            await py.loadPackage("micropip");
+
+            // Load requests package 
+            await py.runPythonAsync(`
+              import micropip
+              try:
+                  await micropip.install("requests")
+                  print("✅ Requests installed successfully")
+              except Exception as e:
+                  print(f"❌ Failed to install requests: {e}")
+              `);
+          } catch (err) {
+            console.error("Failed to load Pyodide:", err);
+          }
+        };
+        document.body.appendChild(script);
+      } catch (error) {
+        console.error("Error setting up Pyodide:", error);
+      }
+    }
+    loadPyodideLib();
+  }, []);
 
   const handleExecuteCode = async () => {
+    if (!pyodide) {
+      setResponse("Error: Pyodide is not loaded yet.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/run", {
-        code,
-        language: "python"
-      });
-      setResponse(res.data.output);
+      // Redirect sys.stdout to capture print() output
+      pyodide.runPython(`
+        import sys
+        from io import StringIO
+        sys.stdout = StringIO()
+      `);
+
+      // Execute the Python code
+      const result = await pyodide.runPythonAsync(code);
+      
+      // Retrieve the captured stdout content
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      
+      // Combine the result and stdout
+      const fullResponse = stdout + (result !== undefined ? "\nResult: " + result : "");
+      setResponse(fullResponse);
     } catch (err) {
-      setResponse("Error: " + (err instanceof Error ? err.message : "Unknown error"));
+      setResponse("Error:\n" + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
   };
-  
-
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -121,7 +149,7 @@ else:
             {/* Code Editor */}
             <Box sx={{ p: 1 }}>
               <Paper elevation={3} sx={{ height: '100%', p: 2 }}>
-                <CodeEditor value={code} onChange={setCode} />
+                <CodeEditor code={code} setCode={setCode} />
               </Paper>
             </Box>
 

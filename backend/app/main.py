@@ -29,6 +29,12 @@ class CodeInput(BaseModel):
 
 @app.post("/run")
 async def run_code(code_input: CodeInput):
-    print (code_input)
-    result = await executor.execute_code(code_input.code, code_input.language)
-    return result
+    print(code_input)
+    try:
+        result = await executor.execute_code(code_input.code, code_input.language)
+        return result
+    except Exception as e:
+        import traceback
+        print(f"Error executing code: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
