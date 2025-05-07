@@ -9,27 +9,16 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Paper
 } from '@mui/material';
-import {
-  PlayArrow as PlayArrowIcon,
-  Description as DescriptionIcon
-} from '@mui/icons-material';
+import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
 import CodeEditor from './components/CodeEditor';
 import ResponsePanel from './components/ResponsePanel';
 import DocumentationPanel from './components/DocumentationPanel';
+import FolderStructure from './components/FolderStructure';
+import globalTheme from './themes/globalTheme';
 
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: { main: '#90caf9' },
-    secondary: { main: '#f48fb1' },
-  },
-});
+
 
 function App() {
   const [code, setCode] = useState(`print("Hello, Pyodide!")`);
@@ -37,13 +26,13 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [pyodide, setPyodide] = useState<any>(null);
   const [showDocs, setShowDocs] = useState(false);
+  const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
 
-  // Load Pyodide on component mount
   useEffect(() => {
     async function loadPyodideLib() {
       try {
         const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js";
+        script.src = "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js";
         script.onload = async () => {
           try {
             const py = await window.loadPyodide();
@@ -52,7 +41,6 @@ function App() {
 
             await py.loadPackage("micropip");
 
-            // Load requests package 
             await py.runPythonAsync(`
               import micropip
               try:
@@ -81,20 +69,14 @@ function App() {
 
     setLoading(true);
     try {
-      // Redirect sys.stdout to capture print() output
       pyodide.runPython(`
         import sys
         from io import StringIO
         sys.stdout = StringIO()
       `);
 
-      // Execute the Python code
       const result = await pyodide.runPythonAsync(code);
-      
-      // Retrieve the captured stdout content
       const stdout = pyodide.runPython("sys.stdout.getvalue()");
-      
-      // Combine the result and stdout
       const fullResponse = stdout + (result !== undefined ? "\nResult: " + result : "");
       setResponse(fullResponse);
     } catch (err) {
@@ -105,7 +87,7 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={globalTheme}>
       <CssBaseline />
       <AppBar position="fixed">
         <Toolbar>
@@ -118,63 +100,100 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', mt: 8 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', pt: 8 }}>
+        {/* Top Section: Split into two halves vertically */}
         <Split
           direction="vertical"
-          sizes={showDocs ? [75, 25] : [100, 0]}
-          minSize={0}
-          expandToMin={false}
-          gutterSize={6}
-          style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+          sizes={[70, 30]}
+          minSize={100}
+          gutterSize={5}
+          style={{ height: '100%' }}
         >
-          {/* Top Section: Main App */}
+          {/* Upper Half: Folder Structure, Code Editor, and Response Panel */}
           <Split
-            className="split-horizontal"
-            sizes={[15, 60, 25]}
-            minSize={150}
-            gutterSize={10}
-            direction="horizontal"
+            sizes={[20, 50, 30]}
+            minSize={100}
+            gutterSize={5}
             style={{ display: 'flex', height: '100%' }}
           >
-            {/* Sidebar */}
-            <Box sx={{ p: 1, backgroundColor: '#1e1e1e' }}>
-              <List>
-                <ListItemButton onClick={() => setShowDocs(prev => !prev)}>
-                  <ListItemIcon><DescriptionIcon /></ListItemIcon>
-                  <ListItemText primary="Docs" />
-                </ListItemButton> 
-              </List>
-            </Box>
+            {/* Folder Structure */}
+            <Paper 
+              elevation={3} 
+              sx={{ 
+                overflow: 'auto',
+                borderRadius: 0,
+                m: 0,
+              
+              }}
+            >
+              <FolderStructure onSelectEndpoint={setSelectedEndpointId} />
+            </Paper>
 
             {/* Code Editor */}
-            <Box sx={{ p: 1 }}>
-              <Paper elevation={3} sx={{ height: '100%', p: 2 }}>
-                <CodeEditor code={code} setCode={setCode} />
-              </Paper>
-            </Box>
+            <Paper 
+              elevation={3} 
+              sx={{ 
+                overflow: 'hidden', // Prevent scrollbars from interfering
+                borderRadius: 0,
+                m: 0,
+                height: '100%', // Ensure it takes up the full height
+              }}
+            >
+              <CodeEditor code={code} setCode={setCode} />
+            </Paper>
 
             {/* Response Panel */}
-            <Box sx={{ p: 1 }}>
-              <Paper elevation={3} sx={{ height: '100%', p: 2 }}>
+            <Paper 
+              elevation={3} 
+              sx={{ 
+                overflow: 'auto',
+                borderRadius: 0,
+                m: 0
+              }}
+            >
+              <Box sx={{ p: 2 }}>
                 <Typography variant="h6" gutterBottom>
                   Response
                 </Typography>
                 <ResponsePanel response={response} loading={loading} />
-              </Paper>
-            </Box>
+              </Box>
+            </Paper>
           </Split>
 
-          {/* Bottom Section: Documentation */}
-          <Box sx={{ p: 1 }}>
-            {showDocs && (
-              <Paper elevation={3} sx={{ height: '100%', p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Documentation
-                </Typography>
-                <DocumentationPanel />
-              </Paper>
-            )}
-          </Box>
+          {/* Bottom Half: Documentation Panel (Console-like) */}
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              display: 'flex', // Enable flex layout
+              flexDirection: 'column', // Ensure children stack vertically
+              flex: 1, // Allow this section to grow and fill available space
+              overflow: 'hidden', // Prevent scrollbars from interfering
+              backgroundColor: '#1e1e1e',
+              borderTop: '1px solid #333',
+              borderRadius: 0,
+              m: 0
+            }}
+          >
+            <Box 
+              sx={{ 
+                backgroundColor: '#2d2d2d', 
+                p: 0.5, 
+                pl: 2,
+                borderBottom: '1px solid #333',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#cccccc' }}>
+                DOCUMENTATION
+              </Typography>
+            </Box>
+            
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
+              {/* Documentation Panel */}
+              <DocumentationPanel endpointId={selectedEndpointId} />
+            </Box>
+          </Paper>
         </Split>
       </Box>
     </ThemeProvider>

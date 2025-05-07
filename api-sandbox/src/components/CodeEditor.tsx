@@ -13,19 +13,16 @@ interface CodeEditorProps {
 }
 
 export default function PythonEditor( { code, setCode }: CodeEditorProps) {
- 
-
   return (
-    <div>
+  
       <Editor
-        height="300px"
+        height="100%"
+        width="100%"
         defaultLanguage="python"
         value={code}
         onChange={(val) => setCode(val || "")}
         theme="vs-dark"
       />
-   
-     
-    </div>
+
   );
 }
