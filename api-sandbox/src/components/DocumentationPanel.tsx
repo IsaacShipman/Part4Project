@@ -29,127 +29,14 @@ import {
   AccountTree,
   ContentCopy
 } from '@mui/icons-material';
+import { EndpointData } from '../types'
+import { defaultEndpointData } from '../types'
+import { DocumentationPanelProps } from '../types'
+import CodeBlock from './CodeBlock';
 
-// Define TypeScript interfaces for the data structure
-interface RequiredParam {
-  name: string;
-  type: string;
-  description: string;
-}
 
-interface ResponseField {
-  name: string;
-  type: string;
-  description: string;
-}
 
-interface ResponseSchema {
-  brief: string;
-  fields: ResponseField[];
-}
 
-interface Documentation {
-  description: string;
-  required_params: RequiredParam[];
-  response_schema: ResponseSchema;
-}
-
-interface CodeExample {
-  language: string;
-  code: string;
-  description: string;
-}
-
-interface EndpointData {
-  method: string;
-  path: string;
-  summary: string;
-  operation_id: string;
-  doc_url: string;
-  documentation: Documentation;
-  code_examples: CodeExample[];
-  category: string;
-}
-
-// Component that displays code with syntax highlighting (simple version)
-const CodeBlock = ({ code, language }: { code: string; language: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
-    });
-  };
-
-  return (
-    <Box
-      component="div"
-      sx={{
-        position: 'relative',
-        backgroundColor: '#0a0a0a',
-        color: '#e6e6e6',
-        padding: 2,
-        borderRadius: 1,
-        overflow: 'auto',
-        fontSize: '0.8rem',
-        fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
-        maxHeight: '180px',
-        '&::-webkit-scrollbar': {
-          width: '8px',
-          height: '8px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          borderRadius: '4px',
-        },
-      }}
-    >
-      <Box component="code">{code}</Box>
-      <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="top">
-        <IconButton
-          onClick={handleCopy}
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            color: '#90caf9',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            },
-          }}
-        >
-          <ContentCopy fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
-};
-
-// Define default values for EndpointData
-const defaultEndpointData: EndpointData = {
-  method: '',
-  path: '',
-  summary: '',
-  operation_id: '',
-  doc_url: '',
-  documentation: {
-    description: '',
-    required_params: [],
-    response_schema: {
-      brief: '',
-      fields: [],
-    },
-  },
-  code_examples: [],
-  category: '',
-};
-
-interface DocumentationPanelProps {
-  endpointId: number | null;
-}
 
 // Main component
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) => {

@@ -14,33 +14,20 @@ import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { Endpoint } from '../types';
+import { FolderStructure } from '../types';
 
 // Define types for the data structure
-interface Endpoint {
-  id: number;
-  method: string;
-  path: string;
-  summary: string;
-  category: string;
-}
-
-interface FolderStructure {
-  isEndpoint: boolean;
-  fullPath: string;
-  children: Record<string, FolderStructure>;
-  endpoints: Endpoint[];
-}
-
 interface FolderItemProps {
-  name: string;
-  structure: FolderStructure;
-  onSelectEndpoint: (endpointId: number) => void;
-  selectedEndpointId: number | null;
-}
-
-interface APIFolderStructureProps {
-  onSelectEndpoint: (endpointId: number) => void;
-}
+    name: string;
+    structure: FolderStructure;
+    onSelectEndpoint: (endpointId: number) => void;
+    selectedEndpointId: number | null;
+  }
+  
+  export interface APIFolderStructureProps {
+    onSelectEndpoint: (endpointId: number) => void;
+  }
 
 export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStructureProps) {
   const [data, setData] = useState<Record<string, Endpoint[]> | null>(null);
@@ -52,11 +39,10 @@ export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStruct
   // Predefined categories
   const predefinedCategories = ["repositories", "contents", "branches", "commits", "pull_requests", "issues"];
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api-docs/structure"); // Adjust the URL if needed
+        const response = await fetch("http://localhost:8000/api-docs/structure"); 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
