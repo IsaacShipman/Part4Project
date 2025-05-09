@@ -35,10 +35,6 @@ import { DocumentationPanelProps } from '../types'
 import CodeBlock from './CodeBlock';
 
 
-
-
-
-// Main component
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -74,7 +70,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) =
   // Format method for method badge styling
   const getMethodColor = (method: string) => {
     switch (method.toUpperCase()) {
-      case 'GET': return '#2e7d32'; // Darker green for dark theme
+      case 'GET': return '#2e7d32'; // Darker green 
       case 'POST': return '#1565c0'; // Darker blue
       case 'PUT': return '#e65100'; // Darker orange
       case 'DELETE': return '#c62828'; // Darker red

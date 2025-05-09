@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 
-/**
- * JsonViewer component for displaying JSON data in an interactive, collapsible tree view
- * @param {Object} props
- * @param {string|Object} props.data - JSON string or object to display
- * @returns {JSX.Element}
- */
+
 const JsonViewer = ({ data }) => {
   const [expandedKeys, setExpandedKeys] = useState(new Set());
 
@@ -106,11 +101,10 @@ const JsonViewer = ({ data }) => {
     } catch (error) {
       // If standard parsing fails, try handling common issues like single quotes
       try {
-        // Replace single quotes with double quotes for both keys and values
-        // This regex replaces single quotes that are either at the start of a string or after a colon
+
         const fixedJson = jsonString
           .replace(/'/g, '"')
-          .replace(/(\w+):/g, '"$1":'); // Fix unquoted keys if present
+          .replace(/(\w+):/g, '"$1":'); 
         
         const parsed = JSON.parse(fixedJson);
         return (

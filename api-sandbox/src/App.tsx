@@ -26,7 +26,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [pyodide, setPyodide] = useState<any>(null);
   const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
-  const [activePanel, setActivePanel] = useState<'documentation' | 'console'>('console'); // New state
+  const [activePanel, setActivePanel] = useState<'documentation' | 'console'>('console'); 
   const [getRequests, setGetRequests] = useState<{ line: number; url: string; type: string }[]>([]);
   const [apiResponses, setApiResponses] = useState<{ line: number; url: string; response: string }[]>([]);
 
@@ -69,9 +69,9 @@ function App() {
       return;
     }
 
-    setActivePanel('console'); // Switch to console panel
+    setActivePanel('console'); 
     setLoading(true);
-    setApiResponses([]); // Clear previous API responses
+    setApiResponses([]); 
     try {
       pyodide.runPython(`
         import sys
@@ -80,8 +80,8 @@ function App() {
       `);
 
       // Wrap the code to intercept requests.get calls
-      const wrappedCode = `
-import requests
+      //DONT CHANGE THE INDENTATION OF THIS PYTHON CODE
+      const wrappedCode = `import requests
 original_get = requests.get
 responses = []
 
@@ -121,7 +121,7 @@ responses
 
   const handleSelectEndpoint = (endpointId: number) => {
     setSelectedEndpointId(endpointId);
-    setActivePanel('documentation'); // Switch to documentation panel
+    setActivePanel('documentation'); 
   };
 
   useEffect(() => {

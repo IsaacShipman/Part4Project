@@ -102,7 +102,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
       dragInterval={1}
       direction="horizontal"
       cursor="col-resize"
-      style={{ display: 'flex', height: '100%' }} // Ensure parent container fills the screen
+      style={{ display: 'flex', height: '100%' }} 
       onDragEnd={(sizes) => {
         setSplitSizes(sizes);
         setTerminalMaximized(sizes[0] === 0);
@@ -329,7 +329,6 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         
         <Box 
           sx={{ 
-            flexGrow: 1, // Ensure this Box grows to fill the panel
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -341,8 +340,8 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
             ref={terminalRef}
             sx={{
               flexGrow: 1,
-              overflowY: 'auto', // Ensure vertical scrolling
-              overflowX: 'hidden', // Prevent horizontal scrolling
+              overflowY: 'auto', 
+              overflowX: 'hidden', 
               scrollbarWidth: 'thin',
               maxHeight: '100%',
               scrollbarColor: 'rgba(255,255,255,0.2) transparent',
