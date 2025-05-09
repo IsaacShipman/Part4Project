@@ -9,7 +9,8 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  Paper
+  Paper,
+  Button,
 } from '@mui/material';
 import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
 import CodeEditor from './components/CodeEditor';
@@ -17,16 +18,17 @@ import ResponsePanel from './components/ResponsePanel';
 import DocumentationPanel from './components/DocumentationPanel';
 import FolderStructure from './components/FolderStructure';
 import globalTheme from './themes/globalTheme';
-
-
+import { scanForRequests } from './components/JsonViewer';
 
 function App() {
   const [code, setCode] = useState(`print("Hello, Pyodide!")`);
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pyodide, setPyodide] = useState<any>(null);
-  const [showDocs, setShowDocs] = useState(false);
   const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
+  const [activePanel, setActivePanel] = useState<'documentation' | 'console'>('console'); // New state
+  const [getRequests, setGetRequests] = useState<{ line: number; url: string; type: string }[]>([]);
+  const [apiResponses, setApiResponses] = useState<{ line: number; url: string; response: string }[]>([]);
 
   useEffect(() => {
     async function loadPyodideLib() {
@@ -67,7 +69,9 @@ function App() {
       return;
     }
 
+    setActivePanel('console'); // Switch to console panel
     setLoading(true);
+    setApiResponses([]); // Clear previous API responses
     try {
       pyodide.runPython(`
         import sys
@@ -75,16 +79,55 @@ function App() {
         sys.stdout = StringIO()
       `);
 
-      const result = await pyodide.runPythonAsync(code);
+      // Wrap the code to intercept requests.get calls
+      const wrappedCode = `
+import requests
+original_get = requests.get
+responses = []
+
+def custom_get(url, *args, **kwargs):
+    response = original_get(url, *args, **kwargs)
+    responses.append((url, response.text))
+    return response
+
+requests.get = custom_get
+
+${code}
+
+requests.get = original_get
+responses
+      `;
+
+      // Run the Python code and capture the API responses
+      const apiResponsesResult = await pyodide.runPythonAsync(wrappedCode);
+
+      // Capture the terminal output (stdout)
       const stdout = pyodide.runPython("sys.stdout.getvalue()");
-      const fullResponse = stdout + (result !== undefined ? "\nResult: " + result : "");
-      setResponse(fullResponse);
+      setResponse(stdout); // Only set stdout to the terminal output
+
+      // Parse and store API responses
+      const parsedResponses = apiResponsesResult.map(([url, response]: [string, string], index: number) => ({
+        line: getRequests[index]?.line || -1,
+        url,
+        response,
+      }));
+      setApiResponses(parsedResponses);
     } catch (err) {
       setResponse("Error:\n" + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
   };
+
+  const handleSelectEndpoint = (endpointId: number) => {
+    setSelectedEndpointId(endpointId);
+    setActivePanel('documentation'); // Switch to documentation panel
+  };
+
+  useEffect(() => {
+    const requests = scanForRequests(code);
+    setGetRequests(requests);
+  }, [code]);
 
   return (
     <ThemeProvider theme={globalTheme}>
@@ -101,7 +144,6 @@ function App() {
       </AppBar>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', pt: 8 }}>
-        {/* Top Section: Split into two halves vertically */}
         <Split
           direction="vertical"
           sizes={[70, 30]}
@@ -109,89 +151,83 @@ function App() {
           gutterSize={5}
           style={{ height: '100%' }}
         >
-          {/* Upper Half: Folder Structure, Code Editor, and Response Panel */}
           <Split
             sizes={[20, 50, 30]}
             minSize={100}
             gutterSize={5}
             style={{ display: 'flex', height: '100%' }}
           >
-            {/* Folder Structure */}
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                overflow: 'auto',
-                borderRadius: 0,
-                m: 0,
-              
-              }}
-            >
-              <FolderStructure onSelectEndpoint={setSelectedEndpointId} />
+            <Paper elevation={3} sx={{ overflow: 'auto', borderRadius: 0, m: 0 }}>
+              <FolderStructure onSelectEndpoint={handleSelectEndpoint} />
             </Paper>
 
-            {/* Code Editor */}
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                overflow: 'hidden', // Prevent scrollbars from interfering
-                borderRadius: 0,
-                m: 0,
-                height: '100%', // Ensure it takes up the full height
-              }}
-            >
+            <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 0, m: 0, height: '100%' }}>
               <CodeEditor code={code} setCode={setCode} />
-            </Paper>
-
-            {/* Response Panel */}
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                overflow: 'auto',
-                borderRadius: 0,
-                m: 0
-              }}
-            >
-              <Box sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Response
-                </Typography>
-                <ResponsePanel response={response} loading={loading} />
-              </Box>
             </Paper>
           </Split>
 
-          {/* Bottom Half: Documentation Panel (Console-like) */}
-          <Paper 
-            elevation={3} 
-            sx={{ 
-              display: 'flex', // Enable flex layout
-              flexDirection: 'column', // Ensure children stack vertically
-              flex: 1, // Allow this section to grow and fill available space
-              overflow: 'hidden', // Prevent scrollbars from interfering
+          <Paper
+            elevation={3}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              overflow: 'hidden',
               backgroundColor: '#1e1e1e',
               borderTop: '1px solid #333',
               borderRadius: 0,
-              m: 0
+              m: 0,
             }}
           >
-            <Box 
-              sx={{ 
-                backgroundColor: '#2d2d2d', 
-                p: 0.5, 
+            <Box
+              sx={{
+                backgroundColor: '#2d2d2d',
                 pl: 2,
                 borderBottom: '1px solid #333',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: 1,
               }}
             >
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#cccccc' }}>
+              <Button
+                variant={activePanel === 'console' ? 'contained' : 'text'}
+                onClick={() => setActivePanel('console')}
+                sx={{
+                  fontFamily: 'monospace',
+                  color: activePanel === 'console' ? '#ffffff' : '#cccccc',
+                  backgroundColor: activePanel === 'console' ? '#3a3a3a' : 'transparent',
+                  alignSelf: 'left',
+                }}
+              >
+                CONSOLE
+              </Button>
+              <Button
+                variant={activePanel === 'documentation' ? 'contained' : 'text'}
+                onClick={() => setActivePanel('documentation')}
+                sx={{
+                  fontFamily: 'monospace',
+                  color: activePanel === 'documentation' ? '#ffffff' : '#cccccc',
+                  backgroundColor: activePanel === 'documentation' ? '#3a3a3a' : 'transparent',
+                }}
+              >
                 DOCUMENTATION
-              </Typography>
+              </Button>
             </Box>
-            
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-              {/* Documentation Panel */}
-              <DocumentationPanel endpointId={selectedEndpointId} />
+
+            <Box sx={{ overflow: 'auto' }}>
+              {activePanel === 'documentation' ? (
+                <DocumentationPanel endpointId={selectedEndpointId} />
+              ) : (
+                <Box sx={{ p: 2 }}>
+                  <ResponsePanel
+                    response={response}
+                    loading={loading}
+                    getRequests={getRequests}
+                    apiResponses={apiResponses}
+                  />
+                </Box>
+              )}
             </Box>
           </Paper>
         </Split>

@@ -1,7 +1,13 @@
-import requests 
+import requests
+response = requests.get("https://jsonplaceholder.typicode.com/posts/1")
+print("This is a print statement")
 
-response = requests.get('https://jsonplaceholder.typicode.com/posts/1')
 
+
+import requests
+
+owner = 'octocat'
+repo = 'Hello-World'
+url = f'https://api.github.com/repos/{owner}/{repo}'
+response = requests.get(url)
 print(response.json())
-
-
