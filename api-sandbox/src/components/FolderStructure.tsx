@@ -68,7 +68,7 @@ export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStruct
 
   const handleEndpointClick = (endpointId: number) => {
     setSelectedEndpointId(endpointId);
-    onSelectEndpoint(endpointId); // Notify parent component
+    onSelectEndpoint(endpointId);
   };
 
   // Function to get method color based on HTTP method
@@ -208,7 +208,7 @@ export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStruct
   const createFolderStructures = () => {
     const folderStructures: Record<string, FolderStructure> = {};
     
-    // Create a folder for each predefined category, even if there are no endpoints for it
+    // Create a folder for each predefined category
     predefinedCategories.forEach(category => {
       folderStructures[category] = {
         isEndpoint: false,
