@@ -8,49 +8,22 @@ import FolderStructure from '../components/FolderStructure';
 import { scanForRequests } from '../components/JsonViewer';
 import RequestPanel from '../components/RequestPanel';
 
-function MainView() {
+
+interface MainViewProps {
+  onExecuteCode: (fn: () => void) => void;
+  pyodide: any; // Add pyodide as a prop
+}
+
+function MainView({ onExecuteCode, pyodide }: MainViewProps  ) {
   const [code, setCode] = useState(`print("Hello, Pyodide!")`);
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [pyodide, setPyodide] = useState<any>(null);
   const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
   const [activePanel, setActivePanel] = useState<'documentation' | 'console'>('console');
   const [getRequests, setGetRequests] = useState<{ line: number; url: string; type: string }[]>([]);
   const [apiResponses, setApiResponses] = useState<{ line: number; url: string; response: string }[]>([]);
   const [isRequestPanelOpen, setIsRequestPanelOpen] = useState(false);
 
-  useEffect(() => {
-    async function loadPyodideLib() {
-      try {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js";
-        script.onload = async () => {
-          try {
-            const py = await window.loadPyodide();
-            setPyodide(py);
-            console.log("✅ Pyodide loaded");
-
-            await py.loadPackage("micropip");
-
-            await py.runPythonAsync(`
-              import micropip
-              try:
-                  await micropip.install("requests")
-                  print("✅ Requests installed successfully")
-              except Exception as e:
-                  print(f"❌ Failed to install requests: {e}")
-              `);
-          } catch (err) {
-            console.error("Failed to load Pyodide:", err);
-          }
-        };
-        document.body.appendChild(script);
-      } catch (error) {
-        console.error("Error setting up Pyodide:", error);
-      }
-    }
-    loadPyodideLib();
-  }, []);
 
   const handleExecuteCode = async () => {
     if (!pyodide) {
@@ -111,7 +84,8 @@ responses
   useEffect(() => {
     const requests = scanForRequests(code);
     setGetRequests(requests);
-  }, [code]);
+    onExecuteCode(handleExecuteCode);
+  }, [code, onExecuteCode]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', pt: 8 }}>
