@@ -102,7 +102,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
       dragInterval={1}
       direction="horizontal"
       cursor="col-resize"
-      style={{ display: 'flex', height: '100%' }} 
+      style={{ display: 'flex', flexGrow: 1, height: '100%' }} // Ensure Split fills the parent container
       onDragEnd={(sizes) => {
         setSplitSizes(sizes);
         setTerminalMaximized(sizes[0] === 0);
@@ -113,13 +113,14 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
       <Paper 
         elevation={3} 
         sx={{ 
-          height: '100%', 
           display: 'flex', 
           flexDirection: 'column',
           flexGrow: 1, // Allow the panel to grow
+          height: '100%', // Ensure it fills the Split container
           overflow: 'hidden',
-          borderRadius: 1,
-          transition: 'all 0.2s ease-in-out',
+          borderRadius: 0, // Remove border radius if unnecessary
+          m: 0, // Ensure no margin
+          p: 0, // Ensure no padding
           visibility: splitSizes[0] === 0 ? 'hidden' : 'visible',
           minHeight: 0, // Prevent collapsing
         }}
@@ -144,30 +145,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
           p: 1,
           bgcolor: theme.palette.mode === 'dark' ? '#252526' : '#f3f3f3',
         }}>
-          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ mb: 0.5 }}>Request Line:</Typography>
-            <Select
-              value={selectedLine?.toString() || ''}
-              onChange={handleLineChange}
-              displayEmpty
-              size="small"
-              sx={{ 
-                fontSize: '0.875rem', 
-                minHeight: 'unset',
-                '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'
-                },
-              }}
-            >
-              <MenuItem value="" disabled>Select a line</MenuItem>
-              {getRequests.map((req) => (
-                <MenuItem key={req.line} value={req.line.toString()}>
-                  Line {req.line}: {req.type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
+          
           <ButtonGroup 
             size="small" 
             variant="outlined" 
@@ -207,48 +185,59 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         <Box sx={{ 
           flexGrow: 1, 
           
-          overflow: 'auto',
+          overflow: 'hidden', // Prevent the entire component from scrolling
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.palette.mode === 'dark' ? '#1E1E1E' : '#ffffff'
+          backgroundColor: theme.palette.mode === 'dark' ? '#1E1E1E' : '#ffffff',
         }}>
-          <Box sx={{
-            height: '100%',
-            overflow: 'auto',
-            p: 1.5,
-            scrollbarWidth: 'thin',
-            scrollbarColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2) transparent' : 'rgba(0,0,0,0.2) transparent',
-            '&::-webkit-scrollbar': {
-              width: '8px',
-              height: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-            },
-          }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflow: 'auto', // Enable scrolling only for this container
+              p: 1.5,
+              scrollbarWidth: 'thin',
+              scrollbarColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2) transparent' : 'rgba(0,0,0,0.2) transparent',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+                height: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+              },
+            }}
+          >
             {loading ? (
               <Stack direction="row" alignItems="center" spacing={1}>
                 <CircularProgress size={20} />
                 <Typography variant="body2">Processing request...</Typography>
               </Stack>
             ) : selectedApiResponse ? (
-              <JsonViewer data={selectedApiResponse.response} />
+              <Box
+                sx={{
+                  maxHeight: '100%', // Ensure the JSON viewer doesn't exceed the container height
+                  overflow: 'auto', // Enable scrolling for the JSON viewer
+                }}
+              >
+                <JsonViewer data={selectedApiResponse.response} />
+              </Box>
             ) : (
-              <Box sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                overflow:'hidden',
-                color: theme.palette.text.secondary
-              }}>
+              <Box
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  color: theme.palette.text.secondary,
+                }}
+              >
                 <Typography variant="body2">Select a request to view response</Typography>
               </Box>
             )}
@@ -260,27 +249,31 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
       <Paper 
         elevation={3} 
         sx={{ 
-          height: '100%', 
           display: 'flex', 
           flexDirection: 'column',
           flexGrow: 1, // Allow the panel to grow
+          height: '100%', // Ensure it fills the Split container
           overflow: 'hidden',
           bgcolor: '#1E1E1E', 
           color: '#E0E0E0',
-          borderRadius: 1,
+          borderRadius: 0, // Remove border radius if unnecessary
+          m: 0, // Ensure no margin
+          p: 0, // Ensure no padding
           visibility: splitSizes[1] === 0 ? 'hidden' : 'visible',
           minHeight: 0, // Prevent collapsing
         }}
       >
-        <Box sx={{ 
-          py: 0.75,
-          px: 1.5,
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          bgcolor: '#252526'
-        }}>
+        <Box 
+          sx={{ 
+            py: 0.75,
+            px: 1.5,
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: '#252526'
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TerminalIcon size={16} />
             <Typography variant="subtitle2" fontWeight="medium">TERMINAL</Typography>
@@ -329,6 +322,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         
         <Box 
           sx={{ 
+            flexGrow: 1, // Allow the terminal content to grow
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -339,11 +333,11 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
           <Box
             ref={terminalRef}
             sx={{
-              flexGrow: 1,
+              flexGrow: 1, // Allow the terminal content to grow
               overflowY: 'auto', 
               overflowX: 'hidden', 
               scrollbarWidth: 'thin',
-              maxHeight: '100%',
+              maxHeight: '100%', // Remove any restrictions on height
               scrollbarColor: 'rgba(255,255,255,0.2) transparent',
               '&::-webkit-scrollbar': {
                 width: '8px',
@@ -377,106 +371,29 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
                   <span style={{ color: '#569CD6' }}>$</span> Running process... 
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-       
                   <CircularProgress size={16} sx={{ color: '#75BEFF' }} />
                 </Box>
               </Box>
             ) : (
-              <Box sx={{ p: 1, maxHeight: '300px', overflowY: 'auto' }}>
+              <Box sx={{ p: 1 }}>
                 {response ? (
-                  <>
-                    <Box 
-                      component="div" 
-                      sx={{ 
-                        borderBottom: '1px dashed rgba(255,255,255,0.1)',
-                        mb: 1,
-                        pb: 0.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        color: '#569CD6'
-                      }}
-                    >
-                      <span>[{getCurrentTime()}]</span> 
-                      <span>Process started</span>
-                    </Box>
-                    <pre 
-                      style={{ 
-                        margin: 0, 
-                        padding: '8px 0',
-                        fontSize: '0.875rem',
-                        lineHeight: 1.5,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        color: '#CCCCCC'
-                      }}
-                    >
-                      {response}
-                    </pre>
-                    <Box 
-                      component="div" 
-                      sx={{ 
-                        borderTop: '1px dashed rgba(255,255,255,0.1)',
-                        mt: 1,
-                        pt: 0.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        color: '#3C9C3C'
-                      }}
-                    >
-                      <span>[{getCurrentTime()}]</span> 
-                      <span>Process completed with exit code 0</span>
-                    </Box>
-                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
-                      <span style={{ color: '#569CD6', marginRight: '8px' }}>$</span>
-                      <Box 
-                        component="span" 
-                        sx={{ 
-                          width: '8px', 
-                          height: '16px', 
-                          bgcolor: '#CCCCCC', 
-                          display: 'inline-block',
-                          animation: 'blink 1s step-end infinite',
-                          '@keyframes blink': {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0 },
-                          }
-                        }} 
-                      />
-                    </Box>
-                  </>
+                  <pre 
+                    style={{ 
+                      margin: 0, 
+                      padding: '8px 0',
+                      fontSize: '0.875rem',
+                      lineHeight: 1.5,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      color: '#CCCCCC'
+                    }}
+                  >
+                    {response}
+                  </pre>
                 ) : (
-                  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#75BEFF',
-                        mb: 2,
-                        p: 1,
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
-                      }}
-                    >
-                      Terminal ready
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', p: 1 }}>
-                      <span style={{ color: '#569CD6', marginRight: '8px' }}>$</span>
-                      <Box 
-                        component="span" 
-                        sx={{ 
-                          width: '8px', 
-                          height: '16px', 
-                          bgcolor: '#CCCCCC', 
-                          display: 'inline-block',
-                          animation: 'blink 1s step-end infinite',
-                          '@keyframes blink': {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0 },
-                          }
-                        }} 
-                      />
-                    </Box>
-                  </Box>
+                  <Typography variant="body2" sx={{ color: '#75BEFF' }}>
+                    Terminal ready
+                  </Typography>
                 )}
               </Box>
             )}

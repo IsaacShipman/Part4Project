@@ -77,13 +77,3 @@ export const defaultEndpointData: EndpointData = {
     endpoints: Endpoint[];
   }
   
-  export interface FolderItemProps {
-    name: string;
-    structure: FolderStructure;
-    onSelectEndpoint: (endpointId: number) => void;
-    selectedEndpointId: number | null;
-  }
-  
-  export interface APIFolderStructureProps {
-    onSelectEndpoint: (endpointId: number) => void;
-  }
