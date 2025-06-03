@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
 import { ContentCopy } from '@mui/icons-material';
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const [copied, setCopied] = useState(false);
+  const theme = useTheme();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code).then(() => {
@@ -17,13 +18,13 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
       component="div"
       sx={{
         position: 'relative',
-        backgroundColor: '#0a0a0a',
-        color: '#e6e6e6',
+        backgroundColor: theme.custom.codeBlock.background,
+        color: theme.custom.codeBlock.foreground,
         padding: 2,
         borderRadius: 1,
         overflow: 'auto',
         fontSize: '0.8rem',
-        fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
+        fontFamily: theme.custom.terminal.fontFamily,
         maxHeight: '180px',
         '&::-webkit-scrollbar': {
           width: '8px',
@@ -44,7 +45,7 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
             position: 'absolute',
             top: 8,
             right: 8,
-            color: '#90caf9',
+            color: theme.palette.primary.main,
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
             '&:hover': {
               backgroundColor: 'rgba(255, 255, 255, 0.2)',

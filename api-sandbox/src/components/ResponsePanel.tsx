@@ -1,25 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Box, 
-  Typography, 
-  Button, 
-  Select, 
-  MenuItem, 
-  Divider,
-  FormControl,
-  ButtonGroup,
-  Paper,
-  CircularProgress,
-  Stack,
-  useTheme,
-  SelectChangeEvent,
-  IconButton,
-  Tooltip
+  Box, Typography, Button, Select, MenuItem, Divider,
+  FormControl, ButtonGroup, Paper, CircularProgress,
+  Stack, useTheme, SelectChangeEvent, IconButton, Tooltip
 } from '@mui/material';
 import Split from 'react-split';
 import '../split-view.css';
 import JsonViewer from './JsonViewer';
 import { ChevronRight, X, Maximize2, Minimize2, Terminal as TerminalIcon, RefreshCw } from 'lucide-react';
+import { ApiCall } from '../types/api';
 
 interface GetRequest {
   line: number;
@@ -30,11 +19,13 @@ interface GetRequest {
 interface ResponsePanelProps {
   response: string | null;
   loading: boolean;
-  getRequests: GetRequest[];
+  getRequests: { line: number; url: string; type: string }[];
   apiResponses: { line: number; url: string; response: string }[];
+  selectedRequestIndex: number | null;
+  selectedApiCall: ApiCall | null;
 }
 
-const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getRequests, apiResponses }) => {
+const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, apiResponses, selectedRequestIndex }) => {
   const [view, setView] = useState<'headers' | 'body' | 'response'>('response');
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
   const [terminalMaximized, setTerminalMaximized] = useState<boolean>(false);
@@ -47,7 +38,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
     setSelectedLine(event.target.value ? Number(event.target.value) : null);
   };
 
-  const selectedApiResponse = apiResponses.find((res) => res.line === selectedLine);
+  const selectedApiResponse = selectedRequestIndex !== null ? apiResponses[selectedRequestIndex] : null;
 
   // Auto-scroll to bottom when terminal content changes
   useEffect(() => {
@@ -80,9 +71,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
 
   // Clear the terminal (mock function)
   const clearTerminal = () => {
-    // In a real app, you would clear the terminal content here
     console.log("Terminal cleared");
-    // This would be handled by your state management
   };
 
   // Get the current time for terminal prompt
@@ -102,7 +91,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
       dragInterval={1}
       direction="horizontal"
       cursor="col-resize"
-      style={{ display: 'flex', flexGrow: 1, height: '100%' }} // Ensure Split fills the parent container
+      style={{ display: 'flex', flexGrow: 1, height: '100%' }}
       onDragEnd={(sizes) => {
         setSplitSizes(sizes);
         setTerminalMaximized(sizes[0] === 0);
@@ -115,18 +104,18 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         sx={{ 
           display: 'flex', 
           flexDirection: 'column',
-          flexGrow: 1, // Allow the panel to grow
-          height: '100%', // Ensure it fills the Split container
+          flexGrow: 1,
+          height: '100%',
           overflow: 'hidden',
-          borderRadius: 0, // Remove border radius if unnecessary
-          m: 0, // Ensure no margin
-          p: 0, // Ensure no padding
+          borderRadius: 0,
+          m: 0,
+          p: 0,
           visibility: splitSizes[0] === 0 ? 'hidden' : 'visible',
-          minHeight: 0, // Prevent collapsing
+          minHeight: 0,
         }}
       >
         <Box sx={{ 
-          bgcolor: theme.palette.mode === 'dark' ? '#252526' : '#f3f3f3',
+          bgcolor: theme.palette.background.subtle,
           py: 1, 
           px: 1.5,
           display: 'flex',
@@ -143,7 +132,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         <Box sx={{ 
           borderBottom: `1px solid ${theme.palette.divider}`,
           p: 1,
-          bgcolor: theme.palette.mode === 'dark' ? '#252526' : '#f3f3f3',
+          bgcolor: theme.palette.background.subtle,
         }}>
           
           <ButtonGroup 
@@ -153,7 +142,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
             sx={{ 
               minHeight: 28,
               '.MuiButton-root': {
-                borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'
+                borderColor: `rgba(255, 255, 255, 0.12)`
               }
             }}
             fullWidth
@@ -184,19 +173,18 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
 
         <Box sx={{ 
           flexGrow: 1, 
-          
-          overflow: 'hidden', // Prevent the entire component from scrolling
+          overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.palette.mode === 'dark' ? '#1E1E1E' : '#ffffff',
+          backgroundColor: theme.palette.background.paper,
         }}>
           <Box
             sx={{
               flexGrow: 1,
-              overflow: 'auto', // Enable scrolling only for this container
+              overflow: 'auto',
               p: 1.5,
               scrollbarWidth: 'thin',
-              scrollbarColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2) transparent' : 'rgba(0,0,0,0.2) transparent',
+              scrollbarColor: 'rgba(255,255,255,0.2) transparent',
               '&::-webkit-scrollbar': {
                 width: '8px',
                 height: '8px',
@@ -205,11 +193,11 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
                 background: 'transparent',
               },
               '&::-webkit-scrollbar-thumb': {
-                background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                background: 'rgba(255,255,255,0.2)',
                 borderRadius: '4px',
               },
               '&::-webkit-scrollbar-thumb:hover': {
-                background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                background: 'rgba(255,255,255,0.3)',
               },
             }}
           >
@@ -221,8 +209,8 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
             ) : selectedApiResponse ? (
               <Box
                 sx={{
-                  maxHeight: '100%', // Ensure the JSON viewer doesn't exceed the container height
-                  overflow: 'auto', // Enable scrolling for the JSON viewer
+                  maxHeight: '100%',
+                  overflow: 'auto',
                 }}
               >
                 <JsonViewer data={selectedApiResponse.response} />
@@ -251,34 +239,34 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         sx={{ 
           display: 'flex', 
           flexDirection: 'column',
-          flexGrow: 1, // Allow the panel to grow
-          height: '100%', // Ensure it fills the Split container
+          flexGrow: 1,
+          height: '100%',
           overflow: 'hidden',
-          bgcolor: '#1E1E1E', 
-          color: '#E0E0E0',
-          borderRadius: 0, // Remove border radius if unnecessary
-          m: 0, // Ensure no margin
-          p: 0, // Ensure no padding
+          bgcolor: theme.custom.terminal.background,
+          color: theme.custom.terminal.foreground,
+          borderRadius: 0,
+          m: 0,
+          p: 0,
           visibility: splitSizes[1] === 0 ? 'hidden' : 'visible',
-          minHeight: 0, // Prevent collapsing
+          minHeight: 0,
         }}
       >
         <Box 
           sx={{ 
             py: 0.75,
             px: 1.5,
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            borderBottom: `1px solid ${theme.palette.divider}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            bgcolor: '#252526'
+            bgcolor: theme.palette.background.subtle
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TerminalIcon size={16} />
             <Typography variant="subtitle2" fontWeight="medium">TERMINAL</Typography>
             {loading && (
-              <CircularProgress size={14} sx={{ color: '#75BEFF', ml: 1 }} />
+              <CircularProgress size={14} sx={{ color: theme.palette.primary.main, ml: 1 }} />
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -286,7 +274,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
               <IconButton 
                 size="small" 
                 onClick={clearTerminal}
-                sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: 'rgba(255,255,255,0.8)' } }}
+                sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.text.primary } }}
               >
                 <X size={14} />
               </IconButton>
@@ -294,7 +282,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
             <Tooltip title="Refresh">
               <IconButton 
                 size="small"
-                sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: 'rgba(255,255,255,0.8)' } }}
+                sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.text.primary } }}
               >
                 <RefreshCw size={14} />
               </IconButton>
@@ -303,7 +291,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
               <IconButton 
                 size="small" 
                 onClick={toggleMinimized}
-                sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: 'rgba(255,255,255,0.8)' } }}
+                sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.text.primary } }}
               >
                 <Minimize2 size={14} />
               </IconButton>
@@ -312,7 +300,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
               <IconButton 
                 size="small" 
                 onClick={toggleMaximized}
-                sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: 'rgba(255,255,255,0.8)' } }}
+                sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.text.primary } }}
               >
                 <Maximize2 size={14} />
               </IconButton>
@@ -322,22 +310,22 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
         
         <Box 
           sx={{ 
-            flexGrow: 1, // Allow the terminal content to grow
+            flexGrow: 1,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#1E1E1E',
-            fontFamily: '"Cascadia Code", "Fira Code", "Roboto Mono", monospace',
+            backgroundColor: theme.custom.terminal.background,
+            fontFamily: theme.custom.terminal.fontFamily,
           }}
         >
           <Box
             ref={terminalRef}
             sx={{
-              flexGrow: 1, // Allow the terminal content to grow
+              flexGrow: 1,
               overflowY: 'auto', 
               overflowX: 'hidden', 
               scrollbarWidth: 'thin',
-              maxHeight: '100%', // Remove any restrictions on height
+              maxHeight: '100%',
               scrollbarColor: 'rgba(255,255,255,0.2) transparent',
               '&::-webkit-scrollbar': {
                 width: '8px',
@@ -365,13 +353,13 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#E0E0E0'
+                    color: theme.custom.terminal.foreground
                   }}
                 >
-                  <span style={{ color: '#569CD6' }}>$</span> Running process... 
+                  <span style={{ color: theme.palette.info.main }}>$</span> Running process... 
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                  <CircularProgress size={16} sx={{ color: '#75BEFF' }} />
+                  <CircularProgress size={16} sx={{ color: theme.palette.primary.main }} />
                 </Box>
               </Box>
             ) : (
@@ -385,13 +373,13 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, getReq
                       lineHeight: 1.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
-                      color: '#CCCCCC'
+                      color: theme.custom.terminal.foreground
                     }}
                   >
                     {response}
                   </pre>
                 ) : (
-                  <Typography variant="body2" sx={{ color: '#75BEFF' }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.primary.main }}>
                     Terminal ready
                   </Typography>
                 )}
