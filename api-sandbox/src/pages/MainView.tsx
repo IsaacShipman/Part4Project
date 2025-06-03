@@ -42,6 +42,7 @@ print(f"Posted with status: {response2.status_code}")`);
   const [apiRequests, setApiRequests] = useState<APIRequest[]>([]);
   const [apiCalls, setApiCalls] = useState<ApiCall[]>([]);
   const [isRequestPanelOpen, setIsRequestPanelOpen] = useState(false);
+  
   const [selectedRequestIndex, setSelectedRequestIndex] = useState<number | null>(null);
 
   const handleExecuteCode = useCallback(async () => {
@@ -130,7 +131,7 @@ print(f"Posted with status: {response2.status_code}")`);
       >
         <Split
           sizes={isRequestPanelOpen ? [20, 50, 30] : [20, 77, 3]}
-          minSize={50}
+          minSize={isRequestPanelOpen ? 50 : 30}
           gutterSize={5}
           style={{ 
             display: 'flex', 
@@ -144,14 +145,6 @@ print(f"Posted with status: {response2.status_code}")`);
 
           <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 0, m: 0, height: '100%' }}>
             <CodeEditor code={code} setCode={setCode} />
-            <Box sx={{ 
-              position: 'absolute', 
-              bottom: '38%', 
-              right: isRequestPanelOpen ? '33%' : '5%', 
-              zIndex: 1000 
-            }}>
-          
-            </Box>
           </Paper>
 
           <RequestPanel
@@ -164,6 +157,7 @@ print(f"Posted with status: {response2.status_code}")`);
             onSelectRequest={handleSelectRequest}
             selectedIndex={selectedRequestIndex}
             apiCalls={apiCalls}
+            isOpen={isRequestPanelOpen}
           />
         </Split>
 

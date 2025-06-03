@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { 
   Close, ExpandMore, ChevronRight, AccessTime, Code,
-  Link, DataObject
+  Link, DataObject, ChevronLeft
 } from '@mui/icons-material';
 import { ApiCall } from '../types/api';
 import { RequestSummary } from '../types/api';
@@ -17,6 +17,7 @@ interface RequestPanelProps {
   onSelectRequest: (index: number) => void;
   selectedIndex: number | null;
   apiCalls?: ApiCall[];
+  isOpen: boolean; // Add this prop to track open/closed state
 }
 
 const RequestPanel: React.FC<RequestPanelProps> = ({
@@ -24,7 +25,8 @@ const RequestPanel: React.FC<RequestPanelProps> = ({
   requests,
   onSelectRequest,
   selectedIndex,
-  apiCalls = []
+  apiCalls = [],
+  isOpen
 }) => {
   const [expandedDetails, setExpandedDetails] = useState<number | null>(null);
   const theme = useTheme();
@@ -76,6 +78,63 @@ const RequestPanel: React.FC<RequestPanelProps> = ({
     setExpandedDetails(expandedDetails === index ? null : index);
   };
 
+  // If the panel is closed, render just the collapsed version with chevron
+  if (!isOpen) {
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          height: '100%',
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          borderRadius: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '40px',
+          cursor: 'pointer',
+        }}
+        onClick={() => setIsOpen(true)}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            height: '100%',
+            width: '100%',
+            pt: 2,
+          }}
+        >
+          <ChevronLeft 
+            sx={{ 
+              color: theme.palette.text.secondary,
+              fontSize: '1.5rem',
+              mb: 1
+            }} 
+          />
+         
+          {requests.length > 0 && (
+            <Chip
+              label={requests.length}
+              size="small"
+              sx={{
+                mt: 2,
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                fontSize: '0.7rem',
+                minWidth: '24px',
+                height: '24px',
+              }}
+            />
+          )}
+        </Box>
+      </Paper>
+    );
+  }
+
+  // Otherwise render the full panel
   return (
     <Paper
       elevation={3}
@@ -107,7 +166,7 @@ const RequestPanel: React.FC<RequestPanelProps> = ({
           onClick={() => setIsOpen(false)}
           sx={{ color: theme.palette.text.primary }}
         >
-          <Close />
+          <ChevronRight />
         </IconButton>
       </Box>
 

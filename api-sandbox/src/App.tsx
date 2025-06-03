@@ -1,36 +1,79 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { CssBaseline, ThemeProvider, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
-import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
+import React, { useRef, useState } from 'react';
+import { CssBaseline, ThemeProvider, AppBar, Toolbar, Typography, IconButton, Box, Button, Stack } from '@mui/material';
+import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon, Science as ScienceIcon } from '@mui/icons-material';
 import globalTheme from './themes/globalTheme';
 import MainView from './pages/MainView';
+import SecurityScanView from './pages/SecurityScanView';
 
 
 function App() {
   const executeCodeRef = useRef<() => void>(() => {});
+  const [currentView, setCurrentView] = useState<'main' | 'security'>('main');
 
   return (
     <ThemeProvider theme={globalTheme}>
       <CssBaseline />
       <AppBar position="fixed">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            API Sandbox
-          </Typography>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              if (executeCodeRef.current) {
-                executeCodeRef.current();
-              }
-            }}
-          >
-            <PlayArrowIcon />
-          </IconButton>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {/* Left section with logo and title */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <ScienceIcon sx={{ mr: 1.5, fontSize: 40 }} />
+            <Typography variant="h4" sx={{ fontWeight: 'light' }}>
+              APILab
+            </Typography>
+          </Box>
+
+          {/* Center section with navigation */}
+          <Stack direction="row" spacing={1}>
+            <Button 
+              color="inherit" 
+              startIcon={<CodeIcon />}
+              variant={currentView === 'main' ? 'contained' : 'text'}
+              onClick={() => setCurrentView('main')}
+              sx={{ 
+                bgcolor: currentView === 'main' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' }
+              }}
+            >
+              Editor
+            </Button>
+            <Button 
+              color="inherit" 
+              startIcon={<SecurityIcon />}
+              variant={currentView === 'security' ? 'contained' : 'text'}
+              onClick={() => setCurrentView('security')}
+              sx={{ 
+                bgcolor: currentView === 'security' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' }
+              }}
+            >
+              Security
+            </Button>
+          </Stack>
+
+          {/* Right section with action buttons */}
+          <Box>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                if (executeCodeRef.current && currentView === 'main') {
+                  executeCodeRef.current();
+                }
+              }}
+              disabled={currentView !== 'main'}
+              title="Run Code"
+            >
+              <PlayArrowIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
-      <MainView
-        onExecuteCode={(fn) => (executeCodeRef.current = fn)}
-      />
+      
+      {currentView === 'main' ? (
+        <MainView onExecuteCode={(fn) => (executeCodeRef.current = fn)} />
+      ) : (
+        <SecurityScanView />
+      )}
     </ThemeProvider>
   );
 }

@@ -114,21 +114,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, apiRes
           minHeight: 0,
         }}
       >
-        <Box sx={{ 
-          bgcolor: theme.palette.background.subtle,
-          py: 1, 
-          px: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${theme.palette.divider}`
-        }}>
-          <Typography variant="subtitle2" fontWeight="medium" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <ChevronRight size={16} />
-            API Response Explorer
-          </Typography>
-        </Box>
-
+        
         <Box sx={{ 
           borderBottom: `1px solid ${theme.palette.divider}`,
           p: 1,
@@ -341,47 +327,141 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, loading, apiRes
               '&::-webkit-scrollbar-thumb:hover': {
                 background: 'rgba(255,255,255,0.3)',
               },
+              fontFamily: '"JetBrains Mono", "Courier New", monospace',
+              fontSize: '0.875rem',
+              lineHeight: 1.5,
+              padding: 1.5,
+              letterSpacing: 0.3,
             }}
           >
             {loading ? (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 1 }}>
                 <Typography 
                   variant="body2" 
                   component="div" 
                   sx={{ 
-                    opacity: 0.8,
+                    opacity: 0.9,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: theme.custom.terminal.foreground
+                    color: theme.custom.terminal.foreground,
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    mb: 1,
                   }}
                 >
-                  <span style={{ color: theme.palette.info.main }}>$</span> Running process... 
+  
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5, ml: 2 }}>
                   <CircularProgress size={16} sx={{ color: theme.palette.primary.main }} />
+                  <Typography 
+                    component="span" 
+                    sx={{ 
+                      ml: 1, 
+                      color: theme.palette.grey[400],
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit', 
+                    }}
+                  >
+                    Processing request...
+                  </Typography>
                 </Box>
               </Box>
             ) : (
-              <Box sx={{ p: 1 }}>
+              <Box sx={{ p: 0 }}>
                 {response ? (
-                  <pre 
-                    style={{ 
-                      margin: 0, 
-                      padding: '8px 0',
-                      fontSize: '0.875rem',
-                      lineHeight: 1.5,
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                      color: theme.custom.terminal.foreground
+                  <>
+                    <Box 
+                      component="div" 
+                      sx={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 0.75,
+                        color: theme.custom.terminal.foreground,
+                        mb: 1,
+                        fontSize: 'inherit',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      <span style={{ color: theme.palette.success.main }}>{getCurrentTime()}</span>
+                      <span style={{ color: theme.palette.info.main }}>user@sandbox</span>
+                      <span style={{ color: theme.palette.grey[400] }}>:</span>
+                      <span style={{ color: theme.palette.primary.main }}>~</span>
+                      <span style={{ color: theme.palette.grey[400] }}>$</span> 
+                    </Box>
+                    <pre 
+                      style={{ 
+                        margin: '0 0 12px 0', 
+                        padding: '4px 8px 8px 12px',
+                        fontSize: 'inherit',
+                        lineHeight: 1.5,
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        color: theme.custom.terminal.foreground,
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        borderLeft: `2px solid ${theme.palette.primary.main}`,
+                        borderRadius: '0 4px 4px 0',
+                        fontWeight: 'normal',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      {response}
+                    </pre>
+                    <Box 
+                      sx={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        color: theme.custom.terminal.foreground,
+                        fontFamily: 'inherit',
+                        fontSize: 'inherit',
+                      }}
+                    >
+                      <span style={{ color: theme.palette.success.main }}>{getCurrentTime()}</span>
+                      <span style={{ color: theme.palette.info.main }}>user@sandbox</span>
+                      <span style={{ color: theme.palette.grey[400] }}>:</span>
+                      <span style={{ color: theme.palette.primary.main }}>~</span>
+                      <span style={{ color: theme.palette.grey[400] }}>$</span> 
+                      <span 
+                        style={{ 
+                          display: 'inline-block', 
+                          width: '8px', 
+                          height: '15px',
+                          backgroundColor: theme.palette.grey[400],
+                          animation: 'blink 1s step-end infinite',
+                          marginLeft: '4px',
+                        }}
+                      ></span>
+                    </Box>
+                  </>
+                ) : (
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      color: theme.custom.terminal.foreground,
+                      fontFamily: 'inherit',
+                      fontSize: 'inherit',
                     }}
                   >
-                    {response}
-                  </pre>
-                ) : (
-                  <Typography variant="body2" sx={{ color: theme.palette.primary.main }}>
-                    Terminal ready
-                  </Typography>
+                    <span style={{ color: theme.palette.success.main }}>{getCurrentTime()}</span>
+                    <span style={{ color: theme.palette.info.main }}>user@sandbox</span>
+                    <span style={{ color: theme.palette.grey[400] }}>:</span>
+                    <span style={{ color: theme.palette.primary.main }}>~</span>
+                    <span style={{ color: theme.palette.grey[400] }}>$</span> 
+                    <span 
+                      style={{ 
+                        display: 'inline-block', 
+                        width: '8px', 
+                        height: '15px',
+                        backgroundColor: theme.palette.grey[400],
+                        animation: 'blink 1s step-end infinite',
+                        marginLeft: '4px',
+                      }}
+                    ></span>
+                  </Box>
                 )}
               </Box>
             )}
