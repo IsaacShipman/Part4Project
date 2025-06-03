@@ -1,37 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  Paper,
-  Divider,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Link,
-  IconButton,
-  Tooltip
+  Box, Typography, Tabs, Tab, Paper, Divider, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Accordion, AccordionSummary, AccordionDetails, Link, IconButton, 
+  Tooltip, useTheme
 } from '@mui/material';
 import {
-  Code as CodeIcon,
-  ExpandMore,
-  Description,
-  Info,
-  Code,
-  AccountTree,
-  ContentCopy
+  Code as CodeIcon, ExpandMore, Description, Info, Code,
+  AccountTree, ContentCopy
 } from '@mui/icons-material';
-import { EndpointData } from '../types'
-import { defaultEndpointData } from '../types'
-import { DocumentationPanelProps } from '../types'
+import { EndpointData } from '../types';
+import { defaultEndpointData } from '../types';
+import { DocumentationPanelProps } from '../types';
 import CodeBlock from './CodeBlock';
 
 
@@ -40,6 +20,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<EndpointData>(defaultEndpointData);
+  const theme = useTheme();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -67,15 +48,15 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) =
     fetchEndpointDocumentation();
   }, [endpointId]);
 
-  // Format method for method badge styling
+  // Format method for method badge styling using theme
   const getMethodColor = (method: string) => {
     switch (method.toUpperCase()) {
-      case 'GET': return '#2e7d32'; // Darker green 
-      case 'POST': return '#1565c0'; // Darker blue
-      case 'PUT': return '#e65100'; // Darker orange
-      case 'DELETE': return '#c62828'; // Darker red
-      case 'PATCH': return '#6a1b9a'; // Darker purple
-      default: return '#424242'; // Darker grey
+      case 'GET': return theme.palette.info.light;
+      case 'POST': return theme.palette.success.light;
+      case 'PUT': return theme.palette.warning.light;
+      case 'DELETE': return theme.palette.error.light;
+      case 'PATCH': return theme.palette.secondary.main;
+      default: return theme.palette.grey[700];
     }
   };
 
@@ -88,7 +69,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ endpointId }) =
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        border: '1px solid #333333',
+        border: `1px solid ${theme.palette.divider}`,
       }}
     >
       {/* Header section */}
