@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Split from 'react-split';
-import { ApiCall } from '../types/api';
+import { ApiCall } from '../../types/api';
 import RequestViewer from './RequestViewer';
 import Terminal from './Terminal';
 

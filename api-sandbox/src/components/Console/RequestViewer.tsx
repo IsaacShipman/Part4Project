@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, ButtonGroup, 
   Paper, CircularProgress, Stack, useTheme, styled
 } from '@mui/material';
-import JsonViewer from './JsonViewer';
+import JsonViewer from '../JsonViewer';
 
 interface RequestViewerProps {
   loading: boolean;

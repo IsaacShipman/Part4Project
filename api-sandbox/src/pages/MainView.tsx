@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Split from 'react-split';
 import { Box, Paper, Button, useTheme } from '@mui/material';
-import CodeEditor from '../components/CodeEditor';
-import ResponsePanel from '../components/ResponsePanel';
+import CodeEditor from '../components/CodeEditor/CodeEditor';
+import ResponsePanel from '../components/Console/ResponsePanel';
 import DocumentationPanel from '../components/DocumentationPanel';
-import APIFolderStructure from '../components/FolderComponent/APIFolderStructure';
+import APIFolderStructure from '../components/FolderStructure/APIFolderStructure';
 import RequestPanel from '../components/RequestPanel';
 import axios from 'axios';
 import { ApiCall } from '../types/api';
