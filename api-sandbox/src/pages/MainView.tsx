@@ -4,7 +4,7 @@ import { Box, Paper, Button, useTheme } from '@mui/material';
 import CodeEditor from '../components/CodeEditor';
 import ResponsePanel from '../components/ResponsePanel';
 import DocumentationPanel from '../components/DocumentationPanel';
-import FolderStructure from '../components/FolderStructure';
+import APIFolderStructure from '../components/FolderComponent/APIFolderStructure';
 import RequestPanel from '../components/RequestPanel';
 import axios from 'axios';
 import { ApiCall } from '../types/api';
@@ -140,7 +140,7 @@ print(f"Posted with status: {response2.status_code}")`);
           }}
         >
           <Paper elevation={3} sx={{ overflow: 'auto', borderRadius: 0, m: 0 }}>
-            <FolderStructure onSelectEndpoint={handleSelectEndpoint} />
+            <APIFolderStructure onSelectEndpoint={handleSelectEndpoint} />
           </Paper>
 
           <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 0, m: 0, height: '100%' }}>
