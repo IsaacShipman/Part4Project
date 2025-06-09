@@ -43,3 +43,28 @@ export interface RequestSummary {
       _apiInterceptorCallbacks: ((calls: ApiCall[]) => void)[];
     }
   }
+
+  export interface Endpoint {
+  id: number;
+  method: string;
+  summary: string;
+  category: string;
+}
+
+export interface FolderStructure {
+  isEndpoint: boolean;
+  fullPath: string;
+  children: Record<string, FolderStructure>;
+  endpoints: Endpoint[];
+}
+
+export interface FolderItemProps {
+  name: string;
+  structure: FolderStructure;
+  onSelectEndpoint: (endpointId: number) => void;
+  selectedEndpointId: number | null;
+}
+
+export interface APIFolderStructureProps {
+  onSelectEndpoint: (endpointId: number) => void;
+}

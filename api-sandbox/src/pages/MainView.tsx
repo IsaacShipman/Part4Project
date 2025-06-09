@@ -1,13 +1,98 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Split from 'react-split';
-import { Box, Paper, Button, useTheme } from '@mui/material';
-import CodeEditor from '../components/CodeEditor';
-import ResponsePanel from '../components/ResponsePanel';
-import DocumentationPanel from '../components/DocumentationPanel';
-import FolderStructure from '../components/FolderStructure';
-import RequestPanel from '../components/RequestPanel';
+import { Box, Paper, Button, useTheme, styled, alpha } from '@mui/material';
+import CodeEditor from '../components/CodeEditor/CodeEditor';
+import ResponsePanel from '../components/Console/ResponsePanel';
+import DocumentationPanel from '../components/Documentation/DocumentationPanel';
+import APIFolderStructure from '../components/FolderStructure/APIFolderStructure';
+import RequestPanel from '../components/RequestPanel/RequestPanel';
 import axios from 'axios';
 import { ApiCall } from '../types/api';
+import Description from '@mui/icons-material/Description';
+import Code from '@mui/icons-material/Code';
+import { useFileSystem } from '../hooks/useFileSystem';
+import { updateCurrentFileContent } from '../redux/slices/fileSystemSlice'; // Add this import
+import { useAppDispatch } from '../hooks/reduxHooks'; // Add this import
+
+// Styled components with glassmorphism effects
+const GlassyPaper = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, 
+    ${alpha(theme.palette.background.paper, 0.1)} 0%, 
+    ${alpha(theme.palette.background.paper, 0.05)} 100%)`,
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  borderRadius: '12px',
+  boxShadow: `
+    0 8px 32px ${alpha(theme.palette.common.black, 0.3)},
+    inset 0 1px 0 ${alpha(theme.palette.common.white, 0.1)}
+  `,
+  overflow: 'hidden',
+}));
+
+const GlassyButton = styled(Button)(({ theme, variant }) => ({
+  background: variant === 'contained' 
+    ? `linear-gradient(135deg, 
+        ${alpha(theme.palette.primary.main, 0.2)} 0%, 
+        ${alpha(theme.palette.primary.main, 0.1)} 100%)`
+    : 'transparent',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+  borderRadius: '8px',
+  color: variant === 'contained' ? theme.palette.primary.light : theme.palette.text.secondary,
+  fontWeight: 500,
+  textTransform: 'none',
+  padding: '8px 16px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  '&:hover': {
+    background: `linear-gradient(135deg, 
+      ${alpha(theme.palette.primary.main, 0.3)} 0%, 
+      ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
+    transform: 'translateY(-1px)',
+    boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+    border: `1px solid ${alpha(theme.palette.primary.main, 0.4)}`,
+  },
+}));
+
+const MainContainer = styled(Box)(({ theme }) => ({
+  background: `linear-gradient(135deg, 
+    ${theme.palette.background.default} 0%, 
+    ${alpha(theme.palette.background.paper, 0.8)} 50%,
+    ${theme.palette.background.default} 100%)`,
+  minHeight: '100vh',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: `radial-gradient(circle at 20% 50%, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 50%),
+                 radial-gradient(circle at 80% 20%, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 50%),
+                 radial-gradient(circle at 40% 80%, ${alpha(theme.palette.info.main, 0.05)} 0%, transparent 50%)`,
+    pointerEvents: 'none',
+  },
+}));
+
+const SplitContainer = styled(Box)({
+  '& .gutter': {
+    background: 'transparent',
+    border: 'none',
+    '&:hover': {
+      background: 'rgba(255, 255, 255, 0.1)',
+    },
+  },
+  '& .gutter-horizontal': {
+    cursor: 'col-resize',
+    width: '6px',
+  },
+  '& .gutter-vertical': {
+    cursor: 'row-resize',
+    height: '6px',
+  },
+});
 
 // Define interfaces for compatibility with existing components
 interface APIRequest {
@@ -42,7 +127,11 @@ print(f"Posted with status: {response2.status_code}")`);
   const [apiRequests, setApiRequests] = useState<APIRequest[]>([]);
   const [apiCalls, setApiCalls] = useState<ApiCall[]>([]);
   const [isRequestPanelOpen, setIsRequestPanelOpen] = useState(false);
+  
   const [selectedRequestIndex, setSelectedRequestIndex] = useState<number | null>(null);
+
+  const { currentFile } = useFileSystem();
+  const dispatch = useAppDispatch(); // Initialize dispatch
 
   const handleExecuteCode = useCallback(async () => {
     setLoading(true);
@@ -53,7 +142,7 @@ print(f"Posted with status: {response2.status_code}")`);
 
     try {
       const result = await axios.post("http://localhost:8000/run", {
-        code,
+        code: currentFile ? currentFile.content : code,
         language: "python",
       });
 
@@ -101,7 +190,7 @@ print(f"Posted with status: {response2.status_code}")`);
     } finally {
       setLoading(false);
     }
-  }, [code]);
+  }, [code, currentFile]); // Add currentFile to dependencies
 
   const handleSelectEndpoint = (endpointId: number) => {
     setSelectedEndpointId(endpointId);
@@ -120,139 +209,155 @@ print(f"Posted with status: {response2.status_code}")`);
   const selectedApiCall = selectedRequestIndex !== null ? apiCalls[selectedRequestIndex] : null;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', pt: 8 }}>
-      <Split
-        direction="vertical"
-        sizes={[70, 30]}
-        minSize={100}
-        gutterSize={5}
-        style={{ height: '100%' }}
-      >
+    <MainContainer sx={{ height: 'calc(100vh - 72px)', pt: 8 }}>
+      <SplitContainer sx={{ height: 'calc(100vh - 72px)', position: 'relative' }}>
         <Split
-          sizes={isRequestPanelOpen ? [20, 50, 30] : [20, 77, 3]}
-          minSize={50}
-          gutterSize={5}
-          style={{ 
-            display: 'flex', 
-            height: '100%', 
-            backgroundColor: theme.palette.background.default 
-          }}
+          direction="vertical"
+          sizes={[70, 30]}
+          minSize={100}
+          gutterSize={6}
+          style={{ height: '100%' }}
         >
-          <Paper elevation={3} sx={{ overflow: 'auto', borderRadius: 0, m: 0 }}>
-            <FolderStructure onSelectEndpoint={handleSelectEndpoint} />
-          </Paper>
-
-          <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 0, m: 0, height: '100%' }}>
-            <CodeEditor code={code} setCode={setCode} />
-            <Box sx={{ 
-              position: 'absolute', 
-              bottom: '38%', 
-              right: isRequestPanelOpen ? '33%' : '5%', 
-              zIndex: 1000 
-            }}>
-          
-            </Box>
-          </Paper>
-
-          <RequestPanel
-            setIsOpen={setIsRequestPanelOpen}
-            requests={apiRequests.map(req => ({
-              method: req.method,
-              url: req.url,
-              status: req.status || 0,
-            }))}
-            onSelectRequest={handleSelectRequest}
-            selectedIndex={selectedRequestIndex}
-            apiCalls={apiCalls}
-          />
-        </Split>
-
-        <Paper
-          elevation={3}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            overflow: 'hidden',
-            backgroundColor: theme.palette.background.paper,
-            borderTop: `1px solid ${theme.palette.divider}`,
-            borderRadius: 0,
-            m: 0,
-            p: 0,
-            height: '100%',
-          }}
-        >
-          <Box
-            sx={{
-              backgroundColor: theme.palette.background.default,
-              pl: 2,
-              borderBottom: `1px solid ${theme.palette.divider}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: 1,
+          <Split
+            sizes={isRequestPanelOpen ? [20, 60, 20] : [20, 77, 3]}
+            minSize={isRequestPanelOpen ? 50 : 30}
+            gutterSize={6}
+            style={{ 
+              display: 'flex', 
+              height: '100%',
+              gap: '8px',
+              padding: '10px',
             }}
           >
-            <Button
-              variant={activePanel === 'console' ? 'contained' : 'text'}
-              onClick={() => setActivePanel('console')}
-              sx={{
-                fontFamily: theme.custom.terminal.fontFamily,
-                color: activePanel === 'console' 
-                  ? theme.palette.text.primary 
-                  : theme.palette.text.secondary,
-                backgroundColor: activePanel === 'console' 
-                  ? theme.palette.action.selected 
-                  : 'transparent',
-                alignSelf: 'left',
-              }}
-            >
-              CONSOLE
-            </Button>
-            <Button
-              variant={activePanel === 'documentation' ? 'contained' : 'text'}
-              onClick={() => setActivePanel('documentation')}
-              sx={{
-                fontFamily: theme.custom.terminal.fontFamily,
-                color: activePanel === 'documentation' 
-                  ? theme.palette.text.primary 
-                  : theme.palette.text.secondary,
-                backgroundColor: activePanel === 'documentation' 
-                  ? theme.palette.action.selected 
-                  : 'transparent',
-              }}
-            >
-              DOCUMENTATION
-            </Button>
-          </Box>
+  
+            <APIFolderStructure onSelectEndpoint={handleSelectEndpoint} />
+       
+            <CodeEditor 
+  code={currentFile ? currentFile.content : code} 
+  setCode={(newCode) => {
+    if (currentFile) {
+      // Update the file content in redux
+      dispatch(updateCurrentFileContent(newCode));
+    } else {
+      setCode(newCode);
+    }
+  }} 
+  onExecuteCode={handleExecuteCode} 
+/>
+            
+         
+              <RequestPanel
+                setIsOpen={setIsRequestPanelOpen}
+                requests={apiRequests.map(req => ({
+                  method: req.method,
+                  url: req.url,
+                  status: req.status || 0,
+                }))}
+                onSelectRequest={handleSelectRequest}
+                selectedIndex={selectedRequestIndex}
+                apiCalls={apiCalls}
+                isOpen={isRequestPanelOpen}
+              />
+          
+          </Split>
 
-          <Box sx={{ overflow: 'hidden', height: '100%', flexGrow: 1 }}>
-            {activePanel === 'documentation' ? (
-              <DocumentationPanel endpointId={selectedEndpointId} />
-            ) : (
-              <Box sx={{ height: '100%', flexGrow: 1 }}>
-                <ResponsePanel
-                  response={response}
-                  loading={loading}
-                  getRequests={apiRequests.map(req => ({
-                    line: req.line ?? 0,
-                    url: req.url,
-                    type: req.method || "UNKNOWN",
-                  }))}
-                  apiResponses={apiRequests.map(req => ({
-                    line: req.line ?? 0,
-                    url: req.url,
-                    response: req.response || "No Response",
-                  }))}
-                  selectedRequestIndex={selectedRequestIndex}
-                  selectedApiCall={selectedApiCall}
-                />
-              </Box>
-            )}
+          <Box sx={{ padding: '8px', paddingTop: 0 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                overflow: 'hidden',
+                borderRadius: '12px',
+              }}
+            >
+              {/* Replace the TabContainer with a more compact floating toggle */}
+              <Box sx={{ 
+  position: 'relative',
+  overflow: 'hidden', 
+  height: '100%', 
+  flexGrow: 1,
+  background: `linear-gradient(135deg, 
+    ${alpha(theme.palette.background.paper, 0.02)} 0%, 
+    ${alpha(theme.palette.background.paper, 0.01)} 100%)`,
+}}>
+  {/* Content panels */}
+  <Box sx={{ height: 'calc(100% - 36px)', overflow: 'auto' }}>
+    {activePanel === 'documentation' ? (
+      <DocumentationPanel endpointId={selectedEndpointId !== null ? String(selectedEndpointId) : ""} />
+    ) : (
+      <Box sx={{ height: '100%', flexGrow: 1 }}>
+        <ResponsePanel
+          response={response}
+          loading={loading}
+          getRequests={apiRequests.map(req => ({
+            line: req.line ?? 0,
+            url: req.url,
+            type: req.method || "UNKNOWN",
+          }))}
+          apiResponses={apiRequests.map(req => ({
+            line: req.line ?? 0,
+            url: req.url,
+            response: req.response || "No Response",
+          }))}
+          selectedRequestIndex={selectedRequestIndex}
+          selectedApiCall={selectedApiCall}
+        />
+      </Box>
+    )}
+  </Box>
+  
+  {/* Tab strip at the bottom */}
+  <Box
+    sx={{
+      display: 'flex',
+      height: '36px',
+      borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+      background: alpha(theme.palette.background.paper, 0.1),
+      backdropFilter: 'blur(5px)',
+      WebkitBackdropFilter: 'blur(5px)',
+    }}
+  >
+    <Button
+      sx={{
+        flex: 1,
+        borderRadius: 0,
+        height: '36px',
+        background: activePanel === 'console' ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+        color: activePanel === 'console' ? theme.palette.primary.main : theme.palette.text.secondary,
+        borderRight: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+        '&:hover': {
+          background: alpha(theme.palette.primary.main, 0.1),
+        },
+      }}
+      onClick={() => setActivePanel('console')}
+      startIcon={<Code fontSize="small" />}
+    >
+      Console
+    </Button>
+    <Button
+      sx={{
+        flex: 1,
+        borderRadius: 0,
+        height: '36px',
+        background: activePanel === 'documentation' ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+        color: activePanel === 'documentation' ? theme.palette.primary.main : theme.palette.text.secondary,
+        '&:hover': {
+          background: alpha(theme.palette.primary.main, 0.1),
+        },
+      }}
+      onClick={() => setActivePanel('documentation')}
+      startIcon={<Description fontSize="small" />}
+    >
+      Docs
+    </Button>
+  </Box>
+</Box>
+            </Box>
           </Box>
-        </Paper>
-      </Split>
-    </Box>
+        </Split>
+      </SplitContainer>
+    </MainContainer>
   );
 }
 

@@ -128,7 +128,7 @@ const baseColors = {
 
   // Background colors
   background: {
-    default: '#121212', // Main app background
+    default: '#323232', // Main app background
     paper: '#1e1e1e', // Paper elements
     paperDark: '#0a0a0a', // Darker paper (codeblock)
     subtle: '#252525', // Subtle highlights
