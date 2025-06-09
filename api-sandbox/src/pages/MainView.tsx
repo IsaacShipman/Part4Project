@@ -3,7 +3,7 @@ import Split from 'react-split';
 import { Box, Paper, Button, useTheme } from '@mui/material';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import ResponsePanel from '../components/Console/ResponsePanel';
-import DocumentationPanel from '../components/DocumentationPanel';
+import DocumentationPanel from '../components/Documentation/DocumentationPanel';
 import APIFolderStructure from '../components/FolderStructure/APIFolderStructure';
 import RequestPanel from '../components/RequestPanel';
 import axios from 'axios';
@@ -222,7 +222,7 @@ print(f"Posted with status: {response2.status_code}")`);
 
           <Box sx={{ overflow: 'hidden', height: '100%', flexGrow: 1 }}>
             {activePanel === 'documentation' ? (
-              <DocumentationPanel endpointId={selectedEndpointId} />
+              <DocumentationPanel endpointId={selectedEndpointId !== null ? String(selectedEndpointId) : ""} />
             ) : (
               <Box sx={{ height: '100%', flexGrow: 1 }}>
                 <ResponsePanel

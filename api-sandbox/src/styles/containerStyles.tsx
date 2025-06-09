@@ -61,3 +61,19 @@ export const listStyles: SxProps<Theme> = {
     }
   }
 };
+
+export const glassStyles = {
+  background: 'rgba(15, 23, 42, 0.7)',
+  backdropFilter: 'blur(20px)',
+  border: '1px solid rgba(148, 163, 184, 0.1)',
+  borderRadius: '16px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+};
+
+export const glassCardStyles = {
+  background: 'rgba(30, 41, 59, 0.6)',
+  backdropFilter: 'blur(16px)',
+  border: '1px solid rgba(148, 163, 184, 0.1)',
+  borderRadius: '12px',
+  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+};
