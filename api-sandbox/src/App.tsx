@@ -28,11 +28,13 @@ function App() {
             <Button 
               color="inherit" 
               startIcon={<CodeIcon />}
-              variant={currentView === 'main' ? 'contained' : 'text'}
               onClick={() => setCurrentView('main')}
               sx={{ 
                 bgcolor: currentView === 'main' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' }
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' },
+                // Consistent padding and dimensions
+                padding: '6px 12px',
+                minWidth: '100px'
               }}
             >
               Editor
@@ -40,11 +42,13 @@ function App() {
             <Button 
               color="inherit" 
               startIcon={<SecurityIcon />}
-              variant={currentView === 'security' ? 'contained' : 'text'}
               onClick={() => setCurrentView('security')}
               sx={{ 
                 bgcolor: currentView === 'security' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' }
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' },
+                // Consistent padding and dimensions
+                padding: '6px 12px',
+                minWidth: '100px'
               }}
             >
               Security
