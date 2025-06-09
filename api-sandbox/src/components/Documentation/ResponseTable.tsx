@@ -1,98 +1,56 @@
 import { Box, Typography, TableContainer, Table, TableHead, 
          TableRow, TableCell, TableBody, Paper, Chip } from '@mui/material';
-import { glassCardStyles } from '../../styles/containerStyles'; 
+import { glassStyles } from '../../styles/containerStyles'; 
 import { ResponseSchemaType } from '../../types/documentation';
 
 interface ResponseSchemaProps {
   schema: ResponseSchemaType;
 }
 
-const ResponseSchema = ({ schema }: ResponseSchemaProps) => (
-  <Box sx={{ p: 1 }}>
-    <Box sx={{ 
-      ...glassCardStyles,
-      p: 3,
-      mb: 3,
-    }}>
-      <Typography 
-        variant="body1" 
-        sx={{ 
-          color: '#e2e8f0',
-          lineHeight: 1.6,
-          fontSize: '0.95rem',
-        }}
-      >
-        {schema.brief}
-      </Typography>
-    </Box>
+const ResponseSchema = ({ schema }: { schema: ResponseSchemaType }) => (
+  <Box>
+    <Typography variant="body2" sx={{ color: '#e2e8f0', mb: 2, fontSize: '0.875rem' }}>
+      {schema.brief}
+    </Typography>
     
-    <TableContainer 
-      component={Paper} 
-      sx={{ 
-        ...glassCardStyles,
-        overflow: 'hidden',
-      }}
-    >
-      <Table size="medium">
+    <TableContainer sx={{ 
+      ...glassStyles,
+      maxHeight: '200px',
+      '&::-webkit-scrollbar': { width: '6px' },
+      '&::-webkit-scrollbar-thumb': { 
+        background: 'rgba(96, 165, 250, 0.3)',
+        borderRadius: '3px',
+      },
+    }}>
+      <Table size="small">
         <TableHead>
-          <TableRow sx={{ 
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%)',
-          }}>
-            <TableCell sx={{ 
-              fontWeight: '600', 
-              py: 2,
-              color: '#f1f5f9',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-              fontSize: '0.875rem',
-            }}>
+          <TableRow sx={{ background: 'rgba(59, 130, 246, 0.1)' }}>
+            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
               Field
             </TableCell>
-            <TableCell sx={{ 
-              fontWeight: '600', 
-              py: 2,
-              color: '#f1f5f9',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-              fontSize: '0.875rem',
-            }}>
+            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
               Type
             </TableCell>
-            <TableCell sx={{ 
-              fontWeight: '600', 
-              py: 2,
-              color: '#f1f5f9',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-              fontSize: '0.875rem',
-            }}>
+            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
               Description
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {schema.fields.map((field) => (
-            <TableRow 
-              key={field.name}
-              sx={{ 
-                '&:hover': { 
-                  background: 'rgba(96, 165, 250, 0.05)',
-                },
-                '&:last-child td': {
-                  borderBottom: 'none',
-                }
-              }}
-            >
+            <TableRow key={field.name} sx={{ 
+              '&:hover': { background: 'rgba(96, 165, 250, 0.05)' },
+            }}>
               <TableCell sx={{ 
-                py: 2,
+                py: 1,
                 color: '#e2e8f0',
-                borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
+                borderColor: 'rgba(148, 163, 184, 0.1)',
               }}>
                 {field.name}
               </TableCell>
-              <TableCell sx={{ 
-                py: 2,
-                borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-              }}>
+              <TableCell sx={{ py: 1, borderColor: 'rgba(148, 163, 184, 0.1)' }}>
                 <Chip 
                   label={field.type} 
                   size="small" 
@@ -101,17 +59,16 @@ const ResponseSchema = ({ schema }: ResponseSchemaProps) => (
                       ? 'linear-gradient(45deg, #3b82f6, #1d4ed8)'
                       : 'linear-gradient(45deg, #ec4899, #be185d)',
                     color: 'white',
-                    fontWeight: '500',
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
+                    height: '20px',
                   }}
                 />
               </TableCell>
               <TableCell sx={{ 
-                py: 2,
+                py: 1,
                 color: '#cbd5e1',
-                borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-                fontSize: '0.875rem',
-                lineHeight: 1.5,
+                fontSize: '0.8rem',
+                borderColor: 'rgba(148, 163, 184, 0.1)',
               }}>
                 {field.description}
               </TableCell>
@@ -122,5 +79,6 @@ const ResponseSchema = ({ schema }: ResponseSchemaProps) => (
     </TableContainer>
   </Box>
 );
+
 
 export default ResponseSchema;

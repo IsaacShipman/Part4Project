@@ -12,15 +12,15 @@ import ParametersTable from './ParametersTable';
 import ResponseSchema from './ResponseTable';
 import CodeExamples from './CodeExamples';
 import DocumentationHeader from './Header';
-import { CustomTab } from './TabView';
+import  CustomTab  from './TabView';
 import { DocumentationData } from '../../types/documentation';
 
 const glassStyles = {
   background: 'rgba(15, 23, 42, 0.7)',
   backdropFilter: 'blur(20px)',
   border: '1px solid rgba(148, 163, 184, 0.1)',
-  borderRadius: '8px',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+  borderRadius: '12px',
+  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.4)',
 };
 
 // API URL base - configure based on your environment
@@ -132,31 +132,25 @@ const DocumentationPanel = ({ endpointId }: DocumentationPanelProps) => {
   }
 
   return (
-    <Box sx={{
-      height: '100%',
-      width: '100%',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-      display: 'flex',
-      alignItems: 'stretch',
-      justifyContent: 'center',
-      overflow: 'hidden',
-    }}>
+
       <Paper 
         elevation={0}
         sx={{ 
           ...glassStyles,
-          width: '100%',
-          height: '100%',
+          width: 'calc(100% - 24px)', // Account for left and right margins
+          height: 'calc(100% - 24px)', // Account for top and bottom margins
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          margin: '12px', // Add consistent margin on all sides
         }}
       >
-        <DocumentationHeader data={data} getMethodColor={getMethodColor} />
+        <DocumentationHeader data={data} />
 
         <Box sx={{ 
           borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
           background: 'rgba(15, 23, 42, 0.3)',
+          padding: '0 8px',
         }}>
           <Tabs
             value={activeTab}
@@ -171,6 +165,9 @@ const DocumentationPanel = ({ endpointId }: DocumentationPanelProps) => {
               },
               '& .MuiTabs-scrollButtons': {
                 color: '#94a3b8',
+              },
+              '& .MuiTabs-flexContainer': {
+                gap: '4px',  // Add space between tabs
               }
             }}
           >
@@ -223,7 +220,7 @@ const DocumentationPanel = ({ endpointId }: DocumentationPanelProps) => {
           </Box>
         </Box>
       </Paper>
-    </Box>
+   
   );
 };
 

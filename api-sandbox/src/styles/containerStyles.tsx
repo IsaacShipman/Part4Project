@@ -3,8 +3,8 @@ import { SxProps, Theme } from '@mui/material';
 export const containerStyles: SxProps<Theme> = {
   display: 'flex',
   flexDirection: 'column',
-  height: 'calc(100% - 16px)',
-  width: 'calc(100% - 16px)',
+    width: '100%',
+    height: '100%',
   overflow: 'hidden',
   position: 'relative',
   background: `
@@ -16,8 +16,8 @@ export const containerStyles: SxProps<Theme> = {
   backdropFilter: 'blur(20px)',
   borderRadius: '16px',
   border: '1px solid rgba(71, 85, 105, 0.3)',
-  margin: '8px',
-  padding: '4px',
+  
+
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
   '&::before': {
     content: '""',

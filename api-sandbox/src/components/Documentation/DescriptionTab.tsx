@@ -26,21 +26,7 @@ const DescriptionTab = ({ data }: DescriptionTabProps) => (
       </Typography>
     </Box>
     
-    <Box sx={{ 
-      ...glassCardStyles,
-      p: 3,
-    }}>
-      <Typography 
-        variant="h6" 
-        fontWeight="600" 
-        sx={{ 
-          mb: 2,
-          color: '#f1f5f9',
-          fontSize: '1rem',
-        }}
-      >
-        Resources
-      </Typography>
+   
       <Link 
         href={data.doc_url} 
         target="_blank" 
@@ -67,7 +53,6 @@ const DescriptionTab = ({ data }: DescriptionTabProps) => (
         <Launch fontSize="small" />
         Official Documentation
       </Link>
-    </Box>
   </Box>
 );
 

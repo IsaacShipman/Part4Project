@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { Box, Typography, Paper, styled } from '@mui/material';
+import { Box, Typography, Paper, styled, IconButton } from '@mui/material';
 import { Code } from 'lucide-react';
+import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
 
 declare global {
   interface Window {
@@ -11,7 +12,8 @@ declare global {
 
 interface CodeEditorProps {
   code: string;
-  setCode: (code: string) => void; 
+  setCode: (code: string) => void;
+  onExecuteCode?: () => void; // Add this prop
 }
 
 // Glassy container with backdrop blur effect
@@ -23,10 +25,11 @@ const GlassyPaper = styled(Paper)(({ theme }) => ({
   borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-  margin: '16px',
+  // Remove the margin and adjust height
+  margin: 0,
   display: 'flex',
   flexDirection: 'column',
-  height: 'calc(100% - 32px)', // Full height minus margins
+  height: '100%', // Full height without subtraction
 }));
 
 // Header with gradient
@@ -53,7 +56,7 @@ const EditorContainer = styled(Box)({
   overflow: 'hidden',
 });
 
-export default function PythonEditor({ code, setCode }: CodeEditorProps) {
+export default function PythonEditor({ code, setCode, onExecuteCode }: CodeEditorProps) {
   const [editorReady, setEditorReady] = useState(false);
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
@@ -201,6 +204,36 @@ export default function PythonEditor({ code, setCode }: CodeEditorProps) {
           >
             PYTHON EDITOR
           </Typography>
+          
+          {/* Add Run Code Button */}
+          <IconButton
+            onClick={onExecuteCode}
+            disabled={!onExecuteCode || !editorReady}
+            sx={{
+              ml: 2,
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 20px rgba(74, 144, 226, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 6px 25px rgba(74, 144, 226, 0.5)'
+              },
+              '&:disabled': {
+                background: 'rgba(255, 255, 255, 0.02)',
+                color: '#444'
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            title="Run Code"
+          >
+            <PlayArrowIcon fontSize="small" />
+          </IconButton>
+          
           <Box sx={{ 
             ml: 'auto', 
             width: 8, 
