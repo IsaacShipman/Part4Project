@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, Paper, styled, IconButton } from '@mui/material';
 import { Code } from 'lucide-react';
-import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
+import { PlayArrow as PlayArrowIcon, Save as SaveIcon } from '@mui/icons-material';
 
 declare global {
   interface Window {
@@ -13,7 +13,9 @@ declare global {
 interface CodeEditorProps {
   code: string;
   setCode: (code: string) => void;
-  onExecuteCode?: () => void; // Add this prop
+  onExecuteCode?: () => void;
+  onSaveCode?: () => void;  // New prop for saving code
+  isSaved?: boolean;        // New prop to indicate if code is saved
 }
 
 // Glassy container with backdrop blur effect
@@ -56,7 +58,7 @@ const EditorContainer = styled(Box)({
   overflow: 'hidden',
 });
 
-export default function PythonEditor({ code, setCode, onExecuteCode }: CodeEditorProps) {
+export default function PythonEditor({ code, setCode, onExecuteCode, onSaveCode, isSaved = true }: CodeEditorProps) {
   const [editorReady, setEditorReady] = useState(false);
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
@@ -205,12 +207,41 @@ export default function PythonEditor({ code, setCode, onExecuteCode }: CodeEdito
             PYTHON EDITOR
           </Typography>
           
-          {/* Add Run Code Button */}
+          {/* Save Button */}
+          <IconButton
+            onClick={onSaveCode}
+            disabled={!onSaveCode || !editorReady || isSaved}
+            sx={{
+              ml: 2,
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 6px 25px rgba(16, 185, 129, 0.5)'
+              },
+              '&:disabled': {
+                background: 'rgba(255, 255, 255, 0.02)',
+                color: '#444'
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            title="Save Code"
+          >
+            <SaveIcon fontSize="small" />
+          </IconButton>
+          
+          {/* Run Code Button */}
           <IconButton
             onClick={onExecuteCode}
             disabled={!onExecuteCode || !editorReady}
             sx={{
-              ml: 2,
+              ml: 1,
               width: 36,
               height: 36,
               borderRadius: '10px',

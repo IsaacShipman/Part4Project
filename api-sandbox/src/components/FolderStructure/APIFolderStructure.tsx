@@ -72,9 +72,9 @@ export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStruct
       color: 'rgba(255, 255, 255, 0.7)',
       borderBottom: '2px solid transparent',
       '&.active': {
-        color: 'rgba(255, 255, 255, 0.95)',
+ 
         borderBottom: '2px solid rgba(59, 130, 246, 0.8)',
-        background: 'rgba(59, 130, 246, 0.1)'
+     
       },
       '&:hover': {
         background: 'rgba(59, 130, 246, 0.05)'

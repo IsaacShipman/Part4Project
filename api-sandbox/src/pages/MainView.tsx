@@ -10,50 +10,10 @@ import axios from 'axios';
 import { ApiCall } from '../types/api';
 import Description from '@mui/icons-material/Description';
 import Code from '@mui/icons-material/Code';
-import { useFileSystem } from '../hooks/useFileSystem';
-import { updateCurrentFileContent } from '../redux/slices/fileSystemSlice'; // Add this import
-import { useAppDispatch } from '../hooks/reduxHooks'; // Add this import
+import MainEditor from '../components/CodeEditor/MainEditor';
+import { useFileManager } from '../contexts/FileManagerContext';
 
-// Styled components with glassmorphism effects
-const GlassyPaper = styled(Paper)(({ theme }) => ({
-  background: `linear-gradient(135deg, 
-    ${alpha(theme.palette.background.paper, 0.1)} 0%, 
-    ${alpha(theme.palette.background.paper, 0.05)} 100%)`,
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-  borderRadius: '12px',
-  boxShadow: `
-    0 8px 32px ${alpha(theme.palette.common.black, 0.3)},
-    inset 0 1px 0 ${alpha(theme.palette.common.white, 0.1)}
-  `,
-  overflow: 'hidden',
-}));
 
-const GlassyButton = styled(Button)(({ theme, variant }) => ({
-  background: variant === 'contained' 
-    ? `linear-gradient(135deg, 
-        ${alpha(theme.palette.primary.main, 0.2)} 0%, 
-        ${alpha(theme.palette.primary.main, 0.1)} 100%)`
-    : 'transparent',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-  border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-  borderRadius: '8px',
-  color: variant === 'contained' ? theme.palette.primary.light : theme.palette.text.secondary,
-  fontWeight: 500,
-  textTransform: 'none',
-  padding: '8px 16px',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  '&:hover': {
-    background: `linear-gradient(135deg, 
-      ${alpha(theme.palette.primary.main, 0.3)} 0%, 
-      ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
-    transform: 'translateY(-1px)',
-    boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
-    border: `1px solid ${alpha(theme.palette.primary.main, 0.4)}`,
-  },
-}));
 
 const MainContainer = styled(Box)(({ theme }) => ({
   background: `linear-gradient(135deg, 
@@ -111,7 +71,9 @@ interface MainViewProps {
 
 function MainView({ onExecuteCode }: MainViewProps) {
   const theme = useTheme();
-  const [code, setCode] = useState(`import requests
+  const { getActiveFile } = useFileManager();
+  // Keep the default code for new files or when no file is selected
+  const [defaultCode, setDefaultCode] = useState(`import requests
 response = requests.get("https://jsonplaceholder.typicode.com/todos/1")
 print(response.json())
 
@@ -130,19 +92,22 @@ print(f"Posted with status: {response2.status_code}")`);
   
   const [selectedRequestIndex, setSelectedRequestIndex] = useState<number | null>(null);
 
-  const { currentFile } = useFileSystem();
-  const dispatch = useAppDispatch(); // Initialize dispatch
-
   const handleExecuteCode = useCallback(async () => {
     setLoading(true);
     setResponse(null);
     // Clear previous API calls
     setApiCalls([]);
     setApiRequests([]);
+    
+    // Get the code from the active file or use default code as fallback
+    const activeFile = getActiveFile();
+    const codeToExecute = activeFile ? activeFile.content : defaultCode;
+    
+    console.log("Executing code:", codeToExecute);
 
     try {
       const result = await axios.post("http://localhost:8000/run", {
-        code: currentFile ? currentFile.content : code,
+        code: codeToExecute,
         language: "python",
       });
 
@@ -190,7 +155,7 @@ print(f"Posted with status: {response2.status_code}")`);
     } finally {
       setLoading(false);
     }
-  }, [code, currentFile]); // Add currentFile to dependencies
+  }, [defaultCode, getActiveFile]); 
 
   const handleSelectEndpoint = (endpointId: number) => {
     setSelectedEndpointId(endpointId);
@@ -232,18 +197,11 @@ print(f"Posted with status: {response2.status_code}")`);
   
             <APIFolderStructure onSelectEndpoint={handleSelectEndpoint} />
        
-            <CodeEditor 
-  code={currentFile ? currentFile.content : code} 
-  setCode={(newCode) => {
-    if (currentFile) {
-      // Update the file content in redux
-      dispatch(updateCurrentFileContent(newCode));
-    } else {
-      setCode(newCode);
-    }
-  }} 
-  onExecuteCode={handleExecuteCode} 
-/>
+            <MainEditor 
+                code={defaultCode} 
+                setCode={setDefaultCode} 
+                onExecuteCode={handleExecuteCode} 
+              />
             
          
               <RequestPanel
