@@ -1,73 +1,89 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { debounce } from 'lodash'; // Make sure to install this if not already: npm install lodash
+import React, { useEffect, useRef } from 'react';
 import PythonEditor from './CodeEditor';
-import { useFileSystem } from '../../hooks/useFileSystem';
-import { Box, Typography } from '@mui/material';
+import { useFileManager } from '../../contexts/FileManagerContext';
+import { Box, Snackbar } from '@mui/material';
 
-const MainEditor: React.FC = () => {
-  const { currentFile, updateFileContent } = useFileSystem();
-  const [code, setCode] = useState<string>('');
+interface MainEditorProps {
+    code: string;  // Default code to use when no file is selected
+    setCode: (code: string) => void;  // Update default code (for backward compatibility)
+    onExecuteCode: () => void;
+}
+
+const MainEditor: React.FC<MainEditorProps> = ({ code, setCode, onExecuteCode }) => {
+  const { activeFileId, files, updateFile, getActiveFile } = useFileManager();
+  const [saved, setSaved] = React.useState(true);
+  const [showSavedMessage, setShowSavedMessage] = React.useState(false);
+  const lastActiveFileIdRef = useRef(activeFileId);
   
-  // When the selected file changes, update the editor content
+  // Get the active file based on activeFileId
+  const activeFile = getActiveFile();
+  
+  // Auto-save when switching between files
   useEffect(() => {
-    if (currentFile) {
-      setCode(currentFile.content);
-    } else {
-      setCode('# Select or create a file to start coding');
+    if (lastActiveFileIdRef.current !== activeFileId) {
+      lastActiveFileIdRef.current = activeFileId;
     }
-  }, [currentFile]);
-  
-  // Create a debounced save function - improves performance by not saving on every keystroke
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSave = useCallback(
-    debounce((content: string) => {
-      if (currentFile) {
-        updateFileContent(content);
-        console.log('Auto-saved file:', currentFile.name);
-      }
-    }, 800),
-    [currentFile, updateFileContent]
-  );
+  }, [activeFileId, activeFile]);
   
   const handleCodeChange = (newCode: string) => {
-    setCode(newCode);
-    // Trigger auto-save with debounce
-    debouncedSave(newCode);
+    if (activeFile) {
+      updateFile(activeFile.id, newCode);
+      setSaved(false);
+    } else {
+      // If no active file, update the default code
+      setCode(newCode);
+    }
   };
   
-  // Optional: Handle code execution
-  const handleRunCode = () => {
-    // Implement your code execution logic here
-    console.log('Running code:', code);
+  const handleSaveCode = () => {
+    if (activeFile) {
+      console.log('Saving code:', activeFile.content);
+      setSaved(true);
+      setShowSavedMessage(true);
+    }
   };
+  
+  // Function to pass to CodeEditor's onExecuteCode
+  const handleRunCode = () => {
+    // Auto-save before running
+    if (activeFile) {
+      handleSaveCode();
+    }
+    
+    // Call the onExecuteCode prop from MainView
+    onExecuteCode();
+  };
+  
+  // Auto-save timer
+  useEffect(() => {
+    if (!saved && activeFile) {
+      const timer = setTimeout(() => {
+        setSaved(true);
+        setShowSavedMessage(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [saved, activeFile]);
   
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {!currentFile ? (
-        <Box 
-          sx={{ 
-            flex: 1, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            backgroundColor: 'rgba(15, 20, 25, 0.95)',
-            borderRadius: 2
-          }}
-        >
-          <Typography 
-            variant="body1" 
-            sx={{ color: 'rgba(255, 255, 255, 0.5)' }}
-          >
-            Select or create a file to start coding
-          </Typography>
-        </Box>
-      ) : (
-        <PythonEditor 
-          code={code} 
-          setCode={handleCodeChange} 
-          onExecuteCode={handleRunCode}
-        />
-      )}
+      <PythonEditor 
+        key={activeFileId || 'default'}
+        code={activeFile ? activeFile.content : code} 
+        setCode={handleCodeChange} 
+        onExecuteCode={handleRunCode}
+        onSaveCode={handleSaveCode}
+        isSaved={saved}
+      />
+      
+      <Snackbar
+        open={showSavedMessage}
+        autoHideDuration={3000}
+        onClose={() => setShowSavedMessage(false)}
+        message="File saved successfully"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      />
     </Box>
   );
 };
