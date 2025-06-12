@@ -10,6 +10,8 @@ import json
 import uuid
 import time
 
+from app.services.security_analysis import run_security_scan
+
 app = FastAPI(
     title="API Sandbox",
     description="Interactive API development and testing environment",
@@ -259,3 +261,19 @@ async def record_api_call(session_id: str, call_data: dict):
     
     return {"status": "recorded"}
 
+class SecurityScanRequest(BaseModel):
+    code: str
+
+@app.post("/security-scan")
+async def security_scan(request: SecurityScanRequest):
+    try:
+        print(f"Incoming code for scan (first 100 chars): {request.code[:100]}...")
+        results = run_security_scan(request.code)
+        print(f"Scan results type: {type(results)}")
+        print(f"Scan results (first 200 chars): {str(results)[:200]}...")
+        return {"results": results}
+    except Exception as e:
+        print(f"Error in /security-scan: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

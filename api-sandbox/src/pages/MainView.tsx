@@ -201,6 +201,7 @@ print(f"Posted with status: {response2.status_code}")`);
                 code={defaultCode} 
                 setCode={setDefaultCode} 
                 onExecuteCode={handleExecuteCode} 
+                standalone={false}
               />
             
          
