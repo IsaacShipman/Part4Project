@@ -21,8 +21,6 @@ function SecurityScanView() {
   const [loading, setLoading] = useState(false);
 
   const handleExecuteCode = async () => {
-    console.log("Code being sent: " + defaultCode);
-
     setLoading(true);
     try {
       const response = await fetch("http://localhost:8000/security-scan", {
@@ -30,25 +28,19 @@ function SecurityScanView() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: defaultCode }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.text();
         console.error("Error response:", errorData);
         setScanResult(`Error: ${errorData}`);
         return;
       }
-      
+
       const data = await response.json();
       console.log("Received data:", data);
-      
-      let results = data.results;
 
-      try {
-        results = JSON.parse(results);
-        setScanResult(JSON.stringify(results, null, 2));
-      } catch {
-        setScanResult(results);
-      }
+      // Directly stringify results for display
+      setScanResult(JSON.stringify(data, null, 2));
     } catch (error) {
       console.error("Error:", error);
       if (error instanceof Error) {

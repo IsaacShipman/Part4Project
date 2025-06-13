@@ -274,7 +274,7 @@ async def security_scan(request: SecurityScanRequest):
 
         # temp. logging
         print("[INFO] Security scan completed.")
-        return {"results": results}
+        return results
     except Exception as e:
         # temp. logging
         print(f"[ERROR] Security scan failed: {str(e)}")

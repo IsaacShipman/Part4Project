@@ -86,12 +86,13 @@ def run_security_scan(code: str) -> str:
             # temp. logging
             print("[INFO] OpenAI scan completed successfully.")
             
-            # Return the parsed JSON as a string
-            return json.dumps(parsed)
+            return parsed
         except json.JSONDecodeError as e:
             # If parsing fails, return the raw result
             print("[WARN] Failed to parse OpenAI response as JSON. Returning raw string.")
             print(f"[DEBUG] Parse error: {e}")
+
+            # TODO MAKE INTO AN ERROR JSON OBJECT
             return result
             
     except Exception as e:
