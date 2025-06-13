@@ -41,28 +41,13 @@ function SecurityScanView() {
       const data = await response.json();
       console.log("Received data:", data);
       
-      // Parse the results if they're a string
       let results = data.results;
-      if (typeof results === 'string') {
-        try {
-          results = JSON.parse(results);
-        } catch (e) {
-          // If parsing fails, use as-is
-        }
-      }
-      
-      // Format the results nicely
-      if (Array.isArray(results)) {
-        const formatted = results.map((issue, index) => 
-          `Issue ${index + 1}:\n` +
-          `  Severity: ${issue.severity}\n` +
-          `  Line: ${issue.line}\n` +
-          `  Issue: ${issue.issue}\n` +
-          `  Recommendation: ${issue.recommendation}\n`
-        ).join('\n');
-        setScanResult(formatted);
-      } else {
+
+      try {
+        results = JSON.parse(results);
         setScanResult(JSON.stringify(results, null, 2));
+      } catch {
+        setScanResult(results);
       }
     } catch (error) {
       console.error("Error:", error);
