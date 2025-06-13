@@ -26,17 +26,18 @@ You may only respond using the following JSON format (shown for a single issue; 
 ]
 
 Field definitions:
-issue: Briefly describe the flaw (1–2 sentences max).
+issue: Briefly describe the flaw (1 to 2 sentences max).
 line: Line number where the issue occurs (integer).
 severity: One of "moderate", "high", or "critical".
-recommendation: Clear, concise fix (1–3 sentences).
+recommendation: Clear, concise fix (1 to 3 sentences).
 
 Remember: Output only the JSON array. No extra commentary is required.
 """
 
 def run_security_scan(code: str) -> str:
+    prompt = PROMPT_TEMPLATE.format(code=code)
+
     try:
-        prompt = PROMPT_TEMPLATE.format(code=code)
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
@@ -45,11 +46,13 @@ def run_security_scan(code: str) -> str:
         )
         
         result = response.choices[0].message.content
+
+        # temp. logging
         print(f"Raw OpenAI response: {result}")
         
-        # Try to parse the JSON to ensure it's valid
+        # Parse the JSON to ensure it's valid
         try:
-            # Remove any potential markdown formatting
+            # Remove any markdown formatting
             if result.startswith("```json"):
                 result = result[7:]
             if result.startswith("```"):
@@ -59,14 +62,19 @@ def run_security_scan(code: str) -> str:
             
             # Parse to validate JSON
             parsed = json.loads(result.strip())
+
+            # temp. logging
+            print("[INFO] OpenAI scan completed successfully.")
             
-            # Return the parsed JSON as a string (will be serialized again by FastAPI)
+            # Return the parsed JSON as a string
             return json.dumps(parsed)
         except json.JSONDecodeError:
             # If parsing fails, return the raw result
-            print(f"Failed to parse as JSON, returning raw: {result}")
+            print("[WARN] Failed to parse OpenAI response as JSON. Returning raw string.")
             return result
             
     except Exception as e:
-        print(f"OpenAI API call failed: {str(e)}")
+        # temp. logging
+        print(f"[ERROR] OpenAI API call failed: {str(e)}")
+        
         raise

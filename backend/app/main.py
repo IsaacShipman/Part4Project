@@ -267,13 +267,16 @@ class SecurityScanRequest(BaseModel):
 @app.post("/security-scan")
 async def security_scan(request: SecurityScanRequest):
     try:
-        print(f"Incoming code for scan (first 100 chars): {request.code[:100]}...")
+        # temp. logging
+        print("[INFO] Received /security-scan request.") 
+
         results = run_security_scan(request.code)
-        print(f"Scan results type: {type(results)}")
-        print(f"Scan results (first 200 chars): {str(results)[:200]}...")
+
+        # temp. logging
+        print("[INFO] Security scan completed.")
         return {"results": results}
     except Exception as e:
-        print(f"Error in /security-scan: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        # temp. logging
+        print(f"[ERROR] Security scan failed: {str(e)}")
+        
         raise HTTPException(status_code=500, detail=str(e))
