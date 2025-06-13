@@ -7,16 +7,17 @@ interface MainEditorProps {
     code: string;  // Default code to use when no file is selected
     setCode: (code: string) => void;  // Update default code (for backward compatibility)
     onExecuteCode: () => void;
+    standalone: boolean;
 }
 
-const MainEditor: React.FC<MainEditorProps> = ({ code, setCode, onExecuteCode }) => {
+const MainEditor: React.FC<MainEditorProps> = ({ code, setCode, onExecuteCode, standalone = false }) => {
   const { activeFileId, files, updateFile, getActiveFile } = useFileManager();
   const [saved, setSaved] = React.useState(true);
   const [showSavedMessage, setShowSavedMessage] = React.useState(false);
   const lastActiveFileIdRef = useRef(activeFileId);
   
   // Get the active file based on activeFileId
-  const activeFile = getActiveFile();
+  const activeFile = standalone ? null : getActiveFile();
   
   // Auto-save when switching between files
   useEffect(() => {
