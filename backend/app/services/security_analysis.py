@@ -39,7 +39,7 @@ Example output:
   {{
     "issue": "Hardcoded API key exposes sensitive information.",
     "line": 3,
-    "severity": "high",
+    "severity": "critical",
     "recommendation": "Store API keys in environment variables and load them securely at runtime."
   }},
   {{
