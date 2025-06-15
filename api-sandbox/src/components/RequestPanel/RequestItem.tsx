@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box, ListItem, ListItemButton, Typography, Chip,
   IconButton, Collapse, Divider, useTheme
@@ -33,6 +33,12 @@ const RequestItem: React.FC<RequestItemProps> = ({
   isLast
 }) => {
   const theme = useTheme();
+
+  useEffect(() => {
+        console.log('RequestDetails apiCall:', apiCall);
+    console.log('Response data:', apiCall?.response);
+    console.log('Response headers:', apiCall?.headers);
+  }, [apiCall]);
 
   const formatTimestamp = (timestamp: number): string => {
     return new Date(timestamp * 1000).toLocaleTimeString();

@@ -4,10 +4,11 @@ import {
   Paper, CircularProgress, Stack, useTheme, styled
 } from '@mui/material';
 import JsonViewer from './JsonViewer';
+import { ApiCall } from '../../types/api';
 
 interface RequestViewerProps {
   loading: boolean;
-  selectedApiResponse: { response: string } | null;
+  selectedApiCall: ApiCall | null;
 }
 
 // Glassy container with backdrop blur effect
@@ -67,9 +68,35 @@ const ViewerContent = styled(Box)(({ theme }) => ({
   },
 }));
 
-const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiResponse }) => {
+const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall }) => {
   const theme = useTheme();
-  const [view, setView] = useState<'headers' | 'body' | 'response'>('response');
+  const [view, setView] = useState<'headers' | 'body'>('body');
+
+  // Format JSON data for display
+  const formatJson = (obj: any): string => {
+    if (!obj) return '';
+    if (typeof obj === 'string') return obj;
+    try {
+      return JSON.stringify(obj, null, 2);
+    } catch {
+      return String(obj);
+    }
+  };
+
+  // Get content based on selected view
+  const getContent = () => {
+    if (!selectedApiCall) return null;
+
+    switch (view) {
+      case 'headers':
+        return formatJson(selectedApiCall.headers || {});
+      case 'body':
+        return formatJson(selectedApiCall.response || 
+                          '');
+      default:
+        return '';
+    }
+  };
 
   return (
     <GlassyPaper elevation={0}>
@@ -117,19 +144,7 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiRespo
           >
             Body
           </Button>
-          <Button 
-            onClick={() => setView('response')}
-            variant={view === 'response' ? 'contained' : 'outlined'}
-            sx={{ 
-              px: 1,
-              backgroundColor: view === 'response' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-              '&:hover': {
-                backgroundColor: view === 'response' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.1)'
-              }
-            }}
-          >
-            Response
-          </Button>
+        
         </ButtonGroup>
       </ViewerHeader>
 
@@ -164,7 +179,7 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiRespo
               Processing request...
             </Typography>
           </Stack>
-        ) : selectedApiResponse ? (
+        ) : selectedApiCall ? (
           <Box
             sx={{
               height: '100%',
@@ -179,7 +194,7 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiRespo
               boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             }}
           >
-            <JsonViewer data={selectedApiResponse.response} />
+            <JsonViewer data={getContent()} />
           </Box>
         ) : (
           <Box

@@ -16,14 +16,11 @@ interface ResponsePanelProps {
 const ResponsePanel: React.FC<ResponsePanelProps> = ({ 
   response, 
   loading, 
-  apiResponses, 
-  selectedRequestIndex 
+  selectedApiCall
 }) => {
   const [terminalMaximized, setTerminalMaximized] = useState<boolean>(false);
   const [terminalMinimized, setTerminalMinimized] = useState<boolean>(false);
   const [splitSizes, setSplitSizes] = useState([30, 70]);
-
-  const selectedApiResponse = selectedRequestIndex !== null ? apiResponses[selectedRequestIndex] : null;
 
   // Toggle maximized terminal view
   const toggleMaximized = () => {
@@ -74,7 +71,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
       <div style={{ visibility: splitSizes[0] === 0 ? 'hidden' : 'visible', width: '100%', height: '100%' }}>
         <RequestViewer 
           loading={loading} 
-          selectedApiResponse={selectedApiResponse} 
+          selectedApiCall={selectedApiCall} 
         />
       </div>
 

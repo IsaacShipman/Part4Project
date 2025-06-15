@@ -191,33 +191,11 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           </AccordionSummary>
           <AccordionDetails sx={detailsStyles.accordionDetails}>
             <Box sx={detailsStyles.contentBox}>
-              {renderHeaders(apiCall.request?.headers)}
+              {renderHeaders(apiCall.headers)}
             </Box>
           </AccordionDetails>
         </Accordion>
 
-        {/* Request Body */}
-        {(apiCall.request?.data || apiCall.request?.json) && (
-          <Accordion
-            disableGutters
-            elevation={0}
-            sx={detailsStyles.accordion}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMore sx={{ color: '#94a3b8' }} />}
-              sx={detailsStyles.accordionSummary}
-            >
-              <Typography variant="caption" sx={detailsStyles.label}>
-                Body
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={detailsStyles.accordionDetails}>
-              <Box sx={detailsStyles.contentBox}>
-                {formatJson(apiCall.request.json || apiCall.request.data)}
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        )}
       </Box>
 
       <Divider sx={detailsStyles.divider} />
@@ -245,7 +223,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           </AccordionSummary>
           <AccordionDetails sx={detailsStyles.accordionDetails}>
             <Box sx={detailsStyles.contentBox}>
-              {renderHeaders(apiCall.responseData?.headers)}
+              {renderHeaders(apiCall.headers)}
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -267,8 +245,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           </AccordionSummary>
           <AccordionDetails sx={detailsStyles.accordionDetails}>
             <Box sx={detailsStyles.contentBox}>
-              {apiCall.responseData?.text || 
-               apiCall.responseData?.content || 
+              {apiCall.response || 
                'No content'}
             </Box>
           </AccordionDetails>

@@ -14,7 +14,7 @@ import FileManager from './FileManager';
 export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStructureProps) {
   const { data, loading, error } = useAPIData();
   const { expandedFolders, selectedEndpointId, toggleFolder, selectEndpoint } = useFolderState();
-  const [activeTab, setActiveTab] = useState<'endpoints' | 'files'>('endpoints');
+  const [activeTab, setActiveTab] = useState<'endpoints' | 'files'>('files');
 
   const handleEndpointClick = (endpointId: number) => {
     selectEndpoint(endpointId);

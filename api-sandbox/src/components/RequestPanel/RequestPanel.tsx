@@ -28,6 +28,7 @@ const RequestPanel: React.FC<RequestPanelProps> = ({
 
   useEffect(() => {
     console.log('Requests updated:', apiCalls);
+    
   }, [apiCalls]);
 
   const toggleDetails = (index: number): void => {
