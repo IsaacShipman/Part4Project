@@ -32,14 +32,14 @@ Field definitions:
 - severity: One of "moderate", "high", or "critical".
 - recommendation: How to fix the issue (max 3 sentences).
 
-If multiple issues are found, return a longer JSON array. One object per issue. Do not group or merge them. Each issue must be its own object in the array.
+If multiple issues are found, return a longer JSON array. One object per issue. Do not group or merge them. Each issue must be its own object in the array. The array of issues should be sorted in the order of occureance. 
 
 Example output:
 [
   {{
     "issue": "Hardcoded API key exposes sensitive information.",
     "line": 3,
-    "severity": "high",
+    "severity": "critical",
     "recommendation": "Store API keys in environment variables and load them securely at runtime."
   }},
   {{
@@ -64,11 +64,17 @@ def run_security_scan(code: str) -> str:
             temperature=0,
             max_tokens=1500,
         )
+
+        if not response.choices or not response.choices[0].message.content:
+            print("[ERROR] Empty response from OpenAI")
+            return [{
+                "issue": "Empty response received from AI service.",
+                "line": 0,
+                "severity": "critical",
+                "recommendation": "Please try running the Security Scan again."
+            }]
         
         result = response.choices[0].message.content
-
-        # temp. logging
-        print(f"Raw OpenAI response: {result}")
         
         # Parse JSON to ensure it's valid
         try:
@@ -89,14 +95,25 @@ def run_security_scan(code: str) -> str:
             return parsed
         except json.JSONDecodeError as e:
             # If parsing fails, return the raw result
-            print("[WARN] Failed to parse OpenAI response as JSON. Returning raw string.")
+            print("[WARN] Failed to parse OpenAI response as JSON. Returning error JSON instead.")
             print(f"[DEBUG] Parse error: {e}")
 
-            # TODO MAKE INTO AN ERROR JSON OBJECT
-            return result
+            return [
+              {
+                "issue": f"Backend error response: {e}",
+                "line": 0,
+                "severity": "critical",
+                "recommendation": "Please try running the Security Scan again.",
+              },
+            ]
             
     except Exception as e:
         # temp. logging
         print(f"[ERROR] OpenAI API call failed: {str(e)}")
         
-        raise
+        return [{
+            "issue": f"AI service error: {str(e)}",
+            "line": 0,
+            "severity": "critical",
+            "recommendation": "Please check your internet connection and try running the Security Scan again."
+        }]
