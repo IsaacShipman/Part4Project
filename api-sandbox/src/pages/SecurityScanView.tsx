@@ -1,11 +1,78 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState } from "react";
+import { Box, Typography } from "@mui/material";
+import MainEditor from "../components/CodeEditor/MainEditor";
 
 function SecurityScanView() {
+  const [defaultCode, setDefaultCode] = useState(
+    `import requests
+    API_KEY = "12345-SECRET-API-KEY"
+    BASE_URL = "https://example.com/data"
+
+    def get_data():
+        headers = {
+            "Authorization": f"Bearer {API_KEY}"
+        }
+        response = requests.get(BASE_URL, headers=headers)
+        return response.json()
+
+    print(get_data())
+    `);
+  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleExecuteCode = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/security-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: defaultCode }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Error response:", errorData);
+        setScanResult(`Error: ${errorData}`);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Received data:", data);
+
+      // Directly stringify results for display
+      setScanResult(JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error("Error:", error);
+      if (error instanceof Error) {
+        setScanResult("Error: " + error.message);
+      } else {
+        setScanResult("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Box sx={{ padding: 4, display: 'flex', flexDirection: 'column', height: '100%', marginTop: 8 }}>
-      <Typography variant="h4">Security Scan View</Typography>
-      <Typography variant="body1">This is where the security scan functionality will be implemented.</Typography>
+    <Box
+      sx={{
+        padding: 2,
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 64px)",
+        marginTop: 8,
+      }}
+    >
+      <MainEditor
+        code={defaultCode}
+        setCode={setDefaultCode}
+        onExecuteCode={handleExecuteCode}
+        standalone={true}
+      />
+      <Typography variant="h6" mt={2}>Scan Results:</Typography>
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {loading ? "Scanning..." : scanResult}
+      </pre>
     </Box>
   );
 }
