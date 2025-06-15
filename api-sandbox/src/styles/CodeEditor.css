@@ -1,0 +1,14 @@
+.securityIssueHighlight {
+  background-color: rgba(211, 47, 47, 0.2);
+  border-left: 3px solid #d32f2f;
+}
+
+.securityIssueInlineHighlight {
+  text-decoration: wavy underline #d32f2f;
+}
+
+.securityIssueGutter {
+  background-color: #d32f2f;
+  width: 5px !important;
+  margin-left: 3px;
+}

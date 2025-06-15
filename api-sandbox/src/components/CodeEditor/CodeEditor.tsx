@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, Paper, styled, IconButton } from "@mui/material";
 import { Code } from "lucide-react";
@@ -80,6 +80,9 @@ export default function PythonEditor({
   const [monacoInstance, setMonacoInstance] = useState<any>(null);
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
+    // Store editor and monaco in ref for external access
+
+    
     // Define custom theme
     monaco.editor.defineTheme("cyberpunk-theme", {
       base: "vs-dark",

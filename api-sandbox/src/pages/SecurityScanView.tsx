@@ -1,12 +1,30 @@
 import React, { useState } from "react";
-import { Box, Paper, Typography, IconButton, Chip } from "@mui/material";
+import { Box, Paper, Typography, IconButton, styled, alpha } from "@mui/material";
 import MainEditor from "../components/CodeEditor/MainEditor";
 import { ChevronRight, LocationSearching, GppMaybe } from "@mui/icons-material";
 import { containerStyles, listStyles } from "../styles/containerStyles";
 import IssueCard from "../components/SecurityScan/IssueCard";
 
+const MainContainer = styled(Box)(({ theme }) => ({
+  background: `linear-gradient(135deg, 
+    ${theme.palette.background.default} 0%, 
+    ${alpha(theme.palette.background.paper, 0.8)} 50%,
+    ${theme.palette.background.default} 100%)`,
+  minHeight: '100vh',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+    pointerEvents: 'none',
+  },
+}));
+
 const panelStyles = {
-  // Updated header style to match CodeEditor exactly
   header: {
     background:
       "linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)",
@@ -16,7 +34,6 @@ const panelStyles = {
     alignItems: "center",
     justifyContent: "space-between",
     position: "relative",
-    // Remove the explicit border radius to allow it to follow the parent container
     "&::after": {
       content: '""',
       position: "absolute",
@@ -84,15 +101,15 @@ const panelStyles = {
 function SecurityScanView() {
   const [editorCode, setEditorCode] = useState(
     `import requests
-    API_KEY = "12345-SECRET-API-KEY"
-    BASE_URL = "https://example.com/data"
+API_KEY = "12345-SECRET-API-KEY"
+BASE_URL = "https://example.com/data"
 
-    def get_data():
-        headers = {
-            "Authorization": f"Bearer {API_KEY}"
-        }
-        response = requests.get(BASE_URL, headers=headers)
-        return response.json()
+def get_data():
+    headers = {
+        "Authorization": f"Bearer {API_KEY}"
+    }
+    response = requests.get(BASE_URL, headers=headers)
+    return response.json()
 
     print(get_data())
     `
@@ -148,7 +165,7 @@ function SecurityScanView() {
   };
 
   return (
-    <Box
+    <MainContainer
       sx={{
         padding: 2,
         display: "flex",
@@ -212,7 +229,7 @@ function SecurityScanView() {
           )}
         </Box>
       </Paper>
-    </Box>
+    </MainContainer>
   );
 }
 

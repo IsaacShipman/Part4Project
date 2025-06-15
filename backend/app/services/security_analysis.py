@@ -6,17 +6,19 @@ from openai import OpenAI
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-MODEL_NAME = "gpt-4.1-nano"
+MODEL_NAME = "gpt-4.1-mini"  # Use the appropriate model for your needs
+
 
 PROMPT_TEMPLATE = """
-You are a secure code auditing assistant. Analyze the following API code for security vulnerabilities. Identify and list every potential issue clearly and concisely.
+You are a secure code auditing assistant. Analyze the following API code for security vulnerabilities.
 
 Code to analyze:
 \"\"\"{code}\"\"\"
 
-Respond with **only** the JSON array format given to you. Do not wrap it in markdown. Do not include any explanation, comments, or extra formatting. The output must be a raw, unquoted JSON array.
+IMPORTANT: Be extremely precise with line numbers. Count lines starting from 1 (not 0), gaps inbetween lines count as line numbers.
+If you're mentioning line X, verify that it's actually the Xth line in the provided code.
 
-Format:
+Respond with **only** the JSON array format:
 [
   {{
     "issue": "Concise description of the security flaw.",
@@ -54,9 +56,23 @@ Strictly return only the JSON array. No quotes, no markdown, no text outside the
 """
 
 
-def run_security_scan(code: str) -> str:
-    prompt = PROMPT_TEMPLATE.format(code=code)
+def add_line_numbers(code: str) -> str:
+    """Add line numbers to code for better AI analysis."""
+    lines = code.split('\n')
+    numbered_code = '\n'.join(f"{i+1}: {line}" for i, line in enumerate(lines))
+    return numbered_code
 
+
+def run_security_scan(code: str) -> str:
+    # Store original code for line number verification later
+    original_code = code
+    
+    # Add line numbers to the code for AI analysis
+    numbered_code = add_line_numbers(code)
+    
+    prompt = PROMPT_TEMPLATE.format(code=numbered_code)
+    print("Code received for security scan:")
+    print(numbered_code)  # temp. logging
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
