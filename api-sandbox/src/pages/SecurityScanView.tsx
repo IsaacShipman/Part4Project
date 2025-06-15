@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Paper, Typography, IconButton, Chip } from "@mui/material";
 import MainEditor from "../components/CodeEditor/MainEditor";
-import { ChevronRight, Memory } from "@mui/icons-material";
+import { ChevronRight, LocationSearching, GppMaybe } from "@mui/icons-material";
 import { containerStyles, listStyles } from "../styles/containerStyles";
 import IssueCard from "../components/SecurityScan/IssueCard";
 
@@ -97,38 +97,7 @@ function SecurityScanView() {
     print(get_data())
     `
   );
-  // const [scanResult, setScanResult] = useState<string | null>(null);
-  const [scanResult, setScanResult] = useState([
-    {
-      issue: "Hardcoded API key exposes sensitive information.",
-      line: 2,
-      severity: "critical",
-      recommendation:
-        "Store API keys in environment variables and load them securely at runtime.",
-    },
-    {
-      issue: "API requests use an unencrypted HTTP URL.",
-      line: 4,
-      severity: "high",
-      recommendation:
-        "Use HTTPS to encrypt communication and protect data in transit.",
-    },
-    {
-      issue:
-        "No input validation on user-supplied data before making the API call.",
-      line: 8,
-      severity: "moderate",
-      recommendation:
-        "Validate and sanitize all inputs to prevent injection and unexpected behavior.",
-    },
-    {
-      issue: "No error handling for failed HTTP requests.",
-      line: 9,
-      severity: "moderate",
-      recommendation:
-        "Check the response status and wrap requests in try-except blocks to handle errors gracefully.",
-    },
-  ]);
+  const [scanResult, setScanResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedLine, setSelectedLine] = useState<number | null>(null); // Track selected line
 
@@ -139,35 +108,35 @@ function SecurityScanView() {
 
   const handleExecuteCode = async () => {
     setLoading(true);
-    // try {
-    //   const response = await fetch("http://localhost:8000/security-scan", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ code: defaultCode }),
-    //   });
+    try {
+      const response = await fetch("http://localhost:8000/security-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: defaultCode }),
+      });
 
-    //   if (!response.ok) {
-    //     const errorData = await response.text();
-    //     console.error("Error response:", errorData);
-    //     setScanResult(`Error: ${errorData}`);
-    //     return;
-    //   }
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Error response:", errorData);
+        setScanResult(`Error: ${errorData}`);
+        return;
+      }
 
-    //   const data = await response.json();
-    //   console.log("Received data:", data);
+      const data = await response.json();
+      console.log("Received data:", data);
 
-    //   // Directly stringify results for display
-    //   setScanResult(JSON.stringify(data, null, 2));
-    // } catch (error) {
-    //   console.error("Error:", error);
-    //   if (error instanceof Error) {
-    //     setScanResult("Error: " + error.message);
-    //   } else {
-    //     setScanResult("An unknown error occurred.");
-    //   }
-    // } finally {
-    //   setLoading(false);
-    // }
+      // Directly stringify results for display
+      setScanResult(JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error("Error:", error);
+      if (error instanceof Error) {
+        setScanResult("Error: " + error.message);
+      } else {
+        setScanResult("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -195,7 +164,7 @@ function SecurityScanView() {
         {/* Header */}
         <Box sx={panelStyles.header}>
           <Box sx={panelStyles.headerContent}>
-            <Memory sx={panelStyles.icon} />
+            <GppMaybe sx={panelStyles.icon} />
             <Typography variant="subtitle2" sx={panelStyles.headerTitle}>
               SECURITY SCAN RESULTS
             </Typography>
@@ -207,7 +176,13 @@ function SecurityScanView() {
 
         {/* Content Area */}
         <Box sx={{ ...panelStyles.listContainer, p: 2, overflowY: "auto" }}>
-          {Array.isArray(scanResult) &&
+          {loading ? (
+            <Box sx={panelStyles.emptyState}>
+              <Typography variant="body2" sx={panelStyles.emptyText}>
+                Loading...
+              </Typography>
+            </Box>
+          ) : Array.isArray(scanResult) && scanResult.length > 0 ? (
             scanResult.map((issue, index) => (
               <IssueCard
                 key={index}
@@ -215,7 +190,18 @@ function SecurityScanView() {
                 onIssueClick={() => handleIssueClick(issue.line)}
                 isSelected={selectedLine === issue.line}
               />
-            ))}
+            ))
+          ) : (
+            <Box sx={panelStyles.emptyState}>
+              <LocationSearching sx={panelStyles.emptyIcon} />
+              <Typography variant="body2" sx={panelStyles.emptyText}>
+                No scan results yet.
+              </Typography>
+              <Typography variant="body2" sx={panelStyles.emptySubtext}>
+                Run a security scan to view detected issues.
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Paper>
     </Box>
