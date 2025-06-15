@@ -12,6 +12,7 @@ import Description from '@mui/icons-material/Description';
 import Code from '@mui/icons-material/Code';
 import MainEditor from '../components/CodeEditor/MainEditor';
 import { useFileManager } from '../contexts/FileManagerContext';
+import { saveApiCalls, loadApiCalls } from '../utils/localStorageUtils';
 
 
 
@@ -87,10 +88,39 @@ print(f"Posted with status: {response2.status_code}")`);
   const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
   const [activePanel, setActivePanel] = useState<'documentation' | 'console'>('console');
   const [apiRequests, setApiRequests] = useState<APIRequest[]>([]);
-  const [apiCalls, setApiCalls] = useState<ApiCall[]>([]);
+  const [apiCalls, setApiCalls] = useState<ApiCall[]>(() => loadApiCalls());
   const [isRequestPanelOpen, setIsRequestPanelOpen] = useState(false);
   
   const [selectedRequestIndex, setSelectedRequestIndex] = useState<number | null>(null);
+
+  // Load saved requests on component mount
+  useEffect(() => {
+    const savedCalls = loadApiCalls();
+    if (savedCalls.length > 0) {
+      setApiCalls(savedCalls);
+      
+      // Convert saved API calls to API requests format
+      const requests: APIRequest[] = savedCalls.map(call => ({
+        line: call.request?.line,
+        method: call.method,
+        url: call.url,
+        status: call.status,
+        response: call.response,
+        timestamp: call.timestamp,
+        headers: call.headers
+      }));
+      
+      setApiRequests(requests);
+      setIsRequestPanelOpen(true);
+    }
+  }, []);
+
+  // Save API calls whenever they change
+  useEffect(() => {
+    if (apiCalls.length > 0) {
+      saveApiCalls(apiCalls);
+    }
+  }, [apiCalls]);
 
   const handleExecuteCode = useCallback(async () => {
     setLoading(true);
@@ -117,6 +147,7 @@ print(f"Posted with status: {response2.status_code}")`);
       if (result.data.api_calls && Array.isArray(result.data.api_calls)) {
         const calls = result.data.api_calls;
         setApiCalls(calls);
+        saveApiCalls(calls); // Save to localStorage
         
         // Update API requests for the request panel
         interface APIRequestDetails {

@@ -5,6 +5,7 @@ import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon,
 // Import view components
 import MainView from './pages/MainView';
 import SecurityScanView from './pages/SecurityScanView';
+import APIRequestViewer from './pages/APIRequestViewer';
 
 // Custom theme with dark colors inspired by the screenshots
 const modernTheme = createTheme({
@@ -217,6 +218,37 @@ function App() {
             >
               Security
             </Button>
+                 <Button 
+              startIcon={<SecurityIcon />}
+              onClick={() => setCurrentView('APIViewer')}
+              sx={{ 
+                color: currentView === 'APIViewer' ? '#FFFFFF' : '#B0BEC5',
+                background: currentView === 'APIViewer' 
+                  ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
+                  : 'transparent',
+                borderRadius: '12px',
+                padding: '8px 20px',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                textTransform: 'none',
+                minWidth: '120px',
+                boxShadow: currentView === 'APIViewer' 
+                  ? '0 4px 20px rgba(0, 212, 170, 0.4)' 
+                  : 'none',
+                '&:hover': { 
+                  background: currentView === 'APIViewer'
+                    ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
+                  : 'rgba(255, 255, 255, 0.1)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: currentView === 'APIViewer' 
+                    ? '0 6px 25px rgba(0, 212, 170, 0.5)' 
+                    : '0 2px 10px rgba(255, 255, 255, 0.1)'
+                },
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              API Viewer
+            </Button>
           </Box>
 
           {/* Right section with action buttons and user info */}
@@ -253,8 +285,10 @@ function App() {
           <MainView onExecuteCode={(fn) => {
             executeCodeRef.current = fn;
           }} />
-        ) : (
+        ) : currentView === 'security' ? (
           <SecurityScanView />
+        ) : (
+          <APIRequestViewer />
         )}
       </Box>
     </ThemeProvider>
