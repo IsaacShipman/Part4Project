@@ -32,7 +32,7 @@ Field definitions:
 - severity: One of "moderate", "high", or "critical".
 - recommendation: How to fix the issue (max 3 sentences).
 
-If multiple issues are found, return a longer JSON array. One object per issue. Do not group or merge them. Each issue must be its own object in the array.
+If multiple issues are found, return a longer JSON array. One object per issue. Do not group or merge them. Each issue must be its own object in the array. The array of issues should be sorted in the order of occureance. 
 
 Example output:
 [

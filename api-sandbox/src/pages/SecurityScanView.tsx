@@ -97,7 +97,7 @@ function SecurityScanView() {
     print(get_data())
     `
   );
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedLine, setSelectedLine] = useState<number | null>(null); // Track selected line
 
@@ -118,7 +118,14 @@ function SecurityScanView() {
       if (!response.ok) {
         const errorData = await response.text();
         console.error("Error response:", errorData);
-        setScanResult(`Error: ${errorData}`);
+        setScanResult([
+          {
+            issue: `Error response: ${errorData}`,
+            line: 0,
+            severity: "critical",
+            recommendation: "Please try run Security Scan again.",
+          },
+        ]);
         return;
       }
 
@@ -126,14 +133,18 @@ function SecurityScanView() {
       console.log("Received data:", data);
 
       // Directly stringify results for display
-      setScanResult(JSON.stringify(data, null, 2));
+      // setScanResult(JSON.stringify(data, null, 2));
+      setScanResult(data);
     } catch (error) {
       console.error("Error:", error);
-      if (error instanceof Error) {
-        setScanResult("Error: " + error.message);
-      } else {
-        setScanResult("An unknown error occurred.");
-      }
+      setScanResult([
+        {
+          issue: `Error response: ${error}`,
+          line: 0,
+          severity: "critical",
+          recommendation: "Please try run Security Scan again.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
