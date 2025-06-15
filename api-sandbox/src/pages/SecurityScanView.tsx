@@ -187,7 +187,7 @@ function SecurityScanView() {
           setCode={setDefaultCode}
           onExecuteCode={handleExecuteCode}
           standalone={true}
-          highlightedLine={selectedLine} // Pass selected line to MainEditor
+          highlightedLine={selectedLine}
         />
       </Box>
 
