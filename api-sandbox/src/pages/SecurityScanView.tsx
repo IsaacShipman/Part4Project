@@ -82,7 +82,7 @@ const panelStyles = {
 };
 
 function SecurityScanView() {
-  const [defaultCode, setDefaultCode] = useState(
+  const [editorCode, setEditorCode] = useState(
     `import requests
     API_KEY = "12345-SECRET-API-KEY"
     BASE_URL = "https://example.com/data"
@@ -112,7 +112,7 @@ function SecurityScanView() {
       const response = await fetch("http://localhost:8000/security-scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: defaultCode }),
+        body: JSON.stringify({ code: editorCode }),
       });
 
       if (!response.ok) {
@@ -123,7 +123,7 @@ function SecurityScanView() {
             issue: `Error response: ${errorData}`,
             line: 0,
             severity: "critical",
-            recommendation: "Please try run Security Scan again.",
+            recommendation: "Please run Security Scan again.",
           },
         ]);
         return;
@@ -131,9 +131,6 @@ function SecurityScanView() {
 
       const data = await response.json();
       console.log("Received data:", data);
-
-      // Directly stringify results for display
-      // setScanResult(JSON.stringify(data, null, 2));
       setScanResult(data);
     } catch (error) {
       console.error("Error:", error);
@@ -142,7 +139,7 @@ function SecurityScanView() {
           issue: `Error response: ${error}`,
           line: 0,
           severity: "critical",
-          recommendation: "Please try run Security Scan again.",
+          recommendation: "Please run Security Scan again.",
         },
       ]);
     } finally {
@@ -163,8 +160,8 @@ function SecurityScanView() {
     >
       <Box sx={{ width: "65%" }}>
         <MainEditor
-          code={defaultCode}
-          setCode={setDefaultCode}
+          code={editorCode}
+          setCode={setEditorCode}
           onExecuteCode={handleExecuteCode}
           standalone={true}
           highlightedLine={selectedLine}
