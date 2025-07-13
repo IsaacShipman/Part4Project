@@ -165,7 +165,7 @@ def get_data():
   };
 
   return (
-    <MainContainer
+    <Box
       sx={{
         padding: 2,
         display: "flex",
@@ -229,7 +229,9 @@ def get_data():
           )}
         </Box>
       </Paper>
-    </MainContainer>
+    </Box>
+    
+    
   );
 }
 

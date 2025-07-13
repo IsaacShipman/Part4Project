@@ -31,13 +31,14 @@ app.add_middleware(
 class CodeInput(BaseModel):
     code: str
     language: str = "python"
+    session_id: str | None = None  # Allow session_id from client
 
 @app.post("/run")
 async def run_code(code_input: CodeInput):
     print(code_input)
     try:
         # Create a session ID for tracking API calls
-        session_id = api_proxy.create_session_id()
+        session_id = code_input.session_id or api_proxy.create_session_id()
         
         # Add custom requests wrapper to intercept API calls
         proxy_code = f"""
@@ -132,6 +133,7 @@ requests.request = partial(intercept_request, original_request)
         
         # Include API calls in the result
         result["api_calls"] = api_calls
+        print("Result:", result)
         
         return result
     except Exception as e:
@@ -236,10 +238,12 @@ def clear_proxy_calls(session_id: str):
     api_proxy.clear_calls(session_id)
     return {"status": "success", "message": "Calls cleared"}
 
-@app.post("/api-proxy/create-session")
+@app.get("/api-proxy/create-session")
 def create_proxy_session():
     """Create a new session for tracking API calls."""
+    print("[INFO] Creating new API proxy session.")
     session_id = api_proxy.create_session_id()
+    print(f"Created new session with ID: {session_id}")
     return {"session_id": session_id}
 
 @app.post("/api-proxy/record/{session_id}")
