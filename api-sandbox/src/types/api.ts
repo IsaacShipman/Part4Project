@@ -47,6 +47,7 @@ export interface RequestSummary {
   export interface Endpoint {
   id: number;
   method: string;
+  path: string;
   summary: string;
   category: string;
 }

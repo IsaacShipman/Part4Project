@@ -1,6 +1,8 @@
 import { ApiCall } from '../types/api';
+import { Edge, Node } from 'reactflow';
 
 const API_CALLS_STORAGE_KEY = 'api-sandbox-requests';
+const FLOW_STATE_STORAGE_KEY = 'api-sandbox-flow-state';
 
 export const saveApiCalls = (calls: ApiCall[]): void => {
   try {
@@ -22,4 +24,39 @@ export const loadApiCalls = (): ApiCall[] => {
 
 export const clearApiCalls = (): void => {
   localStorage.removeItem(API_CALLS_STORAGE_KEY);
+};
+// Flow state persistence functions
+export const saveFlowState = (nodes: Node[], edges: Edge[]): void => {
+  try {
+    const flowState = { nodes, edges };
+    localStorage.setItem(FLOW_STATE_STORAGE_KEY, JSON.stringify(flowState));
+  } catch (error) {
+    console.error('Failed to save flow state to localStorage:', error);
+  }
+};
+
+export const loadFlowState = (): { nodes: Node[], edges: Edge[] } => {
+  try {
+    const storedState = localStorage.getItem(FLOW_STATE_STORAGE_KEY);
+    if (storedState) {
+      const parsedState = JSON.parse(storedState);
+      return {
+        nodes: parsedState.nodes || [],
+        edges: parsedState.edges || []
+      };
+    }
+    return { nodes: [], edges: [] };
+  } catch (error) {
+    console.error('Failed to load flow state from localStorage:', error);
+    return { nodes: [], edges: [] };
+  }
+};
+
+export const clearFlowState = (): void => {
+  localStorage.removeItem(FLOW_STATE_STORAGE_KEY);
+};
+
+// Node state persistence functions
+export const clearNodeState = (): void => {
+  localStorage.removeItem('api-sandbox-node-state');
 };
