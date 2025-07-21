@@ -1,4 +1,5 @@
 .env
+backend/app/github_api_docs_old.db
 
 # dependencies
 /node_modules

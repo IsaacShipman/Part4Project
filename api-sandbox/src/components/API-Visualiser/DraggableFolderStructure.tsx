@@ -28,13 +28,21 @@ import { organizeEndpoints, createFolderStructures, PREDEFINED_CATEGORIES } from
 import { LoadingSpinner } from '../FolderStructure/LoadingSpinner';
 import { ErrorMessage } from '../FolderStructure/ErrorMessage';
 import { DraggableFolderItem } from './DraggableFolderItem';
-import { glassCardStyles } from '../../styles/containerStyles';
 
 const PanelContainer = styled(Box)(({ theme }) => ({
-  ...glassCardStyles,
-  border: '1px solid rgba(148, 163, 184, 0.2)',
-  borderRadius: '12px',
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  height: '100%',
   overflow: 'hidden',
+  position: 'relative',
+  background: theme.custom.colors.background.gradient,
+  backdropFilter: 'blur(20px)',
+  borderRadius: '16px',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -42,19 +50,24 @@ const PanelContainer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, rgba(6, 95, 70, 0.08) 0%, transparent 30%)
-    `,
-    borderRadius: '12px',
+    background: theme.palette.mode === 'dark'
+      ? `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}05 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}08 0%, transparent 30%)
+      `
+      : `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}03 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}05 0%, transparent 30%)
+      `,
+    borderRadius: '16px',
     pointerEvents: 'none',
     zIndex: 1,
   }
 }));
 
 const PanelHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: '8px 12px',
   display: 'flex',
   alignItems: 'center',
@@ -68,7 +81,7 @@ const PanelHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   }
 }));
 
@@ -81,14 +94,14 @@ const PanelContent = styled(Box)(({ theme }) => ({
     width: '6px',
   },
   '&::-webkit-scrollbar-track': {
-    background: 'rgba(71, 85, 105, 0.1)',
+    background: theme.custom.colors.border.subtle,
     borderRadius: '3px',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(71, 85, 105, 0.3)',
+    background: theme.custom.colors.border.secondary,
     borderRadius: '3px',
     '&:hover': {
-      background: 'rgba(71, 85, 105, 0.5)',
+      background: theme.custom.colors.border.primary,
     },
   },
 }));
@@ -99,13 +112,13 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
     padding: '6px 12px',
     borderRadius: '6px',
     margin: '2px 8px',
-    background: 'rgba(30, 41, 59, 0.6)',
+    background: theme.custom.colors.background.tertiary,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.1)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     transition: 'all 0.2s ease',
     '&:hover': {
-      background: 'rgba(59, 130, 246, 0.1)',
-      border: '1px solid rgba(59, 130, 246, 0.3)',
+      background: `${theme.custom.colors.primary}10`,
+      border: `1px solid ${theme.custom.colors.primary}30`,
       transform: 'translateY(-1px)',
     },
   },
@@ -113,13 +126,13 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     fontSize: '0.8rem',
     fontWeight: 500,
-    fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+    fontFamily: theme.custom.terminal.fontFamily,
   },
   '& .MuiListItemText-secondary': {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: theme.custom.colors.text.muted,
     fontSize: '0.7rem',
   },
 }));

@@ -25,8 +25,11 @@ export interface RequestData {
     response: string;
     headers?: Record<string, string>;
     timestamp: number;
-    request: RequestData;
-    responseData: ResponseData;
+    request?: RequestData;
+    responseData?: ResponseData;
+    request_headers?: Record<string, string>;
+    request_data?: any;
+    error?: string;
   }
 
 export interface RequestSummary {

@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material';
 
 const TreeContainer = styled(Box)(({ theme }) => ({
-  fontFamily: 'monospace',
+  fontFamily: theme.custom.terminal.fontFamily,
   fontSize: '0.875rem',
   lineHeight: 1.5,
 }));
@@ -34,7 +34,7 @@ const TreeItem = styled(Box)(({ theme }) => ({
   paddingRight: theme.spacing(1),
   borderRadius: theme.shape.borderRadius,
   '&:hover': {
-    backgroundColor: alpha(theme.palette.action.hover, 0.04),
+    backgroundColor: theme.custom.colors.background.secondary,
   },
 }));
 
@@ -202,7 +202,15 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               <IconButton
                 size="small"
                 onClick={() => setExpanded(!expanded)}
-                sx={{ p: 0.5, mr: 0.5 }}
+                sx={{ 
+                  p: 0.5, 
+                  mr: 0.5,
+                  color: theme.custom.colors.text.muted,
+                  '&:hover': {
+                    color: theme.custom.colors.text.primary,
+                    backgroundColor: theme.custom.colors.background.secondary,
+                  }
+                }}
               >
                 {expanded ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
               </IconButton>
@@ -216,11 +224,26 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               checked={isSelected}
               indeterminate={isIndeterminate}
               onChange={handleToggle}
-              sx={{ p: 0.5, mr: 1 }}
+              sx={{ 
+                p: 0.5, 
+                mr: 1,
+                color: theme.custom.colors.primary,
+                '&.Mui-checked': {
+                  color: theme.custom.colors.primary,
+                },
+                '&.MuiCheckbox-indeterminate': {
+                  color: theme.custom.colors.primary,
+                }
+              }}
             />
 
             {/* Type Icon */}
-            <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ 
+              mr: 1, 
+              display: 'flex', 
+              alignItems: 'center',
+              color: theme.custom.colors.text.muted
+            }}>
               {getTypeIcon(type)}
             </Box>
 
@@ -229,7 +252,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               variant="body2"
               sx={{
                 fontWeight: 'medium',
-                color: theme.palette.text.primary,
+                color: theme.custom.colors.text.primary,
                 mr: 1,
               }}
             >
@@ -242,6 +265,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               size="small"
               color={getTypeColor(type)}
               variant="outlined"
+              sx={{
+                borderColor: theme.custom.colors.border.secondary,
+                '& .MuiChip-label': {
+                  color: theme.custom.colors.text.muted,
+                }
+              }}
             />
 
             {/* Value Preview */}
@@ -250,7 +279,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 variant="body2"
                 sx={{
                   ml: 1,
-                  color: theme.palette.text.secondary,
+                  color: theme.custom.colors.text.muted,
                   fontStyle: 'italic',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -310,7 +339,7 @@ const JsonTreeView: React.FC<JsonTreeViewProps> = ({
   if (!data || (typeof data !== 'object' && !Array.isArray(data))) {
     return (
       <Box p={2} textAlign="center">
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color={theme.custom.colors.text.muted}>
           No data to display
         </Typography>
       </Box>
@@ -319,7 +348,12 @@ const JsonTreeView: React.FC<JsonTreeViewProps> = ({
 
   return (
     <TreeContainer>
-      <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 1, p: 1 }}>
+      <Box sx={{ 
+        border: `1px solid ${theme.custom.colors.border.secondary}`, 
+        borderRadius: 1, 
+        p: 1,
+        backgroundColor: theme.custom.colors.background.tertiary,
+      }}>
                   {Array.isArray(data) ? (
             data.map((item, index) => (
               <TreeNode

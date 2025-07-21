@@ -9,20 +9,22 @@ import { ApiCall } from '../types/api';
 
 // Glass-like container with backdrop blur
 const GlassContainer = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, rgba(15, 20, 25, 0.8) 0%, rgba(26, 35, 50, 0.85) 100%)',
+  background: theme.custom.colors.background.gradient,
   backdropFilter: 'blur(20px)',
   WebkitBackdropFilter: 'blur(20px)',
   borderRadius: '12px',
   overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-  border: '1px solid rgba(59, 130, 246, 0.2)',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+    : '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
   height: '100%'
 }));
 
 const PageHeader = styled(Box)(({ theme }) => ({
   padding: '16px 24px',
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}15 0%, ${theme.custom.colors.accent}10 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}20`,
   position: 'relative',
   '&::after': {
     content: '""',
@@ -31,7 +33,7 @@ const PageHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.4) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}40 50%, transparent 100%)`,
   }
 }));
 
@@ -57,6 +59,11 @@ function APIRequestViewer() {
   }));
 
   const selectedApiCall = selectedRequestIndex !== null ? apiCalls[selectedRequestIndex] : null;
+  
+  // Debug logging
+  if (selectedApiCall) {
+    console.log('Selected API Call:', selectedApiCall);
+  }
 
   return (
     <Box 
@@ -66,10 +73,7 @@ function APIRequestViewer() {
         flexDirection: 'column', 
         height: 'calc(100vh - 72px)',
         mt: '64px',
-        background: `linear-gradient(135deg, 
-          ${theme.palette.background.default} 0%, 
-          ${alpha(theme.palette.background.paper, 0.8)} 50%,
-          ${theme.palette.background.default} 100%)`,
+        background: theme.custom.colors.background.gradient,
         position: 'relative',
         '&::before': {
           content: '""',
@@ -78,8 +82,11 @@ function APIRequestViewer() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: `radial-gradient(circle at 10% 30%, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 50%),
-                       radial-gradient(circle at 90% 40%, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 50%)`,
+          background: theme.palette.mode === 'dark'
+            ? `radial-gradient(circle at 10% 30%, ${alpha(theme.custom.colors.primary, 0.1)} 0%, transparent 50%),
+               radial-gradient(circle at 90% 40%, ${alpha(theme.custom.colors.accent, 0.1)} 0%, transparent 50%)`
+            : `radial-gradient(circle at 10% 30%, ${alpha(theme.custom.colors.primary, 0.05)} 0%, transparent 50%),
+               radial-gradient(circle at 90% 40%, ${alpha(theme.custom.colors.accent, 0.05)} 0%, transparent 50%)`,
           pointerEvents: 'none',
           zIndex: -1,
         }
@@ -115,8 +122,8 @@ function APIRequestViewer() {
             <Box 
               sx={{ 
                 p: 2, 
-                borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
-                background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)',
+                borderBottom: `1px solid ${theme.custom.colors.primary}20`,
+                background: `linear-gradient(90deg, ${theme.custom.colors.primary}10 0%, ${theme.custom.colors.accent}05 100%)`,
               }}
             >
         
@@ -126,10 +133,25 @@ function APIRequestViewer() {
                 <Box sx={{ height: '100%' }}>
                   <EnhancedRequestViewer  
                     headers={selectedApiCall.headers || {}}
-                    responseData={typeof selectedApiCall.response === 'string' 
-                      ? JSON.parse(selectedApiCall.response || '{}') 
-                      : selectedApiCall.response || {}}
-                    requestData={selectedApiCall.request?.json || selectedApiCall.request?.data || null}
+                    responseData={(() => {
+                      try {
+                        if (typeof selectedApiCall.response === 'string') {
+                          return JSON.parse(selectedApiCall.response || '{}');
+                        }
+                        return selectedApiCall.response || {};
+                      } catch (e) {
+                        console.error('Error parsing response:', e);
+                        return { error: 'Failed to parse response', raw: selectedApiCall.response };
+                      }
+                    })()}
+                    requestData={(() => {
+                      // Handle different possible request data structures
+                      if (selectedApiCall.request?.json) return selectedApiCall.request.json;
+                      if (selectedApiCall.request?.data) return selectedApiCall.request.data;
+                      if (selectedApiCall.request_data) return selectedApiCall.request_data;
+                      if (selectedApiCall.request_headers) return { headers: selectedApiCall.request_headers };
+                      return null;
+                    })()}
                     statusCode={selectedApiCall.status || 200}
                     url={selectedApiCall.url || ''}
                     method={selectedApiCall.method || 'GET'}
@@ -147,10 +169,10 @@ function APIRequestViewer() {
                     textAlign: 'center'
                   }}
                 >
-                  <Typography variant="h6" sx={{ mb: 1, color: 'text.secondary' }}>
+                  <Typography variant="h6" sx={{ mb: 1, color: theme.custom.colors.text.muted }}>
                     No Request Selected
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="body2" sx={{ color: theme.custom.colors.text.muted }}>
                     Select a request from the left panel to view detailed information about the request and response.
                   </Typography>
                 </Box>

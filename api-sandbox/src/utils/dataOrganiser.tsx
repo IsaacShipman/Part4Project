@@ -6,7 +6,8 @@ export const PREDEFINED_CATEGORIES = [
   "branches", 
   "commits", 
   "pull_requests", 
-  "issues"
+  "issues",
+  "users"
 ];
 
 export const organizeEndpoints = (data: Record<string, Endpoint[]> | null) => {
@@ -17,11 +18,10 @@ export const organizeEndpoints = (data: Record<string, Endpoint[]> | null) => {
     categories[category] = [];
   });
   
-  const allEndpoints = [...(data.repos || []), ...(data.user || [])];
-  
-  allEndpoints.forEach(endpoint => {
-    if (PREDEFINED_CATEGORIES.includes(endpoint.category)) {
-      categories[endpoint.category].push(endpoint);
+  // Data is now already grouped by category from the backend
+  Object.entries(data).forEach(([category, endpoints]) => {
+    if (PREDEFINED_CATEGORIES.includes(category)) {
+      categories[category] = endpoints;
     }
   });
   

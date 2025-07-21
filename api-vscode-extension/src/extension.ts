@@ -416,11 +416,10 @@ function organizeEndpoints(data: Record<string, any[]> | null) {
     PREDEFINED_CATEGORIES.forEach(category => {
         categories[category] = [];
     });
-    // Support both repos/user or flat endpoint arrays
-    const allEndpoints = [...(data.repos || []), ...(data.user || []), ...(Array.isArray(data.endpoints) ? data.endpoints : [])];
-    allEndpoints.forEach(endpoint => {
-        if (PREDEFINED_CATEGORIES.includes(endpoint.category)) {
-            categories[endpoint.category].push(endpoint);
+    // Data is now already grouped by category from the backend
+    Object.entries(data).forEach(([category, endpoints]) => {
+        if (PREDEFINED_CATEGORIES.includes(category)) {
+            categories[category] = endpoints;
         }
     });
     return categories;

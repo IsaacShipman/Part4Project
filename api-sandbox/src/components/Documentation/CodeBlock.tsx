@@ -31,8 +31,11 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
           height: '8px',
         },
         '&::-webkit-scrollbar-thumb': {
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          backgroundColor: theme.custom.colors.border.secondary,
           borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: theme.custom.colors.border.primary,
         },
       }}
     >
@@ -45,10 +48,10 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
             position: 'absolute',
             top: 8,
             right: 8,
-            color: theme.palette.primary.main,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            color: theme.custom.colors.primary,
+            backgroundColor: theme.custom.colors.background.tertiary,
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backgroundColor: theme.custom.colors.background.secondary,
             },
           }}
         >

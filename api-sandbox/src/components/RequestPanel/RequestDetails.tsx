@@ -5,7 +5,6 @@ import {
 } from '@mui/material';
 import { ExpandMore, Link, DataObject } from '@mui/icons-material';
 import { ApiCall } from '../../types/api';
-import { glassCardStyles, glassStyles } from '../../styles/containerStyles';
 
 interface RequestDetailsProps {
   apiCall: ApiCall;
@@ -28,11 +27,11 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
     container: {
       p: 2,
       m: 1,
-      ...glassCardStyles,
+      ...theme.custom.glassCard,
     },
 
     sectionTitle: {
-      color: '#f1f5f9',
+      color: theme.custom.colors.text.primary,
       mb: 1,
       fontWeight: 600,
       display: 'flex',
@@ -42,7 +41,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
 
     sectionIcon: {
       fontSize: '1rem',
-      color: '#3b82f6',
+      color: theme.custom.colors.primary,
     },
 
     urlContainer: {
@@ -50,7 +49,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
     },
 
     label: {
-      color: '#94a3b8',
+      color: theme.custom.colors.text.muted,
       display: 'block',
       mb: 0.5,
       fontSize: '0.75rem',
@@ -60,21 +59,21 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
     },
 
     urlBox: {
-      color: '#e2e8f0',
-      fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+      color: theme.custom.colors.text.primary,
+      fontFamily: theme.custom.terminal.fontFamily,
       fontSize: '0.8rem',
       p: 1.5,
-      background: 'rgba(15, 23, 42, 0.6)',
+      background: theme.custom.colors.background.tertiary,
       borderRadius: 1,
       wordBreak: 'break-all' as const,
-      border: '1px solid rgba(148, 163, 184, 0.1)',
+      border: `1px solid ${theme.custom.colors.border.secondary}`,
     },
 
     accordion: {
       backgroundColor: 'transparent',
       '&:before': { display: 'none' },
       mb: 1,
-      border: '1px solid rgba(148, 163, 184, 0.1)',
+      border: `1px solid ${theme.custom.colors.border.secondary}`,
       borderRadius: '8px !important',
       overflow: 'hidden',
       '&.Mui-expanded': {
@@ -86,12 +85,12 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
       px: 1.5,
       py: 0.5,
       minHeight: '40px',
-      background: 'rgba(148, 163, 184, 0.05)',
+      background: `${theme.custom.colors.text.muted}05`,
       '& .MuiAccordionSummary-content': {
         margin: '8px 0',
       },
       '&.Mui-expanded': {
-        background: 'rgba(148, 163, 184, 0.1)',
+        background: `${theme.custom.colors.text.muted}10`,
       },
     },
 
@@ -100,26 +99,26 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
     },
 
     contentBox: {
-      backgroundColor: 'rgba(15, 23, 42, 0.6)',
+      backgroundColor: theme.custom.colors.background.tertiary,
       p: 1.5,
-      color: '#e2e8f0',
-      fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+      color: theme.custom.colors.text.primary,
+      fontFamily: theme.custom.terminal.fontFamily,
       fontSize: '0.8rem',
       whiteSpace: 'pre-wrap' as const,
-      border: '1px solid rgba(148, 163, 184, 0.1)',
+      border: `1px solid ${theme.custom.colors.border.secondary}`,
       maxHeight: '300px',
       overflow: 'auto',
       '&::-webkit-scrollbar': {
         width: '4px',
       },
       '&::-webkit-scrollbar-track': {
-        background: 'rgba(148, 163, 184, 0.05)',
+        background: `${theme.custom.colors.text.muted}05`,
       },
       '&::-webkit-scrollbar-thumb': {
-        background: 'rgba(148, 163, 184, 0.2)',
+        background: theme.custom.colors.border.secondary,
         borderRadius: '2px',
         '&:hover': {
-          background: 'rgba(148, 163, 184, 0.3)',
+          background: theme.custom.colors.border.primary,
         },
       },
     },
@@ -130,12 +129,12 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
     },
 
     headerKey: {
-      color: '#10b981',
+      color: theme.custom.colors.accent,
       fontWeight: 600,
     },
 
     divider: {
-      borderColor: 'rgba(148, 163, 184, 0.2)',
+      borderColor: theme.custom.colors.border.primary,
       my: 2,
     },
   };
@@ -143,7 +142,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
   const renderHeaders = (headers: Record<string, any> | undefined) => {
     if (!headers || Object.keys(headers).length === 0) {
       return (
-        <Typography sx={{ color: '#64748b', fontStyle: 'italic' }}>
+        <Typography sx={{ color: theme.custom.colors.text.muted, fontStyle: 'italic' }}>
           No headers
         </Typography>
       );
@@ -182,7 +181,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           sx={detailsStyles.accordion}
         >
           <AccordionSummary
-            expandIcon={<ExpandMore sx={{ color: '#94a3b8' }} />}
+            expandIcon={<ExpandMore sx={{ color: theme.custom.colors.text.muted }} />}
             sx={detailsStyles.accordionSummary}
           >
             <Typography variant="caption" sx={detailsStyles.label}>
@@ -214,7 +213,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           sx={detailsStyles.accordion}
         >
           <AccordionSummary
-            expandIcon={<ExpandMore sx={{ color: '#94a3b8' }} />}
+            expandIcon={<ExpandMore sx={{ color: theme.custom.colors.text.muted }} />}
             sx={detailsStyles.accordionSummary}
           >
             <Typography variant="caption" sx={detailsStyles.label}>
@@ -236,7 +235,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ apiCall }) => {
           sx={detailsStyles.accordion}
         >
           <AccordionSummary
-            expandIcon={<ExpandMore sx={{ color: '#94a3b8' }} />}
+            expandIcon={<ExpandMore sx={{ color: theme.custom.colors.text.muted }} />}
             sx={detailsStyles.accordionSummary}
           >
             <Typography variant="caption" sx={detailsStyles.label}>

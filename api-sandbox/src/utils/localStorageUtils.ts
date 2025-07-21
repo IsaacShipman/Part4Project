@@ -60,3 +60,21 @@ export const clearFlowState = (): void => {
 export const clearNodeState = (): void => {
   localStorage.removeItem('api-sandbox-node-state');
 };
+
+// Clear all API Visualizer related storage
+export const clearAllAPIVisualizerStorage = (): void => {
+  localStorage.removeItem(API_CALLS_STORAGE_KEY);
+  localStorage.removeItem(FLOW_STATE_STORAGE_KEY);
+  localStorage.removeItem('api-sandbox-node-state');
+  sessionStorage.removeItem('api-visualizer-initialized');
+};
+
+// Debug function to check what's in storage
+export const debugStorage = (): void => {
+  console.log('=== Storage Debug ===');
+  console.log('API Calls:', localStorage.getItem(API_CALLS_STORAGE_KEY));
+  console.log('Flow State:', localStorage.getItem(FLOW_STATE_STORAGE_KEY));
+  console.log('Node State:', localStorage.getItem('api-sandbox-node-state'));
+  console.log('Session Flag:', sessionStorage.getItem('api-visualizer-initialized'));
+  console.log('===================');
+};

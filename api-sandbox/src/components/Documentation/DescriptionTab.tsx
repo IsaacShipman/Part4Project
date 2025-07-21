@@ -1,32 +1,33 @@
-import { Box, Typography, Link } from '@mui/material';
+import { Box, Typography, Link, useTheme } from '@mui/material';
 import { Launch } from '@mui/icons-material';
-import { glassCardStyles } from '../../styles/containerStyles'; 
 import { DocumentationData } from '../../types/documentation';
 
 interface DescriptionTabProps {
   data: DocumentationData;
 }
 
-const DescriptionTab = ({ data }: DescriptionTabProps) => (
-  <Box sx={{ p: 1 }}>
-    <Box sx={{ 
-      ...glassCardStyles,
-      p: 3,
-      mb: 3,
-    }}>
-      <Typography 
-        variant="body1" 
-        sx={{ 
-          color: '#e2e8f0',
-          lineHeight: 1.7,
-          fontSize: '0.95rem',
-        }}
-      >
-        {data.documentation.description}
-      </Typography>
-    </Box>
-    
-   
+const DescriptionTab = ({ data }: DescriptionTabProps) => {
+  const theme = useTheme();
+  
+  return (
+    <Box sx={{ p: 1 }}>
+      <Box sx={{ 
+        ...theme.custom.glassCard,
+        p: 3,
+        mb: 3,
+      }}>
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            color: theme.custom.colors.text.primary,
+            lineHeight: 1.7,
+            fontSize: '0.95rem',
+          }}
+        >
+          {data.documentation.description}
+        </Typography>
+      </Box>
+      
       <Link 
         href={data.doc_url} 
         target="_blank" 
@@ -36,24 +37,25 @@ const DescriptionTab = ({ data }: DescriptionTabProps) => (
           display: 'inline-flex',
           alignItems: 'center',
           gap: 1,
-          color: '#60a5fa',
+          color: theme.custom.colors.primary,
           fontWeight: '500',
           padding: '8px 16px',
           borderRadius: '8px',
-          background: 'rgba(96, 165, 250, 0.1)',
-          border: '1px solid rgba(96, 165, 250, 0.2)',
+          background: `${theme.custom.colors.primary}10`,
+          border: `1px solid ${theme.custom.colors.primary}20`,
           transition: 'all 0.3s ease',
           '&:hover': {
-            background: 'rgba(96, 165, 250, 0.2)',
+            background: `${theme.custom.colors.primary}20`,
             transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(96, 165, 250, 0.3)',
+            boxShadow: `0 4px 12px ${theme.custom.colors.primary}30`,
           }
         }}
       >
         <Launch fontSize="small" />
         Official Documentation
       </Link>
-  </Box>
-);
+    </Box>
+  );
+};
 
 export default DescriptionTab;

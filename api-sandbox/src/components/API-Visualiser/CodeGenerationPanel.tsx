@@ -21,7 +21,6 @@ import {
   ErrorOutline,
 } from '@mui/icons-material';
 import { useNodeState } from '../../contexts/NodeStateContext';
-import { glassCardStyles } from '../../styles/containerStyles';
 
 const PanelContainer = styled(Paper)(({ theme }) => ({
   position: 'absolute',
@@ -30,11 +29,16 @@ const PanelContainer = styled(Paper)(({ theme }) => ({
   bottom: 20,
   width: 600,
   zIndex: 1000,
-  ...glassCardStyles,
-  overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
+  background: theme.custom.colors.background.gradient,
+  backdropFilter: 'blur(20px)',
+  borderRadius: '16px',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+  overflow: 'hidden',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -42,19 +46,24 @@ const PanelContainer = styled(Paper)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      radial-gradient(circle at 60% 60%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 30%)
-    `,
-    borderRadius: '12px',
+    background: theme.palette.mode === 'dark'
+      ? `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.primary}05 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}08 0%, transparent 30%)
+      `
+      : `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.primary}03 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}05 0%, transparent 30%)
+      `,
+    borderRadius: '16px',
     pointerEvents: 'none',
     zIndex: 1,
   }
 }));
 
 const PanelHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: '12px 16px',
   display: 'flex',
   alignItems: 'center',
@@ -68,7 +77,7 @@ const PanelHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   }
 }));
 
@@ -83,8 +92,8 @@ const PanelContent = styled(Box)(({ theme }) => ({
 
 const CodeContainer = styled(Box)(({ theme }) => ({
   flex: 1,
-  background: 'rgba(15, 23, 42, 0.9)',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
+  background: theme.custom.colors.background.tertiary,
+  border: `1px solid ${theme.custom.colors.border.secondary}`,
   borderRadius: '8px',
   margin: theme.spacing(2),
   overflow: 'hidden',
@@ -93,8 +102,8 @@ const CodeContainer = styled(Box)(({ theme }) => ({
 }));
 
 const CodeHeader = styled(Box)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.8)',
-  borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
+  background: theme.custom.colors.background.secondary,
+  borderBottom: `1px solid ${theme.custom.colors.border.secondary}`,
   padding: '8px 12px',
   display: 'flex',
   alignItems: 'center',
@@ -105,24 +114,24 @@ const CodeContent = styled(Box)(({ theme }) => ({
   flex: 1,
   padding: theme.spacing(2),
   overflowY: 'auto',
-  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+  fontFamily: theme.custom.terminal.fontFamily,
   fontSize: '13px',
   lineHeight: '1.5',
-  color: '#e2e8f0',
+  color: theme.custom.colors.text.primary,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
   '&::-webkit-scrollbar': {
     width: '6px',
   },
   '&::-webkit-scrollbar-track': {
-    background: 'rgba(71, 85, 105, 0.1)',
+    background: theme.custom.colors.border.subtle,
     borderRadius: '3px',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(71, 85, 105, 0.3)',
+    background: theme.custom.colors.border.secondary,
     borderRadius: '3px',
     '&:hover': {
-      background: 'rgba(71, 85, 105, 0.5)',
+      background: theme.custom.colors.border.primary,
     },
   },
 }));
@@ -132,24 +141,24 @@ const ActionButtons = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1),
   justifyContent: 'flex-end',
-  borderTop: '1px solid rgba(148, 163, 184, 0.2)',
+  borderTop: `1px solid ${theme.custom.colors.border.secondary}`,
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  background: 'rgba(59, 130, 246, 0.1)',
-  border: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `${theme.custom.colors.primary}10`,
+  border: `1px solid ${theme.custom.colors.primary}30`,
   borderRadius: '8px',
-  color: '#93c5fd',
+  color: theme.custom.colors.primary,
   fontWeight: 600,
   fontSize: '0.8rem',
   textTransform: 'none',
   padding: '8px 16px',
   transition: 'all 0.2s ease',
   '&:hover': {
-    background: 'rgba(59, 130, 246, 0.2)',
-    border: '1px solid rgba(59, 130, 246, 0.5)',
+    background: `${theme.custom.colors.primary}20`,
+    border: `1px solid ${theme.custom.colors.primary}50`,
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+    boxShadow: `0 4px 12px ${theme.custom.colors.primary}20`,
   },
   '& .MuiButton-startIcon': {
     marginRight: '4px',
@@ -249,21 +258,21 @@ const CodeGenerationPanel: React.FC<CodeGenerationPanelProps> = ({ onClose }) =>
     <PanelContainer>
       <PanelHeader>
         <Box display="flex" alignItems="center" gap={1}>
-          <Code sx={{ color: 'rgba(59, 130, 246, 0.8)' }} />
-          <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
+          <Code sx={{ color: theme.custom.colors.primary }} />
+          <Typography variant="h6" sx={{ color: theme.custom.colors.text.primary, fontWeight: 600 }}>
             Generated Python Code
           </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', ml: 1 }}>
+          <Typography variant="body2" sx={{ color: theme.custom.colors.text.muted, ml: 1 }}>
             ({getNodeCount()} nodes)
           </Typography>
         </Box>
         <IconButton
           onClick={onClose}
           sx={{
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: theme.custom.colors.text.muted,
             '&:hover': {
-              color: 'rgba(255, 255, 255, 0.9)',
-              background: 'rgba(255, 255, 255, 0.1)',
+              color: theme.custom.colors.text.primary,
+              background: theme.custom.colors.background.secondary,
             },
           }}
         >
@@ -277,9 +286,9 @@ const CodeGenerationPanel: React.FC<CodeGenerationPanelProps> = ({ onClose }) =>
             severity="error" 
             sx={{ 
               margin: 2,
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#fca5a5'
+              background: `${theme.palette.error.main}10`,
+              border: `1px solid ${theme.palette.error.main}30`,
+              color: theme.palette.error.main
             }}
             icon={<ErrorOutline />}
           >
@@ -289,14 +298,14 @@ const CodeGenerationPanel: React.FC<CodeGenerationPanelProps> = ({ onClose }) =>
 
         <CodeContainer>
           <CodeHeader>
-            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: theme.custom.colors.text.muted, fontWeight: 500 }}>
               workflow_code.py
             </Typography>
             <Box display="flex" alignItems="center" gap={1}>
               {loading && (
-                <CircularProgress size={16} sx={{ color: 'rgba(59, 130, 246, 0.8)' }} />
+                <CircularProgress size={16} sx={{ color: theme.custom.colors.primary }} />
               )}
-              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+              <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted }}>
                 Python
               </Typography>
             </Box>
@@ -305,15 +314,15 @@ const CodeGenerationPanel: React.FC<CodeGenerationPanelProps> = ({ onClose }) =>
           <CodeContent>
             {loading ? (
               <Box display="flex" alignItems="center" justifyContent="center" height="200px">
-                <CircularProgress size={32} sx={{ color: 'rgba(59, 130, 246, 0.8)' }} />
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', ml: 2 }}>
+                <CircularProgress size={32} sx={{ color: theme.custom.colors.primary }} />
+                <Typography variant="body2" sx={{ color: theme.custom.colors.text.muted, ml: 2 }}>
                   Generating code...
                 </Typography>
               </Box>
             ) : generatedCode ? (
               generatedCode
             ) : (
-              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontStyle: 'italic' }}>
+              <Typography variant="body2" sx={{ color: theme.custom.colors.text.muted, fontStyle: 'italic' }}>
                 No code generated. Please check your workflow configuration.
               </Typography>
             )}
@@ -333,9 +342,9 @@ const CodeGenerationPanel: React.FC<CodeGenerationPanelProps> = ({ onClose }) =>
             disabled={!generatedCode}
             startIcon={copySuccess ? <CheckCircle /> : <ContentCopy />}
             sx={{
-              background: copySuccess ? 'rgba(16, 185, 129, 0.1)' : undefined,
-              border: copySuccess ? '1px solid rgba(16, 185, 129, 0.3)' : undefined,
-              color: copySuccess ? '#86efac' : undefined,
+              background: copySuccess ? `${theme.custom.colors.accent}10` : undefined,
+              border: copySuccess ? `1px solid ${theme.custom.colors.accent}30` : undefined,
+              color: copySuccess ? theme.custom.colors.accent : undefined,
             }}
           >
             {copySuccess ? 'Copied!' : 'Copy Code'}

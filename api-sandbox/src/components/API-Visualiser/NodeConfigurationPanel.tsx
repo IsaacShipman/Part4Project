@@ -46,7 +46,6 @@ import {
 } from '../../constants/apiConstants';
 import JsonTreeView from './JsonTreeView';
 import InputMappingPanel from './InputMappingPanel';
-import { glassCardStyles } from '../../styles/containerStyles';
 
 const PanelContainer = styled(Paper)(({ theme }) => ({
   position: 'absolute',
@@ -55,11 +54,16 @@ const PanelContainer = styled(Paper)(({ theme }) => ({
   bottom: 20,
   width: 450,
   zIndex: 1000,
-  ...glassCardStyles,
-  overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
+  background: theme.custom.colors.background.gradient,
+  backdropFilter: 'blur(20px)',
+  borderRadius: '16px',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+  overflow: 'hidden',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -67,19 +71,24 @@ const PanelContainer = styled(Paper)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, rgba(6, 95, 70, 0.08) 0%, transparent 30%)
-    `,
-    borderRadius: '12px',
+    background: theme.palette.mode === 'dark'
+      ? `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}05 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}08 0%, transparent 30%)
+      `
+      : `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}03 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}05 0%, transparent 30%)
+      `,
+    borderRadius: '16px',
     pointerEvents: 'none',
     zIndex: 1,
   }
 }));
 
 const PanelHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: '12px 16px',
   display: 'flex',
   alignItems: 'center',
@@ -93,7 +102,7 @@ const PanelHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   }
 }));
 
@@ -114,107 +123,107 @@ const TabContent = styled(Box)(({ theme }) => ({
     width: '6px',
   },
   '&::-webkit-scrollbar-track': {
-    background: 'rgba(71, 85, 105, 0.1)',
+    background: theme.custom.colors.border.subtle,
     borderRadius: '3px',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(71, 85, 105, 0.3)',
+    background: theme.custom.colors.border.secondary,
     borderRadius: '3px',
     '&:hover': {
-      background: 'rgba(71, 85, 105, 0.5)',
+      background: theme.custom.colors.border.primary,
     },
   },
 }));
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.6)',
+  background: theme.custom.colors.background.tertiary,
   backdropFilter: 'blur(16px)',
-  borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
+  borderBottom: `1px solid ${theme.custom.colors.border.secondary}`,
   '& .MuiTabs-indicator': {
-    background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.8) 0%, rgba(16, 185, 129, 0.8) 100%)',
+    background: `linear-gradient(90deg, ${theme.custom.colors.primary}80 0%, ${theme.custom.colors.accent}80 100%)`,
     height: '2px',
   },
   '& .MuiTab-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: theme.custom.colors.text.muted,
     fontWeight: 600,
     fontSize: '0.8rem',
     textTransform: 'none',
     minHeight: '48px',
     '&.Mui-selected': {
-      color: 'rgba(255, 255, 255, 0.9)',
+      color: theme.custom.colors.text.primary,
     },
     '&:hover': {
-      color: 'rgba(255, 255, 255, 0.9)',
-      background: 'rgba(148, 163, 184, 0.1)',
+      color: theme.custom.colors.text.primary,
+      background: theme.custom.colors.background.secondary,
     },
   },
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    background: 'rgba(30, 41, 59, 0.6)',
+    background: theme.custom.colors.background.tertiary,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.2)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     borderRadius: '8px',
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     '&:hover': {
-      border: '1px solid rgba(148, 163, 184, 0.4)',
+      border: `1px solid ${theme.custom.colors.border.primary}`,
     },
     '&.Mui-focused': {
-      border: '1px solid rgba(59, 130, 246, 0.6)',
-      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
+      border: `1px solid ${theme.custom.colors.primary}`,
+      boxShadow: `0 0 0 2px ${theme.custom.colors.primary}20`,
     },
     '& fieldset': {
       border: 'none',
     },
   },
   '& .MuiInputLabel-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: theme.custom.colors.text.muted,
     '&.Mui-focused': {
-      color: 'rgba(59, 130, 246, 0.8)',
+      color: theme.custom.colors.primary,
     },
   },
   '& .MuiInputBase-input': {
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     '&::placeholder': {
-      color: 'rgba(255, 255, 255, 0.5)',
+      color: theme.custom.colors.text.muted,
       opacity: 1,
     },
   },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  background: 'rgba(59, 130, 246, 0.1)',
-  border: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `${theme.custom.colors.primary}10`,
+  border: `1px solid ${theme.custom.colors.primary}30`,
   borderRadius: '8px',
-  color: '#93c5fd',
+  color: theme.custom.colors.primary,
   fontWeight: 600,
   fontSize: '0.8rem',
   textTransform: 'none',
   padding: '8px 16px',
   transition: 'all 0.2s ease',
   '&:hover': {
-    background: 'rgba(59, 130, 246, 0.2)',
-    border: '1px solid rgba(59, 130, 246, 0.5)',
+    background: `${theme.custom.colors.primary}20`,
+    border: `1px solid ${theme.custom.colors.primary}50`,
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+    boxShadow: `0 4px 12px ${theme.custom.colors.primary}20`,
   },
   '& .MuiButton-startIcon': {
-    color: '#93c5fd',
+    color: theme.custom.colors.primary,
   }
 }));
 
 const StyledChip = styled(Chip)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.6)',
+  background: theme.custom.colors.background.tertiary,
   backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
-  color: '#e2e8f0',
+  border: `1px solid ${theme.custom.colors.border.secondary}`,
+  color: theme.custom.colors.text.primary,
   fontWeight: 600,
   fontSize: '0.7rem',
   height: '28px',
   '&:hover': {
-    background: 'rgba(148, 163, 184, 0.1)',
-    border: '1px solid rgba(148, 163, 184, 0.4)',
+    background: theme.custom.colors.background.secondary,
+    border: `1px solid ${theme.custom.colors.border.primary}`,
   },
 }));
 
@@ -363,13 +372,14 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
   }, [config?.queryParams, handleConfigUpdate]);
 
   const handleTestNode = async () => {
-    if (!config) return;
+   
+    
     
     // Clear any previous validation errors
     dispatch({ type: 'CLEAR_VALIDATION_ERRORS', nodeId });
     
     // Basic validation
-    if (!config.url?.trim()) {
+    if (!config?.url?.trim()) {
       dispatch({
         type: 'ADD_VALIDATION_ERROR',
         nodeId,
@@ -463,7 +473,7 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
       });
 
       const result = await response.json();
-      
+      console.log(result);
       if (result.success) {
         // Store the resolved path parameters for code generation
         dispatch({
@@ -631,7 +641,7 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
               </Typography>
               <StyledTextField
                 fullWidth
-                label="URL"
+             
                 value={config.url}
                 onChange={(e) => handleConfigUpdate({ url: e.target.value })}
                 variant="outlined"
@@ -647,9 +657,7 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
                 <Typography variant="subtitle2" gutterBottom>
                   Path Parameters
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                  Automatically detected from URL patterns like {'{parameter}'}
-                </Typography>
+     
                 {Object.entries(config.pathParams || {}).map(([key, value]) => (
                   <Box key={key} display="flex" gap={1} mb={1} alignItems="center">
                     <Chip
@@ -660,7 +668,6 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
                       sx={{ minWidth: 80 }}
                     />
                     <StyledTextField
-                      label={`Value for ${key}`}
                       value={value}
                       size="small"
                       sx={{ flex: 1 }}
@@ -875,19 +882,7 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
               </Box>
             )}
 
-            {/* Validation Errors */}
-            {validationErrors.length > 0 && (
-              <Box>
-                <Typography variant="subtitle2" gutterBottom color="error">
-                  Validation Errors
-                </Typography>
-                {validationErrors.map((error, index) => (
-                  <Alert key={index} severity={error.severity} sx={{ mb: 1 }}>
-                    <strong>{error.field}:</strong> {error.message}
-                  </Alert>
-                ))}
-              </Box>
-            )}
+        
           </TabContent>
         )}
 
@@ -1006,14 +1001,19 @@ const NodeConfigurationPanel: React.FC<NodeConfigurationPanelProps> = ({ nodeId,
                     />
                   </Box>
 
-                  {/* Error Type */}
-                  {!testResult.success && testResult.errorType && (
-                    <Box mt={1}>
-                      <Typography variant="body2" color="error">
-                        <strong>Error Type:</strong> {testResult.errorType}
-                      </Typography>
-                    </Box>
-                  )}
+                     {/* Validation Errors */}
+            {validationErrors.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" gutterBottom color="error">
+                  Validation Errors
+                </Typography>
+                {validationErrors.map((error, index) => (
+                  <Alert key={index} severity={error.severity} sx={{ mb: 1 }}>
+                    <strong>{error.field}:</strong> {error.message}
+                  </Alert>
+                ))}
+              </Box>
+            )}
                 </Box>
               )}
             </Box>

@@ -21,13 +21,19 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
     padding: '6px 12px',
     borderRadius: '6px',
     margin: '2px 8px',
-    background: 'rgba(30, 41, 59, 0.6)',
+    background: `
+    radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+    linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+  `,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.1)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     transition: 'all 0.2s ease',
     '&:hover': {
-      background: 'rgba(59, 130, 246, 0.1)',
-      border: '1px solid rgba(59, 130, 246, 0.3)',
+      background: `
+      radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+      linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+    `,
+      border: `1px solid ${theme.custom.colors.primary}30`,
       transform: 'translateY(-1px)',
     },
   },
@@ -35,22 +41,22 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     fontSize: '0.75rem',
     fontWeight: 500,
-    fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+    fontFamily: theme.custom.terminal.fontFamily,
     wordBreak: 'break-all' as const,
     lineHeight: 1.3,
   },
   '& .MuiListItemText-secondary': {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: theme.custom.colors.text.muted,
     fontSize: '0.65rem',
-    fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+    fontFamily: theme.custom.terminal.fontFamily,
   },
 }));
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-  color: 'rgba(59, 130, 246, 0.8)',
+  color: theme.custom.colors.primary,
   minWidth: '28px',
 }));
 
@@ -80,17 +86,17 @@ export const DraggableEndpointItem: React.FC<DraggableEndpointItemProps> = ({
   const getMethodColor = (method: string) => {
     switch (method.toUpperCase()) {
       case 'GET':
-        return 'rgba(34, 197, 94, 0.9)';
+        return theme.custom.colors.accent;
       case 'POST':
-        return 'rgba(59, 130, 246, 0.9)';
+        return theme.custom.colors.primary;
       case 'PUT':
-        return 'rgba(245, 158, 11, 0.9)';
+        return theme.palette.warning.main;
       case 'DELETE':
-        return 'rgba(239, 68, 68, 0.9)';
+        return theme.palette.error.main;
       case 'PATCH':
-        return 'rgba(168, 85, 247, 0.9)';
+        return theme.palette.secondary.main;
       default:
-        return 'rgba(71, 85, 105, 0.9)';
+        return theme.custom.colors.text.muted;
     }
   };
 
@@ -115,10 +121,10 @@ export const DraggableEndpointItem: React.FC<DraggableEndpointItemProps> = ({
         onDragStart={handleDragStart}
         sx={{
           backgroundColor: isSelected 
-            ? 'rgba(59, 130, 246, 0.1)' 
+            ? `${theme.custom.colors.primary}10` 
             : 'transparent',
           borderLeft: isSelected 
-            ? '3px solid #3b82f6' 
+            ? `3px solid ${theme.custom.colors.primary}` 
             : '3px solid transparent',
         }}
       >

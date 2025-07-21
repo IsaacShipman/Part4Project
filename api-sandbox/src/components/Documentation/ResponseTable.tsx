@@ -1,84 +1,105 @@
 import { Box, Typography, TableContainer, Table, TableHead, 
-         TableRow, TableCell, TableBody, Paper, Chip } from '@mui/material';
-import { glassStyles } from '../../styles/containerStyles'; 
+         TableRow, TableCell, TableBody, Paper, Chip, useTheme } from '@mui/material';
 import { ResponseSchemaType } from '../../types/documentation';
 
 interface ResponseSchemaProps {
   schema: ResponseSchemaType;
 }
 
-const ResponseSchema = ({ schema }: { schema: ResponseSchemaType }) => (
-  <Box>
-    <Typography variant="body2" sx={{ color: '#e2e8f0', mb: 2, fontSize: '0.875rem' }}>
-      {schema.brief}
-    </Typography>
-    
-    <TableContainer sx={{ 
-      ...glassStyles,
-      maxHeight: '200px',
-      '&::-webkit-scrollbar': { width: '6px' },
-      '&::-webkit-scrollbar-thumb': { 
-        background: 'rgba(96, 165, 250, 0.3)',
-        borderRadius: '3px',
-      },
-    }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ background: 'rgba(59, 130, 246, 0.1)' }}>
-            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
-              Field
-            </TableCell>
-            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
-              Type
-            </TableCell>
-            <TableCell sx={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', py: 1 }}>
-              Description
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {schema.fields.map((field) => (
-            <TableRow key={field.name} sx={{ 
-              '&:hover': { background: 'rgba(96, 165, 250, 0.05)' },
-            }}>
+const ResponseSchema = ({ schema }: { schema: ResponseSchemaType }) => {
+  const theme = useTheme();
+  
+  return (
+    <Box>
+      <Typography variant="body2" sx={{ 
+        color: theme.custom.colors.text.primary, 
+        mb: 2, 
+        fontSize: '0.875rem' 
+      }}>
+        {schema.brief}
+      </Typography>
+      
+      <TableContainer sx={{ 
+        ...theme.custom.glass,
+        maxHeight: '200px',
+        '&::-webkit-scrollbar': { width: '6px' },
+        '&::-webkit-scrollbar-thumb': { 
+          background: theme.custom.colors.border.secondary,
+          borderRadius: '3px',
+        },
+      }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ background: `${theme.custom.colors.primary}10` }}>
               <TableCell sx={{ 
-                py: 1,
-                color: '#e2e8f0',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.8rem',
-                borderColor: 'rgba(148, 163, 184, 0.1)',
+                color: theme.custom.colors.text.primary, 
+                fontWeight: 600, 
+                fontSize: '0.8rem', 
+                py: 1 
               }}>
-                {field.name}
-              </TableCell>
-              <TableCell sx={{ py: 1, borderColor: 'rgba(148, 163, 184, 0.1)' }}>
-                <Chip 
-                  label={field.type} 
-                  size="small" 
-                  sx={{ 
-                    background: field.type === 'object' 
-                      ? 'linear-gradient(45deg, #3b82f6, #1d4ed8)'
-                      : 'linear-gradient(45deg, #ec4899, #be185d)',
-                    color: 'white',
-                    fontSize: '0.7rem',
-                    height: '20px',
-                  }}
-                />
+                Field
               </TableCell>
               <TableCell sx={{ 
-                py: 1,
-                color: '#cbd5e1',
-                fontSize: '0.8rem',
-                borderColor: 'rgba(148, 163, 184, 0.1)',
+                color: theme.custom.colors.text.primary, 
+                fontWeight: 600, 
+                fontSize: '0.8rem', 
+                py: 1 
               }}>
-                {field.description}
+                Type
+              </TableCell>
+              <TableCell sx={{ 
+                color: theme.custom.colors.text.primary, 
+                fontWeight: 600, 
+                fontSize: '0.8rem', 
+                py: 1 
+              }}>
+                Description
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Box>
-);
-
+          </TableHead>
+          <TableBody>
+            {schema.fields.map((field) => (
+              <TableRow key={field.name} sx={{ 
+                '&:hover': { background: `${theme.custom.colors.primary}05` },
+              }}>
+                <TableCell sx={{ 
+                  py: 1,
+                  color: theme.custom.colors.text.primary,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.8rem',
+                  borderColor: theme.custom.colors.border.secondary,
+                }}>
+                  {field.name}
+                </TableCell>
+                <TableCell sx={{ py: 1, borderColor: theme.custom.colors.border.secondary }}>
+                  <Chip 
+                    label={field.type} 
+                    size="small" 
+                    sx={{ 
+                      background: field.type === 'object' 
+                        ? `linear-gradient(45deg, ${theme.custom.colors.info}, ${theme.custom.colors.primary})`
+                        : `linear-gradient(45deg, ${theme.custom.colors.secondary}, ${theme.custom.colors.accent})`,
+                      color: 'white',
+                      fontSize: '0.7rem',
+                      height: '20px',
+                    }}
+                  />
+                </TableCell>
+                <TableCell sx={{ 
+                  py: 1,
+                  color: theme.custom.colors.text.secondary,
+                  fontSize: '0.8rem',
+                  borderColor: theme.custom.colors.border.secondary,
+                }}>
+                  {field.description}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+};
 
 export default ResponseSchema;

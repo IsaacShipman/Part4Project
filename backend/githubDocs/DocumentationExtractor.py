@@ -6,13 +6,21 @@ from openai import OpenAI
 import argparse
 from tqdm import tqdm
 import re
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class GitHubAPIDocRetriever:
     def __init__(self):
-  
-        self.client = OpenAI(api_key="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")
+        # Get API key from environment variable
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is required")
+        
+        self.client = OpenAI(api_key=api_key)
         self.model = "gpt-4o-mini"
-        self.db_path = "github_api_docs.db"
+        self.db_path = os.getenv("DATABASE_PATH", "github_api_docs.db")
         self.delay = 5
         self.setup_database()
     
@@ -161,8 +169,6 @@ class GitHubAPIDocRetriever:
             conn.close()
     
     def process_endpoints(self, json_file):
-
-
         endpoints = self.load_endpoints(json_file)
         
         # Check how many endpoints are already in the database
@@ -195,7 +201,7 @@ class GitHubAPIDocRetriever:
             # Add delay to avoid rate limiting
             time.sleep(self.delay)
     
-
+    def search_endpoints(self, search_term=None, method=None):
         """
         Query the database for endpoints matching search criteria.
         """

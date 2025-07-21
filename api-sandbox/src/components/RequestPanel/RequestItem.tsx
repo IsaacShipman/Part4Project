@@ -8,7 +8,6 @@ import {
 } from '@mui/icons-material';
 import { ApiCall, RequestSummary } from '../../types/api';
 import RequestDetails from './RequestDetails';
-import { listStyles, glassCardStyles } from '../../styles/containerStyles';
 import { getMethodColor, getStatusColor } from './RequestPanel';
 
 interface RequestItemProps {
@@ -52,14 +51,15 @@ const RequestItem: React.FC<RequestItemProps> = ({
   const itemStyles = {
     listItem: {
       backgroundColor: isSelected 
-        ? 'rgba(59, 130, 246, 0.1)' 
+        ? `${theme.custom.colors.primary}10` 
         : 'transparent',
       borderLeft: isSelected 
-        ? '3px solid #3b82f6' 
+        ? `3px solid ${theme.custom.colors.primary}` 
         : '3px solid transparent',
       transition: 'all 0.2s ease',
+      // Override the global MuiListItem hover styles
       '&:hover': {
-        backgroundColor: 'rgba(148, 163, 184, 0.05)',
+        backgroundColor: 'transparent !important',
       },
     },
     
@@ -67,8 +67,12 @@ const RequestItem: React.FC<RequestItemProps> = ({
       py: 1.5,
       px: 2,
       transition: 'all 0.2s ease',
+      borderRadius: '8px',
+      margin: '2px 8px',
       '&:hover': {
-        backgroundColor: 'rgba(148, 163, 184, 0.08)',
+        backgroundColor: `${theme.custom.colors.background.tertiary}60`,
+        transform: 'translateY(-1px)',
+        boxShadow: `0 2px 8px ${theme.custom.colors.border.primary}`,
       },
     },
 
@@ -102,19 +106,19 @@ const RequestItem: React.FC<RequestItemProps> = ({
     },
 
     lineChip: {
-      color: '#94a3b8',
-      borderColor: 'rgba(148, 163, 184, 0.3)',
+      color: theme.custom.colors.text.muted,
+      borderColor: theme.custom.colors.border.secondary,
       fontSize: '0.6rem',
       height: '22px',
-      background: 'rgba(148, 163, 184, 0.05)',
+      background: `${theme.custom.colors.text.muted}05`,
       '&:hover': {
-        background: 'rgba(148, 163, 184, 0.1)',
+        background: `${theme.custom.colors.text.muted}10`,
       },
     },
 
     urlText: {
-      color: '#e2e8f0',
-      fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+      color: theme.custom.colors.text.primary,
+      fontFamily: theme.custom.terminal.fontFamily,
       fontSize: '0.8rem',
       wordBreak: 'break-all' as const,
       lineHeight: 1.4,
@@ -129,27 +133,27 @@ const RequestItem: React.FC<RequestItemProps> = ({
 
     timestampIcon: {
       fontSize: '0.7rem',
-      color: '#64748b',
+      color: theme.custom.colors.text.muted,
     },
 
     timestampText: {
-      color: '#64748b',
+      color: theme.custom.colors.text.muted,
       fontSize: '0.7rem',
-      fontFamily: '"Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace',
+      fontFamily: theme.custom.terminal.fontFamily,
     },
 
     expandButton: {
-      color: '#94a3b8',
+      color: theme.custom.colors.text.muted,
       p: 1,
       transition: 'all 0.2s ease',
       '&:hover': {
-        color: '#e2e8f0',
-        background: 'rgba(148, 163, 184, 0.1)',
+        color: theme.custom.colors.text.primary,
+        background: `${theme.custom.colors.text.muted}10`,
       },
     },
 
     divider: {
-      borderColor: 'rgba(148, 163, 184, 0.1)',
+      borderColor: theme.custom.colors.border.secondary,
     },
   };
 

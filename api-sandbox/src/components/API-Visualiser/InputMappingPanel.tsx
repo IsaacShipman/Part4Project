@@ -21,6 +21,7 @@ import {
   Button,
   styled,
   alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Search,
@@ -41,41 +42,41 @@ import { NodeConfiguration } from '../../types/node';
 // Styled components for consistent theming
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    background: 'rgba(30, 41, 59, 0.6)',
+    background: theme.custom.colors.background.tertiary,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.2)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     borderRadius: '8px',
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     '&:hover': {
-      border: '1px solid rgba(148, 163, 184, 0.4)',
+      border: `1px solid ${theme.custom.colors.border.primary}`,
     },
     '&.Mui-focused': {
-      border: '1px solid rgba(16, 185, 129, 0.6)',
-      boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.2)',
+      border: `1px solid ${theme.custom.colors.accent}`,
+      boxShadow: `0 0 0 2px ${theme.custom.colors.accent}20`,
     },
     '& fieldset': {
       border: 'none',
     },
   },
   '& .MuiInputLabel-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: theme.custom.colors.text.muted,
     '&.Mui-focused': {
-      color: 'rgba(16, 185, 129, 0.8)',
+      color: theme.custom.colors.accent,
     },
   },
   '& .MuiInputBase-input': {
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     '&::placeholder': {
-      color: 'rgba(255, 255, 255, 0.5)',
+      color: theme.custom.colors.text.muted,
       opacity: 1,
     },
   },
 }));
 
 const StyledAccordion = styled(Accordion)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.6)',
+  background: theme.custom.colors.background.tertiary,
   backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
+  border: `1px solid ${theme.custom.colors.border.secondary}`,
   borderRadius: '8px',
   marginBottom: theme.spacing(1),
   '&:before': {
@@ -91,48 +92,48 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
     margin: theme.spacing(1, 0),
   },
   '& .MuiAccordionSummary-expandIconWrapper': {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: theme.custom.colors.text.muted,
   },
 }));
 
 const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2),
-  background: 'rgba(15, 23, 42, 0.4)',
-  borderTop: '1px solid rgba(148, 163, 184, 0.1)',
+  background: theme.custom.colors.background.secondary,
+  borderTop: `1px solid ${theme.custom.colors.border.subtle}`,
 }));
 
 const StyledChip = styled(Chip)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.6)',
+  background: theme.custom.colors.background.tertiary,
   backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
-  color: '#e2e8f0',
+  border: `1px solid ${theme.custom.colors.border.secondary}`,
+  color: theme.custom.colors.text.primary,
   fontWeight: 600,
   fontSize: '0.7rem',
   height: '28px',
   '&:hover': {
-    background: 'rgba(148, 163, 184, 0.1)',
-    border: '1px solid rgba(148, 163, 184, 0.4)',
+    background: theme.custom.colors.background.secondary,
+    border: `1px solid ${theme.custom.colors.border.primary}`,
   },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  background: 'rgba(16, 185, 129, 0.1)',
-  border: '1px solid rgba(16, 185, 129, 0.3)',
+  background: `${theme.custom.colors.accent}10`,
+  border: `1px solid ${theme.custom.colors.accent}30`,
   borderRadius: '8px',
-  color: '#86efac',
+  color: theme.custom.colors.accent,
   fontWeight: 600,
   fontSize: '0.8rem',
   textTransform: 'none',
   padding: '6px 12px',
   transition: 'all 0.2s ease',
   '&:hover': {
-    background: 'rgba(16, 185, 129, 0.2)',
-    border: '1px solid rgba(16, 185, 129, 0.5)',
+    background: `${theme.custom.colors.accent}20`,
+    border: `1px solid ${theme.custom.colors.accent}50`,
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+    boxShadow: `0 4px 12px ${theme.custom.colors.accent}20`,
   },
   '& .MuiButton-startIcon': {
-    color: '#86efac',
+    color: theme.custom.colors.accent,
   }
 }));
 
@@ -178,6 +179,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
   inputData,
   onFieldSelect,
 }) => {
+  const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [showDataPreview, setShowDataPreview] = useState<Set<string>>(new Set());
@@ -269,10 +271,10 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
       {/* Header with search and summary */}
       <Box mb={2}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Typography variant="subtitle2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
+          <Typography variant="subtitle2" sx={{ color: theme.custom.colors.text.primary, fontWeight: 600 }}>
             Connected Input Nodes ({connectedNodes.length})
           </Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+          <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted }}>
             {totalFields} selected | {totalSmartFields} available
           </Typography>
         </Box>
@@ -286,7 +288,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+                <Search sx={{ color: theme.custom.colors.text.muted }} />
               </InputAdornment>
             ),
             endAdornment: searchQuery && (
@@ -294,7 +296,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => setSearchQuery('')}
-                  sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                  sx={{ color: theme.custom.colors.text.muted }}
                 >
                   <Clear />
                 </IconButton>
@@ -308,14 +310,14 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
       {connectedNodes.length === 0 && (
         <Alert severity="info" sx={{ 
           mb: 2,
-          background: 'rgba(59, 130, 246, 0.1)',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
-          color: '#93c5fd',
+          background: `${theme.custom.colors.primary}10`,
+          border: `1px solid ${theme.custom.colors.primary}30`,
+          color: theme.custom.colors.primary,
           '& .MuiAlert-icon': {
-            color: '#93c5fd',
+            color: theme.custom.colors.primary,
           }
         }}>
-          <Typography variant="body2" sx={{ color: '#93c5fd' }}>
+          <Typography variant="body2" sx={{ color: theme.custom.colors.primary }}>
             No nodes are connected to this data processing node. 
             Connect API endpoint nodes or other data processing nodes to provide input data.
           </Typography>
@@ -333,12 +335,12 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
             expandIcon={<ExpandMore />}
             sx={{
               background: hasData 
-                ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%)'
-                : 'rgba(30, 41, 59, 0.4)',
+                ? `linear-gradient(90deg, ${theme.custom.colors.accent}15 0%, ${theme.custom.colors.accent}10 100%)`
+                : theme.custom.colors.background.tertiary,
               '&.Mui-expanded': {
                 background: hasData 
-                  ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)'
-                  : 'rgba(30, 41, 59, 0.6)',
+                  ? `linear-gradient(90deg, ${theme.custom.colors.accent}20 0%, ${theme.custom.colors.accent}15 100%)`
+                  : theme.custom.colors.background.secondary,
               },
             }}
           >
@@ -364,14 +366,14 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
                 </Box>
                 
                 {node.endpoint && (
-                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted }}>
                     {node.endpoint.method} {node.endpoint.path}
                   </Typography>
                 )}
               </Box>
               
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted }}>
                   {searchQuery 
                     ? `${fields.length}/${totalFields} selected | ${smartFields.length}/${totalSmartFields} available` 
                     : `${totalFields} selected | ${totalSmartFields} available`
@@ -386,6 +388,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
                         e.stopPropagation();
                         handleDataPreviewToggle(node.id);
                       }}
+                      sx={{ color: theme.custom.colors.text.muted }}
                     >
                       {showDataPreview.has(node.id) ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -403,7 +406,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
               {hasData && (
                 <Collapse in={showDataPreview.has(node.id)}>
                   <Box mb={2}>
-                    <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontWeight: 600 }} gutterBottom>
+                    <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted, fontWeight: 600 }} gutterBottom>
                       Data Preview:
                     </Typography>
                     <StyledTextField
@@ -415,7 +418,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        style: { fontFamily: 'monospace', fontSize: '0.75rem' }
+                        style: { fontFamily: theme.custom.terminal.fontFamily, fontSize: '0.75rem' }
                       }}
                     />
                   </Box>
@@ -425,7 +428,7 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
               {/* Selected Output Fields */}
               {fields.length > 0 && (
                 <Box mb={2}>
-                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontWeight: 600 }} gutterBottom>
+                  <Typography variant="caption" sx={{ color: theme.custom.colors.text.muted, fontWeight: 600 }} gutterBottom>
                     Selected Output Fields ({fields.length}):
                   </Typography>
                   <Box display="flex" flexWrap="wrap" gap={0.5} mt={1}>
@@ -453,28 +456,28 @@ const InputMappingPanel: React.FC<InputMappingPanelProps> = ({
                 searchQuery ? (
                   <Alert severity="info" sx={{ 
                     mt: 1,
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    color: '#93c5fd',
+                    background: `${theme.custom.colors.primary}10`,
+                    border: `1px solid ${theme.custom.colors.primary}30`,
+                    color: theme.custom.colors.primary,
                     '& .MuiAlert-icon': {
-                      color: '#93c5fd',
+                      color: theme.custom.colors.primary,
                     }
                   }}>
-                    <Typography variant="body2" sx={{ color: '#93c5fd' }}>
+                    <Typography variant="body2" sx={{ color: theme.custom.colors.primary }}>
                       No selected fields match "{searchQuery}". Try a different search term.
                     </Typography>
                   </Alert>
                 ) : (
                   <Alert severity="warning" sx={{ 
                     mt: 1,
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                    color: '#fcd34d',
+                    background: `${theme.palette.warning.main}10`,
+                    border: `1px solid ${theme.palette.warning.main}30`,
+                    color: theme.palette.warning.main,
                     '& .MuiAlert-icon': {
-                      color: '#fcd34d',
+                      color: theme.palette.warning.main,
                     }
                   }}>
-                    <Typography variant="body2" sx={{ color: '#fcd34d' }}>
+                    <Typography variant="body2" sx={{ color: theme.palette.warning.main }}>
                       No output fields selected in the source node. 
                       Configure the source node to select output fields.
                     </Typography>

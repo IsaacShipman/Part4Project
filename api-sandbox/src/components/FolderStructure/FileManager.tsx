@@ -14,7 +14,8 @@ import {
   DialogActions,
   Button,
   TextField,
-  Paper
+  Paper,
+  useTheme
 } from '@mui/material';
 import { 
   InsertDriveFile, 
@@ -37,6 +38,7 @@ const FileManager: React.FC = () => {
   const [newFileName, setNewFileName] = useState('');
   const [fileToDeleteId, setFileToDeleteId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const theme = useTheme();
 
   const handleCreateFile = () => {
     if (newFileName.trim()) {
@@ -72,9 +74,9 @@ const FileManager: React.FC = () => {
   const dialogStyles = {
     paper: {
       margin: 2,
-      background: 'rgba(30, 41, 59, 0.85)',
+      background: theme.custom.colors.background.secondary,
       backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(71, 85, 105, 0.3)',
+      border: `1px solid ${theme.custom.colors.border.primary}`,
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
       borderRadius: '12px',
       overflow: 'hidden',
@@ -86,8 +88,8 @@ const FileManager: React.FC = () => {
         right: 0,
         bottom: 0,
         background: `
-          radial-gradient(circle at 70% 30%, rgba(16, 185, 129, 0.07) 0%, transparent 60%),
-          linear-gradient(45deg, rgba(59, 130, 246, 0.05) 0%, transparent 50%)
+          radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}07 0%, transparent 60%),
+          linear-gradient(45deg, ${theme.custom.colors.primary}05 0%, transparent 50%)
         `,
         pointerEvents: 'none'
       }
@@ -101,12 +103,12 @@ const FileManager: React.FC = () => {
         justifyContent: 'space-between', 
         alignItems: 'center', 
         p: 1, 
-        borderBottom: '1px solid rgba(71, 85, 105, 0.3)',
-        background: 'rgba(30, 41, 59, 0.2)',
+        borderBottom: `1px solid ${theme.custom.colors.border.primary}`,
+        background: theme.custom.colors.background.secondary,
         backdropFilter: 'blur(8px)',
       }}>
         <Typography variant="subtitle2" sx={{ 
-          color: '#e2e8f0', 
+          color: theme.custom.colors.text.primary, 
           fontWeight: 600, 
           letterSpacing: '0.5px',
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
@@ -117,9 +119,9 @@ const FileManager: React.FC = () => {
           size="small" 
           onClick={() => setNewFileDialogOpen(true)}
           sx={{ 
-            color: 'rgba(59, 130, 246, 0.8)', 
+            color: theme.custom.colors.primary, 
             '&:hover': { 
-              color: '#10b981',
+              color: theme.custom.colors.accent,
               transform: 'scale(1.1)'
             },
             transition: 'all 0.2s ease-in-out'
@@ -134,9 +136,9 @@ const FileManager: React.FC = () => {
           <ListItem sx={{ 
             margin: '8px', 
             borderRadius: '8px',
-            background: 'rgba(30, 41, 59, 0.3)',
+            background: theme.custom.colors.background.tertiary,
             backdropFilter: 'blur(5px)',
-            border: '1px solid rgba(71, 85, 105, 0.2)',
+            border: `1px solid ${theme.custom.colors.border.secondary}`,
             width: '96%', // Use percentage width for responsive centering
           }}>
             <ListItemText 
@@ -144,12 +146,12 @@ const FileManager: React.FC = () => {
               secondary="Create a new file to get started" 
               primaryTypographyProps={{ 
                 variant: 'body2', 
-                color: 'rgba(226, 232, 240, 0.8)',
+                color: theme.custom.colors.text.primary,
                 fontWeight: 500
               }}
               secondaryTypographyProps={{ 
                 variant: 'caption', 
-                color: 'rgba(148, 163, 184, 0.8)' 
+                color: theme.custom.colors.text.muted
               }}
             />
           </ListItem>
@@ -190,27 +192,27 @@ const FileManager: React.FC = () => {
                 onClick={() => handleFileSelection(file.id)}
                 sx={{ 
                   borderRadius: '8px',
-                  background: 'rgba(30, 41, 59, 0.4)',
+                  background: theme.custom.colors.background.tertiary,
                   backdropFilter: 'blur(5px)',
-                  border: '1px solid rgba(71, 85, 105, 0.3)',
+                  border: `1px solid ${theme.custom.colors.border.secondary}`,
                   padding: '8px 12px',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   width: '100%', // Make button take full width of parent
                   paddingRight: '40px', // Make space for the delete button
                   '&.Mui-selected': {
                     background: `
-                      radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%),
-                      rgba(59, 130, 246, 0.2)
+                      radial-gradient(circle at 50% 50%, ${theme.custom.colors.primary}10 0%, transparent 70%),
+                      ${theme.custom.colors.primary}20
                     `,
-                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    border: `1px solid ${theme.custom.colors.primary}40`,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
                     '&:hover': {
-                      background: 'rgba(59, 130, 246, 0.3)',
+                      background: `${theme.custom.colors.primary}30`,
                     }
                   },
                   '&:hover': { 
-                    background: 'rgba(51, 65, 85, 0.5)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    background: theme.custom.colors.background.secondary,
+                    border: `1px solid ${theme.custom.colors.primary}30`,
                     transform: 'translateY(-2px)',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
                   }
@@ -222,8 +224,8 @@ const FileManager: React.FC = () => {
                     fontSize="small" 
                     sx={{ 
                       color: activeFileId === file.id 
-                        ? 'rgba(59, 130, 246, 0.9)' 
-                        : 'rgba(148, 163, 184, 0.8)'
+                        ? theme.custom.colors.primary
+                        : theme.custom.colors.text.muted
                     }} 
                   />
                 </ListItemIcon>
@@ -232,7 +234,7 @@ const FileManager: React.FC = () => {
                   primaryTypographyProps={{ 
                     variant: 'body2',
                     sx: {
-                      color: '#e2e8f0',
+                      color: theme.custom.colors.text.primary,
                       fontWeight: activeFileId === file.id ? 600 : 400
                     }
                   }} 
@@ -249,13 +251,13 @@ const FileManager: React.FC = () => {
         onClose={() => setNewFileDialogOpen(false)}
         PaperProps={{ sx: dialogStyles.paper }}
         BackdropProps={{
-          sx: { backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)' }
+          sx: { backgroundColor: `${theme.custom.colors.background.primary}70`, backdropFilter: 'blur(4px)' }
         }}
       >
         <DialogTitle sx={{ 
-          color: '#e2e8f0', 
-          borderBottom: '1px solid rgba(71, 85, 105, 0.3)',
-          background: 'rgba(30, 41, 59, 0.5)',
+          color: theme.custom.colors.text.primary, 
+          borderBottom: `1px solid ${theme.custom.colors.border.primary}`,
+          background: theme.custom.colors.background.secondary,
           padding: '16px 24px',
         }}>
           Create New Python File
@@ -279,39 +281,39 @@ const FileManager: React.FC = () => {
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: 'rgba(15, 23, 42, 0.3)',
+                backgroundColor: theme.custom.colors.background.tertiary,
                 '& fieldset': {
-                  borderColor: 'rgba(71, 85, 105, 0.5)',
+                  borderColor: theme.custom.colors.border.secondary,
                 },
                 '&:hover fieldset': {
-                  borderColor: 'rgba(59, 130, 246, 0.5)',
+                  borderColor: theme.custom.colors.primary,
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: 'rgba(59, 130, 246, 0.8)',
+                  borderColor: theme.custom.colors.primary,
                 },
               },
               '& .MuiFormLabel-root': {
-                color: 'rgba(148, 163, 184, 0.8)',
+                color: theme.custom.colors.text.muted,
               },
               '& .MuiInputBase-input': {
-                color: '#e2e8f0',
+                color: theme.custom.colors.text.primary,
               },
               '& .MuiFormHelperText-root': {
-                color: 'rgba(148, 163, 184, 0.7)',
+                color: theme.custom.colors.text.muted,
               },
             }}
           />
         </DialogContent>
         <DialogActions sx={{ 
           padding: '12px 24px',
-          borderTop: '1px solid rgba(71, 85, 105, 0.3)',
+          borderTop: `1px solid ${theme.custom.colors.border.primary}`,
         }}>
           <Button 
             onClick={() => setNewFileDialogOpen(false)}
             sx={{
-              color: 'rgba(148, 163, 184, 0.8)',
+              color: theme.custom.colors.text.muted,
               '&:hover': {
-                backgroundColor: 'rgba(51, 65, 85, 0.5)',
+                backgroundColor: theme.custom.colors.background.tertiary,
               }
             }}
           >
@@ -321,11 +323,11 @@ const FileManager: React.FC = () => {
             onClick={handleCreateFile} 
             variant="contained"
             sx={{
-              background: 'linear-gradient(45deg, rgba(59, 130, 246, 0.9), rgba(16, 185, 129, 0.9))',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+              background: `linear-gradient(45deg, ${theme.custom.colors.primary}, ${theme.custom.colors.accent})`,
+              boxShadow: `0 4px 12px ${theme.custom.colors.primary}40`,
               '&:hover': {
-                background: 'linear-gradient(45deg, rgba(59, 130, 246, 1), rgba(16, 185, 129, 1))',
-                boxShadow: '0 6px 16px rgba(59, 130, 246, 0.6)',
+                background: `linear-gradient(45deg, ${theme.custom.colors.primary}, ${theme.custom.colors.accent})`,
+                boxShadow: `0 6px 16px ${theme.custom.colors.primary}60`,
               }
             }}
           >
@@ -340,32 +342,32 @@ const FileManager: React.FC = () => {
         onClose={() => setDeleteDialogOpen(false)}
         PaperProps={{ sx: dialogStyles.paper }}
         BackdropProps={{
-          sx: { backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)' }
+          sx: { backgroundColor: `${theme.custom.colors.background.primary}70`, backdropFilter: 'blur(4px)' }
         }}
       >
         <DialogTitle sx={{ 
-          color: '#e2e8f0', 
-          borderBottom: '1px solid rgba(71, 85, 105, 0.3)',
-          background: 'rgba(30, 41, 59, 0.5)',
+          color: theme.custom.colors.text.primary, 
+          borderBottom: `1px solid ${theme.custom.colors.border.primary}`,
+          background: theme.custom.colors.background.secondary,
           padding: '16px 24px',
         }}>
           Delete File
         </DialogTitle>
         <DialogContent sx={{ padding: '24px' }}>
-          <Typography sx={{ color: '#e2e8f0' }}>
+          <Typography sx={{ color: theme.custom.colors.text.primary }}>
             Are you sure you want to delete this file? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ 
           padding: '12px 24px',
-          borderTop: '1px solid rgba(71, 85, 105, 0.3)',
+          borderTop: `1px solid ${theme.custom.colors.border.primary}`,
         }}>
           <Button 
             onClick={() => setDeleteDialogOpen(false)}
             sx={{
-              color: 'rgba(148, 163, 184, 0.8)',
+              color: theme.custom.colors.text.muted,
               '&:hover': {
-                backgroundColor: 'rgba(51, 65, 85, 0.5)',
+                backgroundColor: theme.custom.colors.background.tertiary,
               }
             }}
           >

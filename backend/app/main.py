@@ -9,6 +9,7 @@ import sqlite3
 import json
 import uuid
 import time
+import base64
 
 from app.services.security_analysis import run_security_scan
 from app.services.data_processor import DataProcessorCodeGenerator
@@ -53,7 +54,6 @@ class DataProcessingRequest(BaseModel):
 
 @app.post("/run")
 async def run_code(code_input: CodeInput):
-    print(code_input)
     try:
         # Create a session ID for tracking API calls
         session_id = code_input.session_id or api_proxy.create_session_id()
@@ -66,6 +66,7 @@ import requests
 from functools import partial
 from urllib.parse import urlparse
 import json
+import base64
 
 # Store original requests functions
 original_get = requests.get
@@ -77,6 +78,9 @@ original_request = requests.request
 
 # Create a session ID for tracking - define this before using it
 SESSION_ID = "{session_id}"
+
+# Store intercepted calls locally
+intercepted_calls = []
 
 # Custom function to intercept requests
 def intercept_request(original_func, *args, **kwargs):
@@ -92,23 +96,17 @@ def intercept_request(original_func, *args, **kwargs):
     try:
         response = original_func(*args, **kwargs)
         
-        # Send the intercepted request to our API
-        requests_data = {{
+        # Store the intercepted request locally
+        call_data = {{
             'method': method,
             'url': url,
             'headers': dict(response.headers),
             'response': response.text,
-            'status': response.status_code
+            'status': response.status_code,
+            'request_headers': kwargs.get('headers', {{}}),
+            'request_data': kwargs.get('json') or kwargs.get('data')
         }}
-        
-        # Use the original request to avoid infinite recursion and explicitly refer to SESSION_ID
-        try:
-            original_post(
-                f'http://host.docker.internal:8000/api-proxy/record/{session_id}',
-                json=requests_data
-            )
-        except Exception as e:
-            print(f"Failed to record API call: {{e}}")
+        intercepted_calls.append(call_data)
         
         return response
     except Exception as e:
@@ -116,17 +114,12 @@ def intercept_request(original_func, *args, **kwargs):
         error_data = {{
             'method': method,
             'url': url,
-            'error': str(e)
+            'error': str(e),
+            'status': 0,
+            'request_headers': kwargs.get('headers', {{}}),
+            'request_data': kwargs.get('json') or kwargs.get('data')
         }}
-        
-        # Use the original request to avoid infinite recursion and explicitly refer to SESSION_ID
-        try:
-            original_post(
-                f'http://host.docker.internal:8000/api-proxy/record/{session_id}',
-                json=error_data
-            )
-        except Exception as rec_error:
-            print(f"Failed to record API error: {{rec_error}}")
+        intercepted_calls.append(error_data)
         
         # Re-raise the original exception
         raise
@@ -141,24 +134,107 @@ requests.request = partial(intercept_request, original_request)
 
 # Your code starts here:
 {code_input.code}
+
+# Store intercepted calls for extraction (use a simpler approach with unique markers)
+if intercepted_calls:
+    try:
+        # Convert to JSON with proper escaping
+        json_data = json.dumps(intercepted_calls, ensure_ascii=False, separators=(',', ':'))
+        # Use a unique marker that's unlikely to appear in normal output
+        print("===INTERCEPTED_API_CALLS_START===")
+        print(json_data)
+        print("===INTERCEPTED_API_CALLS_END===")
+    except Exception as e:
+        # Fallback: try to encode each call separately
+        try:
+            safe_calls = []
+            for call in intercepted_calls:
+                safe_call = {{
+                    'method': str(call.get('method', 'UNKNOWN')),
+                    'url': str(call.get('url', '')),
+                    'status': int(call.get('status', 0)),
+                    'response': str(call.get('response', '')),
+                    'headers': dict(call.get('headers', {{}})),
+                    'request_headers': dict(call.get('request_headers', {{}})),
+                    'request_data': call.get('request_data')
+                }}
+                safe_calls.append(safe_call)
+            json_data = json.dumps(safe_calls, ensure_ascii=False, separators=(',', ':'))
+            print("===INTERCEPTED_API_CALLS_START===")
+            print(json_data)
+            print("===INTERCEPTED_API_CALLS_END===")
+        except Exception as e2:
+            print(f"Failed to encode API calls: {{e2}}")
 """
         
         # Execute the code
         result = await executor.execute_code(proxy_code, code_input.language)
         
-        # Get the intercepted API calls
-        api_calls = api_proxy.get_calls(session_id)
+        # Parse intercepted API calls from the output and clean the output
+        api_calls = []
+        output = result.get("output", "")
         
-        # Include API calls in the result as a string to avoid type errors
-        result["api_calls"] = json.dumps(api_calls)
-        print("Result:", result)
+        print(f"DEBUG: Raw output length: {len(output)}")
+        print(f"DEBUG: Output contains INTERCEPTED_API_CALLS_START: {'===INTERCEPTED_API_CALLS_START===' in output}")
         
-        return result
+        # Look for the intercepted calls section in the output
+        if "===INTERCEPTED_API_CALLS_START===" in output:
+            # Extract the JSON data between the markers
+            start_marker = "===INTERCEPTED_API_CALLS_START==="
+            end_marker = "===INTERCEPTED_API_CALLS_END==="
+            
+            start_idx = output.find(start_marker)
+            end_idx = output.find(end_marker)
+            
+            if start_idx != -1 and end_idx != -1:
+                # Extract the JSON data
+                json_start = start_idx + len(start_marker)
+                json_data = output[json_start:end_idx].strip()
+                print(f"DEBUG: Found JSON data length: {len(json_data)}")
+                
+                try:
+                    # Parse the JSON data
+                    parsed_calls = json.loads(json_data)
+                    print(f"DEBUG: Parsed {len(parsed_calls)} API calls")
+                    for i, call in enumerate(parsed_calls):
+                        api_calls.append({
+                            "id": i,
+                            "method": call.get("method", "UNKNOWN"),
+                            "url": call.get("url", ""),
+                            "status": call.get("status", 0),
+                            "response": call.get("response", ""),
+                            "headers": call.get("headers", {}),
+                            "timestamp": time.time(),
+                            "request_headers": call.get("request_headers", {}),
+                            "request_data": call.get("request_data"),
+                            "error": call.get("error")
+                        })
+                except json.JSONDecodeError as e:
+                    print(f"Error parsing API calls: {e}")
+                    print(f"DEBUG: JSON data preview: {json_data[:200]}...")
+                
+                # Remove the API call markers from the output for clean terminal display
+                clean_output = output[:start_idx] + output[end_idx + len(end_marker):]
+                clean_output = clean_output.strip()
+            else:
+                clean_output = output
+        else:
+            clean_output = output
+        
+        # Create a new result dictionary with the API calls
+        final_result = {
+            "status": result.get("status", "error"),
+            "output": clean_output,
+            "api_calls": api_calls
+        }
+        
+        print(f"DEBUG: Final result - API calls count: {len(api_calls)}")
+        print(f"DEBUG: Final result - Status: {final_result['status']}")
+        
+        return final_result
         
     except Exception as e:
         import traceback
-        print(f"Error executing code: {e}")
-        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/test-node")
@@ -197,6 +273,15 @@ async def test_node(request: TestNodeRequest):
         
         # Make the HTTP request
         response = requests.request(**request_params)
+
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "error_type": "http_error",
+            }
         
         # Try to parse response as JSON, fallback to text
         try:
@@ -377,25 +462,23 @@ def get_db_connection():
 
 @app.get("/api-docs/structure")
 def get_api_docs_structure():
-    """Return all endpoints grouped by top-level folder (e.g., 'repos', 'users')."""
+    """Return all endpoints grouped by category."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, method, path, summary, category FROM github_api_docs ORDER BY path")
+    cursor.execute("SELECT id, method, path, summary, category FROM github_api_docs ORDER BY category, path")
     rows = cursor.fetchall()
     conn.close()
 
     structure = {}
     for id, method, path, summary, category in rows:
-        top_level = path.strip("/").split("/")[0]
-        if top_level not in structure:
-            structure[top_level] = []
-        structure[top_level].append({
+        if category not in structure:
+            structure[category] = []
+        structure[category].append({
             "id": id,
             "method": method,
             "path": path,
             "summary": summary,
             "category": category
-
         })
     return structure
 
@@ -464,9 +547,7 @@ def clear_proxy_calls(session_id: str):
 @app.get("/api-proxy/create-session")
 def create_proxy_session():
     """Create a new session for tracking API calls."""
-    print("[INFO] Creating new API proxy session.")
     session_id = api_proxy.create_session_id()
-    print(f"Created new session with ID: {session_id}")
     return {"session_id": session_id}
 
 @app.post("/api-proxy/record/{session_id}")
@@ -498,18 +579,9 @@ class GenerateCodeRequest(BaseModel):
 @app.post("/security-scan")
 async def security_scan(request: SecurityScanRequest):
     try:
-        # temp. logging
-        print("[INFO] Received /security-scan request.") 
-
         results = run_security_scan(request.code)
-
-        # temp. logging
-        print("[INFO] Security scan completed.")
         return results
     except Exception as e:
-        # temp. logging
-        print(f"[ERROR] Security scan failed: {str(e)}")
-        
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/generate-code")

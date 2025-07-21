@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItem, Typography, Box, Chip } from '@mui/material';
+import { ListItem, Typography, Box, Chip, useTheme } from '@mui/material';
 import { Endpoint } from '../../types/api';
 import { getMethodColor } from '../../utils/methodTypes';
 
@@ -14,6 +14,7 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
   isSelected, 
   onSelect 
 }) => {
+  const theme = useTheme();
   const methodStyle = getMethodColor(endpoint.method);
 
   return (
@@ -28,17 +29,17 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
         width: 'calc(100% - 16px)',
         background: isSelected 
           ? `
-            radial-gradient(circle at 30% 70%, rgba(59, 130, 246, 0.2) 0%, transparent 70%),
-            rgba(59, 130, 246, 0.15)
+            radial-gradient(circle at 30% 70%, ${theme.custom.colors.primary}20 0%, transparent 70%),
+            ${theme.custom.colors.primary}15
           ` 
           : `
-            radial-gradient(circle at 80% 20%, rgba(6, 78, 59, 0.08) 0%, transparent 60%),
-            rgba(15, 23, 42, 0.6)
+            radial-gradient(circle at 80% 20%, ${theme.custom.colors.accent}08 0%, transparent 60%),
+            ${theme.custom.colors.background.tertiary}
           `,
         backdropFilter: 'blur(8px)',
         border: isSelected 
-          ? '1px solid rgba(59, 130, 246, 0.4)' 
-          : '1px solid rgba(71, 85, 105, 0.2)',
+          ? `1px solid ${theme.custom.colors.primary}40` 
+          : `1px solid ${theme.custom.colors.border.secondary}`,
         overflow: 'hidden',
         zIndex: 2,
         '&::before': {
@@ -48,7 +49,7 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
           left: '-100%',
           width: '100%',
           height: '100%',
-          background: 'linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent)',
+          background: `linear-gradient(90deg, transparent, ${theme.custom.colors.accent}10, transparent)`,
           transition: 'left 0.5s ease',
           pointerEvents: 'none'
         },
@@ -59,27 +60,27 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
           right: 0,
           width: '2px',
           height: '0%',
-          background: 'linear-gradient(to bottom, rgba(16, 185, 129, 0.8), rgba(16, 185, 129, 0.2))',
+          background: `linear-gradient(to bottom, ${theme.custom.colors.accent}80, ${theme.custom.colors.accent}20)`,
           transition: 'height 0.3s ease',
           pointerEvents: 'none'
         },
         '&:hover': { 
           background: isSelected 
             ? `
-              radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 70%),
-              rgba(59, 130, 246, 0.2)
+              radial-gradient(circle at 50% 50%, ${theme.custom.colors.primary}25 0%, transparent 70%),
+              ${theme.custom.colors.primary}20
             ` 
             : `
-              radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.12) 0%, transparent 70%),
-              rgba(30, 41, 59, 0.6)
+              radial-gradient(circle at 50% 50%, ${theme.custom.colors.accent}12 0%, transparent 70%),
+              ${theme.custom.colors.background.secondary}
             `,
           border: isSelected
-            ? '1px solid rgba(59, 130, 246, 0.5)'
-            : '1px solid rgba(16, 185, 129, 0.4)',
+            ? `1px solid ${theme.custom.colors.primary}50`
+            : `1px solid ${theme.custom.colors.accent}40`,
           transform: 'scale(1.01)',
           boxShadow: isSelected
-            ? '0 4px 20px rgba(59, 130, 246, 0.2)'
-            : '0 4px 20px rgba(16, 185, 129, 0.1)',
+            ? `0 4px 20px ${theme.custom.colors.primary}20`
+            : `0 4px 20px ${theme.custom.colors.accent}10`,
           '&::before': {
             left: '100%'
           },
@@ -98,7 +99,7 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
           sx={{ 
             fontWeight: '700',
             fontSize: '0.7rem',
-            fontFamily: 'monospace',
+            fontFamily: theme.custom.terminal.fontFamily,
             minWidth: '50px',
             height: '20px',
             position: 'relative',
@@ -127,7 +128,7 @@ export const EndpointItem: React.FC<EndpointItemProps> = ({
         <Typography 
           variant="body2" 
           sx={{ 
-            color: '#cbd5e1',
+            color: theme.custom.colors.text.primary,
             fontSize: '0.85rem',
             fontWeight: '400'
           }}

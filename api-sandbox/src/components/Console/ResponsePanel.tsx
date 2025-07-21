@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Split from 'react-split';
+import { useTheme } from '@mui/material';
 import { ApiCall } from '../../types/api';
 import RequestViewer from './RequestViewer';
 import Terminal from './Terminal';
@@ -18,6 +19,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
   loading, 
   selectedApiCall
 }) => {
+  const theme = useTheme();
   const [terminalMaximized, setTerminalMaximized] = useState<boolean>(false);
   const [terminalMinimized, setTerminalMinimized] = useState<boolean>(false);
   const [splitSizes, setSplitSizes] = useState([30, 70]);
@@ -60,7 +62,12 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
       dragInterval={1}
       direction="horizontal"
       cursor="col-resize"
-      style={{ display: 'flex', flexGrow: 1, height: '100%' }}
+      style={{ 
+        display: 'flex', 
+        flexGrow: 1, 
+        height: '100%',
+        backgroundColor: theme.custom.colors.background.primary,
+      }}
       onDragEnd={(sizes) => {
         setSplitSizes(sizes);
         setTerminalMaximized(sizes[0] === 0);
@@ -68,7 +75,12 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
       }}
     >
       {/* Left Panel - Request Viewer */}
-      <div style={{ visibility: splitSizes[0] === 0 ? 'hidden' : 'visible', width: '100%', height: '100%' }}>
+      <div style={{ 
+        visibility: splitSizes[0] === 0 ? 'hidden' : 'visible', 
+        width: '100%', 
+        height: '100%',
+        backgroundColor: theme.custom.colors.background.primary,
+      }}>
         <RequestViewer 
           loading={loading} 
           selectedApiCall={selectedApiCall} 
@@ -76,7 +88,12 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
       </div>
 
       {/* Right Panel - Terminal */}
-      <div style={{ visibility: splitSizes[1] === 0 ? 'hidden' : 'visible', width: '100%', height: '100%' }}>
+      <div style={{ 
+        visibility: splitSizes[1] === 0 ? 'hidden' : 'visible', 
+        width: '100%', 
+        height: '100%',
+        backgroundColor: theme.custom.colors.background.primary,
+      }}>
         <Terminal 
           response={response}
           loading={loading}

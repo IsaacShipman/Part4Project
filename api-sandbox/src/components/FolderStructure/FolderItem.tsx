@@ -5,7 +5,8 @@ import {
   ListItemIcon,
   Collapse,
   Typography,
-  List
+  List,
+  useTheme
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -25,6 +26,7 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
   isExpanded,
   onToggle
 }) => {
+  const theme = useTheme();
   const hasEndpoints = structure.endpoints && structure.endpoints.length > 0;
 
   return (
@@ -37,9 +39,12 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
           margin: '4px 8px',
           padding: '12px 16px',
           position: 'relative',
-          background: 'rgba(30, 41, 59, 0.4)',
+          background: `
+          radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+          linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+        `,
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(71, 85, 105, 0.3)',
+          border: `1px solid ${theme.custom.colors.border.secondary}`,
           overflow: 'hidden',
           zIndex: 2,
           '&::before': {
@@ -50,8 +55,8 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
             right: 0,
             bottom: 0,
             background: `
-              radial-gradient(circle at 70% 30%, rgba(16, 185, 129, 0.03) 0%, transparent 60%),
-              linear-gradient(45deg, rgba(6, 78, 59, 0.05) 0%, transparent 50%)
+              radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+              linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
             `,
             opacity: 0,
             transition: 'opacity 0.3s ease',
@@ -59,14 +64,14 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
           },
           '&:hover': { 
             background: `
-              radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 70%),
-              rgba(51, 65, 85, 0.5)
+              radial-gradient(circle at 50% 50%, ${theme.custom.colors.accent}08 0%, transparent 70%),
+              ${theme.custom.colors.background.secondary}
             `,
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            border: `1px solid ${theme.custom.colors.accent}30`,
             transform: 'translateY(-2px) scale(1.01)',
             boxShadow: `
               0 8px 32px rgba(0, 0, 0, 0.4),
-              0 0 20px rgba(16, 185, 129, 0.1)
+              0 0 20px ${theme.custom.colors.accent}10
             `,
             '&::before': {
               opacity: 1
@@ -83,20 +88,20 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
           sx={{
             display: 'flex',
             flexGrow: 0,
-            color: '#64748b',
+            color: theme.custom.colors.text.muted,
             minWidth: '32px'
           }}
         >
           {isExpanded ? 
             <ExpandLessIcon sx={{ 
-              color: '#60a5fa',
+              color: theme.custom.colors.primary,
               transition: 'all 0.3s ease',
               transform: 'rotate(0deg)'
             }} /> : 
             <ExpandMoreIcon sx={{
               transition: 'all 0.3s ease',
               '&:hover': {
-                color: '#10b981',
+                color: theme.custom.colors.accent,
                 transform: 'scale(1.1)'
               }
             }} />
@@ -108,7 +113,7 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
               variant="body1" 
               fontWeight="600" 
               sx={{ 
-                color: '#e2e8f0',
+                color: theme.custom.colors.text.primary,
                 textTransform: 'capitalize',
                 letterSpacing: '0.5px'
               }}
@@ -120,7 +125,7 @@ export const FolderItem: React.FC<FolderItemComponentProps> = ({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#64748b',
+                color: theme.custom.colors.text.muted,
                 fontSize: '0.75rem'
               }}
             >

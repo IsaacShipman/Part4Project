@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -10,9 +10,7 @@ import {
   Snackbar,
   Alert,
   useTheme,
-  List,
-  ListItem,
-  ListItemText
+  CircularProgress
 } from '@mui/material';
 import {
   ExpandMore,
@@ -22,7 +20,155 @@ import {
   DataArray
 } from '@mui/icons-material';
 
-// Memoized individual value components
+// Virtualized list component for large arrays
+const VirtualizedList = memo(({ items, renderItem, itemHeight = 24, containerHeight = 400 }) => {
+  const [scrollTop, setScrollTop] = useState(0);
+  const containerRef = useRef(null);
+
+  const visibleItemCount = Math.ceil(containerHeight / itemHeight);
+  const startIndex = Math.floor(scrollTop / itemHeight);
+  const endIndex = Math.min(startIndex + visibleItemCount + 1, items.length);
+
+  const visibleItems = items.slice(startIndex, endIndex);
+  const totalHeight = items.length * itemHeight;
+  const offsetY = startIndex * itemHeight;
+
+  const handleScroll = useCallback((e) => {
+    setScrollTop(e.target.scrollTop);
+  }, []);
+
+  return (
+    <Box
+      ref={containerRef}
+      sx={{
+        height: containerHeight,
+        overflow: 'auto',
+        position: 'relative'
+      }}
+      onScroll={handleScroll}
+    >
+      <Box sx={{ height: totalHeight, position: 'relative' }}>
+        <Box sx={{ transform: `translateY(${offsetY}px)` }}>
+          {visibleItems.map((item, index) => (
+            <Box key={startIndex + index} sx={{ height: itemHeight }}>
+              {renderItem(item, startIndex + index)}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+});
+
+// Lazy loading component for large objects
+const LazyObjectRenderer = memo(({ data, path, onToggleExpand, expandedKeys, onCopy, theme, maxItems = 50 }) => {
+  const [showAll, setShowAll] = useState(false);
+  const keys = Object.keys(data);
+  const shouldLazyLoad = keys.length > maxItems;
+  const displayKeys = showAll ? keys : keys.slice(0, maxItems);
+
+  if (keys.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Chip
+          icon={<DataObject />}
+          label="Object(0)"
+          size="small"
+          variant="outlined"
+          sx={{ height: 20, fontSize: '0.75rem' }}
+        />
+        <Tooltip title="Copy Python path">
+          <IconButton
+            size="small"
+            onClick={() => onCopy(path)}
+            sx={{ p: 0.25 }}
+          >
+            <ContentCopy sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => onToggleExpand(path)}
+          sx={{ p: 0.5 }}
+        >
+          {expandedKeys.has(path) ? <ExpandMore /> : <ChevronRight />}
+        </IconButton>
+        <Chip
+          icon={<DataObject />}
+          label={`Object(${keys.length})`}
+          size="small"
+          variant="outlined"
+          sx={{ height: 20, fontSize: '0.75rem' }}
+        />
+        <Tooltip title="Copy Python path">
+          <IconButton
+            size="small"
+            onClick={() => onCopy(path)}
+            sx={{ p: 0.25 }}
+          >
+            <ContentCopy sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Collapse in={expandedKeys.has(path)}>
+        <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
+          {shouldLazyLoad && !showAll ? (
+            <>
+              {displayKeys.map(key => (
+                <ObjectItem
+                  key={key}
+                  item={data[key]}
+                  keyName={key}
+                  path={path}
+                  onToggleExpand={onToggleExpand}
+                  expandedKeys={expandedKeys}
+                  onCopy={onCopy}
+                  theme={theme}
+                />
+              ))}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Showing {maxItems} of {keys.length} items
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setShowAll(true)}
+                  sx={{ p: 0.5 }}
+                >
+                  <Typography variant="caption" color="primary">
+                    Show All
+                  </Typography>
+                </IconButton>
+              </Box>
+            </>
+          ) : (
+            displayKeys.map(key => (
+              <ObjectItem
+                key={key}
+                item={data[key]}
+                keyName={key}
+                path={path}
+                onToggleExpand={onToggleExpand}
+                expandedKeys={expandedKeys}
+                onCopy={onCopy}
+                theme={theme}
+              />
+            ))
+          )}
+        </Box>
+      </Collapse>
+    </Box>
+  );
+});
+
+// Memoized value display component
 const ValueDisplay = memo(({ value, path, onCopy, theme }) => {
   const getValueColor = useCallback((val) => {
     if (val === null) return theme.palette.error.main;
@@ -191,8 +337,8 @@ const ValueDisplay = memo(({ value, path, onCopy, theme }) => {
   );
 });
 
-// Memoized array item component
-const ArrayItem = memo(({ item, index, path, nestLevel, onToggleExpand, expandedKeys, onCopy, theme }) => {
+// Optimized array item component
+const ArrayItem = memo(({ item, index, path, onToggleExpand, expandedKeys, onCopy, theme }) => {
   const currentPath = path ? `${path}.${index}` : `${index}`;
   const isExpanded = expandedKeys.has(currentPath);
 
@@ -214,69 +360,25 @@ const ArrayItem = memo(({ item, index, path, nestLevel, onToggleExpand, expanded
           {index}:
         </Typography>
         <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => onToggleExpand(currentPath)}
-              sx={{ p: 0.5 }}
-            >
-              {isExpanded ? <ExpandMore /> : <ChevronRight />}
-            </IconButton>
-            <Chip
-              icon={isArray ? <DataArray /> : <DataObject />}
-              label={`${isArray ? 'Array' : 'Object'}(${keys.length})`}
-              size="small"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '0.75rem' }}
+          {isArray ? (
+            <LazyArrayRenderer
+              data={item}
+              path={currentPath}
+              onToggleExpand={onToggleExpand}
+              expandedKeys={expandedKeys}
+              onCopy={onCopy}
+              theme={theme}
             />
-            <Tooltip title="Copy Python path">
-              <IconButton
-                size="small"
-                onClick={() => onCopy(currentPath)}
-                sx={{ 
-                  p: 0.25,
-                  opacity: 0,
-                  transition: 'opacity 0.2s',
-                  '.MuiBox-root:hover &': { opacity: 1 }
-                }}
-              >
-                <ContentCopy sx={{ fontSize: 12 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Collapse in={isExpanded}>
-            <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
-              {isArray ? (
-                item.map((subItem, subIndex) => (
-                  <ArrayItem
-                    key={subIndex}
-                    item={subItem}
-                    index={subIndex}
-                    path={currentPath}
-                    nestLevel={nestLevel + 1}
-                    onToggleExpand={onToggleExpand}
-                    expandedKeys={expandedKeys}
-                    onCopy={onCopy}
-                    theme={theme}
-                  />
-                ))
-              ) : (
-                Object.keys(item).map(key => (
-                  <ObjectItem
-                    key={key}
-                    item={item[key]}
-                    keyName={key}
-                    path={currentPath}
-                    nestLevel={nestLevel + 1}
-                    onToggleExpand={onToggleExpand}
-                    expandedKeys={expandedKeys}
-                    onCopy={onCopy}
-                    theme={theme}
-                  />
-                ))
-              )}
-            </Box>
-          </Collapse>
+          ) : (
+            <LazyObjectRenderer
+              data={item}
+              path={currentPath}
+              onToggleExpand={onToggleExpand}
+              expandedKeys={expandedKeys}
+              onCopy={onCopy}
+              theme={theme}
+            />
+          )}
         </Box>
       </Box>
     );
@@ -302,14 +404,120 @@ const ArrayItem = memo(({ item, index, path, nestLevel, onToggleExpand, expanded
   );
 });
 
-// Memoized object item component
-const ObjectItem = memo(({ item, keyName, path, nestLevel, onToggleExpand, expandedKeys, onCopy, theme }) => {
+// Lazy array renderer for large arrays
+const LazyArrayRenderer = memo(({ data, path, onToggleExpand, expandedKeys, onCopy, theme, maxItems = 100 }) => {
+  const [showAll, setShowAll] = useState(false);
+  const shouldLazyLoad = data.length > maxItems;
+  const displayData = showAll ? data : data.slice(0, maxItems);
+
+  if (data.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Chip
+          icon={<DataArray />}
+          label="Array(0)"
+          size="small"
+          variant="outlined"
+          sx={{ height: 20, fontSize: '0.75rem' }}
+        />
+        <Tooltip title="Copy Python path">
+          <IconButton
+            size="small"
+            onClick={() => onCopy(path)}
+            sx={{ p: 0.25 }}
+          >
+            <ContentCopy sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => onToggleExpand(path)}
+          sx={{ p: 0.5 }}
+        >
+          {expandedKeys.has(path) ? <ExpandMore /> : <ChevronRight />}
+        </IconButton>
+        <Chip
+          icon={<DataArray />}
+          label={`Array(${data.length})`}
+          size="small"
+          variant="outlined"
+          sx={{ height: 20, fontSize: '0.75rem' }}
+        />
+        <Tooltip title="Copy Python path">
+          <IconButton
+            size="small"
+            onClick={() => onCopy(path)}
+            sx={{ p: 0.25 }}
+          >
+            <ContentCopy sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Collapse in={expandedKeys.has(path)}>
+        <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
+          {shouldLazyLoad && !showAll ? (
+            <>
+              {displayData.map((item, index) => (
+                <ArrayItem
+                  key={index}
+                  item={item}
+                  index={index}
+                  path={path}
+                  onToggleExpand={onToggleExpand}
+                  expandedKeys={expandedKeys}
+                  onCopy={onCopy}
+                  theme={theme}
+                />
+              ))}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Showing {maxItems} of {data.length} items
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setShowAll(true)}
+                  sx={{ p: 0.5 }}
+                >
+                  <Typography variant="caption" color="primary">
+                    Show All
+                  </Typography>
+                </IconButton>
+              </Box>
+            </>
+          ) : (
+            displayData.map((item, index) => (
+              <ArrayItem
+                key={index}
+                item={item}
+                index={index}
+                path={path}
+                onToggleExpand={onToggleExpand}
+                expandedKeys={expandedKeys}
+                onCopy={onCopy}
+                theme={theme}
+              />
+            ))
+          )}
+        </Box>
+      </Collapse>
+    </Box>
+  );
+});
+
+// Optimized object item component
+const ObjectItem = memo(({ item, keyName, path, onToggleExpand, expandedKeys, onCopy, theme }) => {
   const currentPath = path ? `${path}.${keyName}` : keyName;
   const isExpanded = expandedKeys.has(currentPath);
 
   if (typeof item === 'object' && item !== null) {
     const isArray = Array.isArray(item);
-    const keys = isArray ? item.length : Object.keys(item);
     
     return (
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
@@ -325,69 +533,25 @@ const ObjectItem = memo(({ item, keyName, path, nestLevel, onToggleExpand, expan
           "{keyName}":
         </Typography>
         <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => onToggleExpand(currentPath)}
-              sx={{ p: 0.5 }}
-            >
-              {isExpanded ? <ExpandMore /> : <ChevronRight />}
-            </IconButton>
-            <Chip
-              icon={isArray ? <DataArray /> : <DataObject />}
-              label={`${isArray ? 'Array' : 'Object'}(${keys.length})`}
-              size="small"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '0.75rem' }}
+          {isArray ? (
+            <LazyArrayRenderer
+              data={item}
+              path={currentPath}
+              onToggleExpand={onToggleExpand}
+              expandedKeys={expandedKeys}
+              onCopy={onCopy}
+              theme={theme}
             />
-            <Tooltip title="Copy Python path">
-              <IconButton
-                size="small"
-                onClick={() => onCopy(currentPath)}
-                sx={{ 
-                  p: 0.25,
-                  opacity: 0,
-                  transition: 'opacity 0.2s',
-                  '.MuiBox-root:hover &': { opacity: 1 }
-                }}
-              >
-                <ContentCopy sx={{ fontSize: 12 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Collapse in={isExpanded}>
-            <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
-              {isArray ? (
-                item.map((subItem, subIndex) => (
-                  <ArrayItem
-                    key={subIndex}
-                    item={subItem}
-                    index={subIndex}
-                    path={currentPath}
-                    nestLevel={nestLevel + 1}
-                    onToggleExpand={onToggleExpand}
-                    expandedKeys={expandedKeys}
-                    onCopy={onCopy}
-                    theme={theme}
-                  />
-                ))
-              ) : (
-                Object.keys(item).map(key => (
-                  <ObjectItem
-                    key={key}
-                    item={item[key]}
-                    keyName={key}
-                    path={currentPath}
-                    nestLevel={nestLevel + 1}
-                    onToggleExpand={onToggleExpand}
-                    expandedKeys={expandedKeys}
-                    onCopy={onCopy}
-                    theme={theme}
-                  />
-                ))
-              )}
-            </Box>
-          </Collapse>
+          ) : (
+            <LazyObjectRenderer
+              data={item}
+              path={currentPath}
+              onToggleExpand={onToggleExpand}
+              expandedKeys={expandedKeys}
+              onCopy={onCopy}
+              theme={theme}
+            />
+          )}
         </Box>
       </Box>
     );
@@ -413,11 +577,12 @@ const ObjectItem = memo(({ item, keyName, path, nestLevel, onToggleExpand, expan
   );
 });
 
-// Main JsonViewer component with performance optimizations
-const JsonViewer = ({ data }) => {
+// Main optimized JsonViewer component
+const JsonViewerOptimized = ({ data }) => {
   const [expandedKeys, setExpandedKeys] = useState(new Set());
   const [copiedPath, setCopiedPath] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const theme = useTheme();
 
   const toggleExpand = useCallback((key) => {
@@ -463,8 +628,7 @@ const JsonViewer = ({ data }) => {
 
   const parseAndFormatJson = useCallback((jsonString) => {
     try {
-      const parsed = JSON.parse(jsonString);
-      return parsed;
+      return JSON.parse(jsonString);
     } catch (error) {
       try {
         const fixedJson = jsonString
@@ -542,124 +706,27 @@ const JsonViewer = ({ data }) => {
       }
 
       return (
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => toggleExpand('root')}
-              sx={{ p: 0.5 }}
-            >
-              {expandedKeys.has('root') ? <ExpandMore /> : <ChevronRight />}
-            </IconButton>
-            <Chip
-              icon={<DataArray />}
-              label={`Array(${parsedData.length})`}
-              size="small"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '0.75rem' }}
-            />
-            <Tooltip title="Copy Python path">
-              <IconButton
-                size="small"
-                onClick={() => copyToClipboard('')}
-                sx={{ p: 0.25 }}
-              >
-                <ContentCopy sx={{ fontSize: 12 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Collapse in={expandedKeys.has('root')}>
-            <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
-              {parsedData.map((item, index) => (
-                <ArrayItem
-                  key={index}
-                  item={item}
-                  index={index}
-                  path=""
-                  nestLevel={0}
-                  onToggleExpand={toggleExpand}
-                  expandedKeys={expandedKeys}
-                  onCopy={copyToClipboard}
-                  theme={theme}
-                />
-              ))}
-            </Box>
-          </Collapse>
-        </Box>
+        <LazyArrayRenderer
+          data={parsedData}
+          path=""
+          onToggleExpand={toggleExpand}
+          expandedKeys={expandedKeys}
+          onCopy={copyToClipboard}
+          theme={theme}
+        />
       );
     }
 
     if (typeof parsedData === 'object' && parsedData !== null) {
-      const keys = Object.keys(parsedData);
-      
-      if (keys.length === 0) {
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip
-              icon={<DataObject />}
-              label="Object(0)"
-              size="small"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '0.75rem' }}
-            />
-            <Tooltip title="Copy Python path">
-              <IconButton
-                size="small"
-                onClick={() => copyToClipboard('')}
-                sx={{ p: 0.25 }}
-              >
-                <ContentCopy sx={{ fontSize: 12 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        );
-      }
-
       return (
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => toggleExpand('root')}
-              sx={{ p: 0.5 }}
-            >
-              {expandedKeys.has('root') ? <ExpandMore /> : <ChevronRight />}
-            </IconButton>
-            <Chip
-              icon={<DataObject />}
-              label={`Object(${keys.length})`}
-              size="small"
-              variant="outlined"
-              sx={{ height: 20, fontSize: '0.75rem' }}
-            />
-            <Tooltip title="Copy Python path">
-              <IconButton
-                size="small"
-                onClick={() => copyToClipboard('')}
-                sx={{ p: 0.25 }}
-              >
-                <ContentCopy sx={{ fontSize: 12 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Collapse in={expandedKeys.has('root')}>
-            <Box sx={{ ml: 2, mt: 1, borderLeft: '2px solid', borderColor: 'divider', pl: 2 }}>
-              {keys.map(key => (
-                <ObjectItem
-                  key={key}
-                  item={parsedData[key]}
-                  keyName={key}
-                  path=""
-                  nestLevel={0}
-                  onToggleExpand={toggleExpand}
-                  expandedKeys={expandedKeys}
-                  onCopy={copyToClipboard}
-                  theme={theme}
-                />
-              ))}
-            </Box>
-          </Collapse>
-        </Box>
+        <LazyObjectRenderer
+          data={parsedData}
+          path=""
+          onToggleExpand={toggleExpand}
+          expandedKeys={expandedKeys}
+          onCopy={copyToClipboard}
+          theme={theme}
+        />
       );
     }
 
@@ -680,7 +747,13 @@ const JsonViewer = ({ data }) => {
           }
         }}
       >
-        {renderContent}
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          renderContent
+        )}
       </Paper>
       
       <Snackbar
@@ -697,50 +770,4 @@ const JsonViewer = ({ data }) => {
   );
 };
 
-// Export the scan function as well
-export const scanForRequests = (code) => {
-  const lines = code.split("\n");
-  const requests = [];
-
-  lines.forEach((line, index) => {
-    const match = line.match(/requests\.(get|post|put|delete|patch)\(([^)]+)\)/);
-
-    if (match) {
-      const [, type, paramContent] = match;
-
-      const stringMatch = paramContent.match(/['"]([^'"]+)['"]/);
-      let url = "Variable used - check definition";
-
-      if (stringMatch) {
-        url = stringMatch[1];
-      } else {
-        const varMatch = paramContent.trim();
-        url = `Variable: ${varMatch}`;
-      }
-
-      requests.push({
-        line: index + 1,
-        url,
-        type: type.toUpperCase(),
-      });
-    }
-
-    if (index > 0) {
-      const prevLine = lines[index - 1];
-      const fStringMatch = prevLine.match(/url\s*=\s*f['"](.*)['"]/);
-      const currentRequestMatch = line.match(/requests\.(get|post|put|delete|patch)\((\w+)\)/);
-
-      if (fStringMatch && currentRequestMatch && currentRequestMatch[2] === 'url') {
-        requests.push({
-          line: index + 1,
-          url: fStringMatch[1],
-          type: currentRequestMatch[1].toUpperCase(),
-        });
-      }
-    }
-  });
-
-  return requests;
-};
-
-export default JsonViewer;
+export default JsonViewerOptimized; 

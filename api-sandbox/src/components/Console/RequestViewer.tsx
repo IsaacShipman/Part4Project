@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, ButtonGroup, 
   Paper, CircularProgress, Stack, useTheme, styled
 } from '@mui/material';
-import JsonViewer from './JsonViewer';
+import JsonViewer from './JsonViewerOptimized';
 import { ApiCall } from '../../types/api';
 
 interface RequestViewerProps {
@@ -13,13 +13,15 @@ interface RequestViewerProps {
 
 // Glassy container with backdrop blur effect
 const GlassyPaper = styled(Paper)(({ theme }) => ({
-  background: 'linear-gradient(135deg, rgba(15, 20, 25, 0.9) 0%, rgba(26, 35, 50, 0.95) 100%)',
+  background: theme.custom.colors.background.gradient,
   backdropFilter: 'blur(20px)',
   WebkitBackdropFilter: 'blur(20px)',
-  border: '1px solid rgba(59, 130, 246, 0.2)',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
   borderRadius: '12px',
   overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+    : '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
   margin: '16px',
   display: 'flex',
   flexDirection: 'column',
@@ -28,8 +30,8 @@ const GlassyPaper = styled(Paper)(({ theme }) => ({
 
 // Header with gradient
 const ViewerHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: '8px 16px',
   position: 'relative',
   '&::after': {
@@ -39,7 +41,7 @@ const ViewerHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   }
 }));
 
@@ -51,7 +53,7 @@ const ViewerContent = styled(Box)(({ theme }) => ({
   maxHeight: '100%',
   padding: '16px',
   scrollbarWidth: 'thin',
-  scrollbarColor: 'rgba(59, 130, 246, 0.3) transparent',
+  scrollbarColor: `${theme.custom.colors.primary}30 transparent`,
   '&::-webkit-scrollbar': {
     width: '8px',
   },
@@ -59,12 +61,12 @@ const ViewerContent = styled(Box)(({ theme }) => ({
     background: 'transparent',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(16, 185, 129, 0.3))',
+    background: `linear-gradient(180deg, ${theme.custom.colors.primary}40, ${theme.custom.colors.accent}30)`,
     borderRadius: '4px',
-    border: '1px solid rgba(59, 130, 246, 0.2)',
+    border: `1px solid ${theme.custom.colors.primary}20`,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(16, 185, 129, 0.4))',
+    background: `linear-gradient(180deg, ${theme.custom.colors.primary}60, ${theme.custom.colors.accent}40)`,
   },
 }));
 
@@ -108,11 +110,11 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
           sx={{ 
             minHeight: 28,
             '.MuiButton-root': {
-              borderColor: 'rgba(59, 130, 246, 0.3)',
-              color: 'rgba(255, 255, 255, 0.8)',
+              borderColor: `${theme.custom.colors.primary}30`,
+              color: theme.custom.colors.text.secondary,
               '&.Mui-selected, &:hover': {
-                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                borderColor: 'rgba(59, 130, 246, 0.5)',
+                backgroundColor: `${theme.custom.colors.primary}20`,
+                borderColor: `${theme.custom.colors.primary}50`,
               }
             }
           }}
@@ -123,9 +125,9 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
             variant={view === 'headers' ? 'contained' : 'outlined'}
             sx={{ 
               px: 1,
-              backgroundColor: view === 'headers' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+              backgroundColor: view === 'headers' ? `${theme.custom.colors.primary}20` : 'transparent',
               '&:hover': {
-                backgroundColor: view === 'headers' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.1)'
+                backgroundColor: view === 'headers' ? `${theme.custom.colors.primary}30` : `${theme.custom.colors.primary}10`
               }
             }}
           >
@@ -136,9 +138,9 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
             variant={view === 'body' ? 'contained' : 'outlined'}
             sx={{ 
               px: 1,
-              backgroundColor: view === 'body' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+              backgroundColor: view === 'body' ? `${theme.custom.colors.primary}20` : 'transparent',
               '&:hover': {
-                backgroundColor: view === 'body' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.1)'
+                backgroundColor: view === 'body' ? `${theme.custom.colors.primary}30` : `${theme.custom.colors.primary}10`
               }
             }}
           >
@@ -156,8 +158,8 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
             spacing={1}
             sx={{
               padding: '12px',
-              background: 'rgba(59, 130, 246, 0.05)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
+              background: `transparent`,
+              border: `1px solid ${theme.custom.colors.primary}20`,
               borderRadius: '8px',
               marginTop: '8px',
             }}
@@ -165,14 +167,14 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
             <CircularProgress 
               size={20} 
               sx={{ 
-                color: '#3b82f6',
-                filter: 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.4))'
+                color: theme.custom.colors.primary,
+                filter: `drop-shadow(0 0 4px ${theme.custom.colors.primary}40)`
               }}
             />
             <Typography 
               variant="body2"
               sx={{ 
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: theme.custom.colors.text.secondary,
                 fontWeight: 500,
               }}
             >
@@ -184,13 +186,11 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
             sx={{
               height: '100%',
               overflow: 'auto',
-              background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(15, 20, 25, 0.4) 100%)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              borderLeft: '3px solid rgba(59, 130, 246, 0.6)',
+              background: 'transparent',
               borderRadius: '0 8px 8px 0',
               padding: '12px',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
               boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             }}
           >
@@ -204,7 +204,7 @@ const RequestViewer: React.FC<RequestViewerProps> = ({ loading, selectedApiCall 
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden',
-              color: 'rgba(255, 255, 255, 0.6)',
+              color: theme.custom.colors.text.muted,
             }}
           >
             <Typography 

@@ -139,7 +139,15 @@ const loadNodeStateFromStorage = (): NodeState => {
   }
 };
 
-const initialState: NodeState = loadNodeStateFromStorage();
+const initialState: NodeState = {
+  configurations: {},
+  testResults: {},
+  validationErrors: {},
+  connections: []
+};
+
+// Flag to control localStorage persistence
+let shouldPersistToStorage = false;
 
 const nodeStateReducer = (state: NodeState, action: NodeAction): NodeState => {
   let newState: NodeState;
@@ -290,8 +298,10 @@ const nodeStateReducer = (state: NodeState, action: NodeAction): NodeState => {
       return state;
   }
 
-  // Save to localStorage after every state change
-  saveNodeStateToStorage(newState);
+  // Save to localStorage after every state change (only if persistence is enabled)
+  if (shouldPersistToStorage) {
+    saveNodeStateToStorage(newState);
+  }
   return newState;
 };
 
@@ -305,6 +315,8 @@ interface NodeStateContextType {
   getAvailableInputs: (nodeId: string) => { [sourceNodeId: string]: string[] };
   getInputData: (nodeId: string) => { [sourceNodeId: string]: any };
   getConnectedInputNodes: (nodeId: string) => NodeConfiguration[];
+  enablePersistence: () => void;
+  disablePersistence: () => void;
 }
 
 const NodeStateContext = createContext<NodeStateContextType | undefined>(undefined);
@@ -397,6 +409,14 @@ console.log('Filtered result:', extractSelectedFields(sourceNodeResult.response,
     return connectedNodes;
   };
 
+  const enablePersistence = () => {
+    shouldPersistToStorage = true;
+  };
+
+  const disablePersistence = () => {
+    shouldPersistToStorage = false;
+  };
+
   const contextValue: NodeStateContextType = {
     state,
     dispatch,
@@ -406,7 +426,9 @@ console.log('Filtered result:', extractSelectedFields(sourceNodeResult.response,
     hasValidationErrors,
     getAvailableInputs,
     getInputData,
-    getConnectedInputNodes
+    getConnectedInputNodes,
+    enablePersistence,
+    disablePersistence
   };
 
   return (

@@ -1,44 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { CssBaseline, ThemeProvider, AppBar, Toolbar, Typography, IconButton, Box, Button, Stack, Avatar } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
-import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon, Science as ScienceIcon, Search as SearchIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
+import { CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Button, Stack, Avatar } from '@mui/material';
+import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon, Science as ScienceIcon, Search as SearchIcon, Notifications as NotificationsIcon, Visibility as VisibilityIcon, Api as ApiIcon } from '@mui/icons-material';
 // Import view components
 import MainView from './pages/MainView';
 import SecurityScanView from './pages/SecurityScanView';
 import APIRequestViewer from './pages/APIRequestViewer';
 import APIVisualiser from './pages/APIVisualiser';
-
-// Custom theme with dark colors inspired by the screenshots
-const modernTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#4A90E2',
-      light: '#6BA3F0',
-      dark: '#2E5A9E'
-    },
-    secondary: {
-      main: '#00D4AA',
-      light: '#33E0BB',
-      dark: '#00A388'
-    },
-    background: {
-      default: '#0D1421',
-      paper: '#1E2A3A'
-    },
-    text: {
-      primary: '#FFFFFF',
-      secondary: '#B0BEC5'
-    }
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    fontWeightLight: 300,
-    fontWeightRegular: 400,
-    fontWeightMedium: 500,
-    fontWeightBold: 700
-  }
-});
+// Import theme components
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeToggle from './components/ThemeToggle';
 
 // Animated background component
 const AnimatedBackground = () => {
@@ -52,7 +22,7 @@ const AnimatedBackground = () => {
         bottom: 0,
         overflow: 'hidden',
         zIndex: -1,
-        background: 'linear-gradient(135deg, #0D1421 0%, #1A2332 50%, #0F1B2A 100%)',
+        background: (theme) => theme.custom.colors.background.gradient,
         '&::before, &::after': {
           content: '""',
           position: 'absolute',
@@ -64,7 +34,7 @@ const AnimatedBackground = () => {
         '&::before': {
           width: '300px',
           height: '300px',
-          background: 'radial-gradient(circle, rgba(0, 212, 170, 0.3) 0%, rgba(0, 212, 170, 0.1) 50%, transparent 100%)',
+          background: (theme) => `radial-gradient(circle, ${theme.custom.colors.accent}30 0%, ${theme.custom.colors.accent}10 50%, transparent 100%)`,
           top: '-150px',
           left: '20%',
           animationDelay: '0s'
@@ -72,7 +42,7 @@ const AnimatedBackground = () => {
         '&::after': {
           width: '200px',
           height: '200px',
-          background: 'radial-gradient(circle, rgba(74, 144, 226, 0.4) 0%, rgba(74, 144, 226, 0.1) 50%, transparent 100%)',
+          background: (theme) => `radial-gradient(circle, ${theme.custom.colors.primary}40 0%, ${theme.custom.colors.primary}10 50%, transparent 100%)`,
           top: '-100px',
           right: '30%',
           animationDelay: '3s'
@@ -92,15 +62,15 @@ function App() {
   const [currentView, setCurrentView] = useState('main');
 
   return (
-    <ThemeProvider theme={modernTheme}>
+    <ThemeProvider>
       <CssBaseline />
       <AppBar 
         position="fixed" 
         elevation={0}
         sx={{
-          background: 'rgba(13, 20, 33, 0.95)',
+          background: (theme) => `${theme.custom.colors.background.primary}95`,
           backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          borderBottom: (theme) => `1px solid ${theme.custom.colors.border.primary}`,
           zIndex: 1200 // Ensure AppBar stays on top
         }}
       >
@@ -118,12 +88,12 @@ function App() {
                 width: 48,
                 height: 48,
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #4A90E2 0%, #00D4AA 100%)',
+                background: (theme) => `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.accent} 100%)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 mr: 2,
-                boxShadow: '0 8px 32px rgba(74, 144, 226, 0.3)'
+                boxShadow: (theme) => `0 8px 32px ${theme.custom.colors.primary}30`
               }}
             >
               <ScienceIcon sx={{ fontSize: 28, color: 'white' }} />
@@ -133,7 +103,7 @@ function App() {
                 variant="h5" 
                 sx={{ 
                   fontWeight: 700,
-                  background: 'linear-gradient(135deg, #FFFFFF 0%, #B0BEC5 100%)',
+                  background: (theme) => `linear-gradient(135deg, ${theme.custom.colors.text.primary} 0%, ${theme.custom.colors.text.secondary} 100%)`,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -150,20 +120,23 @@ function App() {
           <Box
             sx={{
               display: 'flex',
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: (theme) => `${theme.custom.colors.background.tertiary}50`,
               borderRadius: '16px',
               padding: '4px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)'
+              border: (theme) => `1px solid ${theme.custom.colors.border.primary}`,
+              backdropFilter: 'blur(10px)',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)'
             }}
           >
             <Button 
               startIcon={<CodeIcon />}
               onClick={() => setCurrentView('main')}
               sx={{ 
-                color: currentView === 'main' ? '#FFFFFF' : '#B0BEC5',
-                background: currentView === 'main' 
-                  ? 'linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)' 
+                color: (theme) => currentView === 'main' ? theme.custom.colors.text.primary : theme.custom.colors.text.secondary,
+                background: (theme) => currentView === 'main' 
+                  ? `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.info} 100%)` 
                   : 'transparent',
                 borderRadius: '12px',
                 padding: '8px 20px',
@@ -171,17 +144,17 @@ function App() {
                 fontSize: '0.875rem',
                 textTransform: 'none',
                 minWidth: '120px',
-                boxShadow: currentView === 'main' 
-                  ? '0 4px 20px rgba(74, 144, 226, 0.4)' 
+                boxShadow: (theme) => currentView === 'main' 
+                  ? `0 4px 20px ${theme.custom.colors.primary}40` 
                   : 'none',
                 '&:hover': { 
-                  background: currentView === 'main'
-                    ? 'linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)'
-                    : 'rgba(255, 255, 255, 0.1)',
+                  background: (theme) => currentView === 'main'
+                    ? `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.info} 100%)`
+                    : `${theme.custom.colors.background.tertiary}50`,
                   transform: 'translateY(-1px)',
-                  boxShadow: currentView === 'main' 
-                    ? '0 6px 25px rgba(74, 144, 226, 0.5)' 
-                    : '0 2px 10px rgba(255, 255, 255, 0.1)'
+                  boxShadow: (theme) => currentView === 'main' 
+                    ? `0 6px 25px ${theme.custom.colors.primary}50` 
+                    : `0 2px 10px ${theme.custom.colors.border.primary}`
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -192,9 +165,9 @@ function App() {
               startIcon={<SecurityIcon />}
               onClick={() => setCurrentView('security')}
               sx={{ 
-                color: currentView === 'security' ? '#FFFFFF' : '#B0BEC5',
-                background: currentView === 'security' 
-                  ? 'linear-gradient(135deg, #00D4AA 0%, #33E0BB 100%)' 
+                color: (theme) => currentView === 'security' ? theme.custom.colors.text.primary : theme.custom.colors.text.secondary,
+                background: (theme) => currentView === 'security' 
+                  ? `linear-gradient(135deg, ${theme.custom.colors.accent} 0%, ${theme.custom.colors.success} 100%)` 
                   : 'transparent',
                 borderRadius: '12px',
                 padding: '8px 20px',
@@ -202,30 +175,30 @@ function App() {
                 fontSize: '0.875rem',
                 textTransform: 'none',
                 minWidth: '120px',
-                boxShadow: currentView === 'security' 
-                  ? '0 4px 20px rgba(0, 212, 170, 0.4)' 
+                boxShadow: (theme) => currentView === 'security' 
+                  ? `0 4px 20px ${theme.custom.colors.accent}40` 
                   : 'none',
                 '&:hover': { 
-                  background: currentView === 'security'
-                    ? 'linear-gradient(135deg, #00D4AA 0%, #33E0BB 100%)'
-                    : 'rgba(255, 255, 255, 0.1)',
+                  background: (theme) => currentView === 'security'
+                    ? `linear-gradient(135deg, ${theme.custom.colors.accent} 0%, ${theme.custom.colors.success} 100%)`
+                    : `${theme.custom.colors.background.tertiary}50`,
                   transform: 'translateY(-1px)',
-                  boxShadow: currentView === 'security' 
-                    ? '0 6px 25px rgba(0, 212, 170, 0.5)' 
-                    : '0 2px 10px rgba(255, 255, 255, 0.1)'
+                  boxShadow: (theme) => currentView === 'security' 
+                    ? `0 6px 25px ${theme.custom.colors.accent}50` 
+                    : `0 2px 10px ${theme.custom.colors.border.primary}`
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               Security
             </Button>
-                 <Button 
-              startIcon={<SecurityIcon />}
+            <Button 
+              startIcon={<VisibilityIcon />}
               onClick={() => setCurrentView('APIViewer')}
               sx={{ 
-                color: currentView === 'APIViewer' ? '#FFFFFF' : '#B0BEC5',
-                background: currentView === 'APIViewer' 
-                  ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
+                color: (theme) => currentView === 'APIViewer' ? theme.custom.colors.text.primary : theme.custom.colors.text.secondary,
+                background: (theme) => currentView === 'APIViewer' 
+                  ? `linear-gradient(135deg, ${theme.custom.colors.warning} 0%, ${theme.custom.colors.error} 100%)` 
                   : 'transparent',
                 borderRadius: '12px',
                 padding: '8px 20px',
@@ -233,17 +206,17 @@ function App() {
                 fontSize: '0.875rem',
                 textTransform: 'none',
                 minWidth: '120px',
-                boxShadow: currentView === 'APIViewer' 
-                  ? '0 4px 20px rgba(0, 212, 170, 0.4)' 
+                boxShadow: (theme) => currentView === 'APIViewer' 
+                  ? `0 4px 20px ${theme.custom.colors.warning}40` 
                   : 'none',
                 '&:hover': { 
-                  background: currentView === 'APIViewer'
-                    ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
-                  : 'rgba(255, 255, 255, 0.1)',
+                  background: (theme) => currentView === 'APIViewer'
+                    ? `linear-gradient(135deg, ${theme.custom.colors.warning} 0%, ${theme.custom.colors.error} 100%)` 
+                    : `${theme.custom.colors.background.tertiary}50`,
                   transform: 'translateY(-1px)',
-                  boxShadow: currentView === 'APIViewer' 
-                    ? '0 6px 25px rgba(0, 212, 170, 0.5)' 
-                    : '0 2px 10px rgba(255, 255, 255, 0.1)'
+                  boxShadow: (theme) => currentView === 'APIViewer' 
+                    ? `0 6px 25px ${theme.custom.colors.warning}50` 
+                    : `0 2px 10px ${theme.custom.colors.border.primary}`
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -251,12 +224,12 @@ function App() {
               API Viewer
             </Button>
             <Button 
-              startIcon={<SecurityIcon />}
+              startIcon={<ApiIcon />}
               onClick={() => setCurrentView('APIVisualiser')}
               sx={{ 
-                color: currentView === 'APIVisualiser' ? '#FFFFFF' : '#B0BEC5',
-                background: currentView === 'APIVisualiser' 
-                  ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
+                color: (theme) => currentView === 'APIVisualiser' ? theme.custom.colors.text.primary : theme.custom.colors.text.secondary,
+                background: (theme) => currentView === 'APIVisualiser' 
+                  ? `linear-gradient(135deg, ${theme.custom.colors.secondary} 0%, ${theme.custom.colors.accent} 100%)` 
                   : 'transparent',
                 borderRadius: '12px',
                 padding: '8px 20px',
@@ -264,17 +237,17 @@ function App() {
                 fontSize: '0.875rem',
                 textTransform: 'none',
                 minWidth: '120px',
-                boxShadow: currentView === 'APIVisualiser' 
-                  ? '0 4px 20px rgba(0, 212, 170, 0.4)' 
+                boxShadow: (theme) => currentView === 'APIVisualiser' 
+                  ? `0 4px 20px ${theme.custom.colors.secondary}40` 
                   : 'none',
                 '&:hover': { 
-                  background: currentView === 'APIVisualiser'
-                    ? 'linear-gradient(135deg,rgb(116, 51, 90) 0%,rgb(164, 58, 240) 100%)' 
-                  : 'rgba(255, 255, 255, 0.1)',
+                  background: (theme) => currentView === 'APIVisualiser'
+                    ? `linear-gradient(135deg, ${theme.custom.colors.secondary} 0%, ${theme.custom.colors.accent} 100%)` 
+                    : `${theme.custom.colors.background.tertiary}50`,
                   transform: 'translateY(-1px)',
-                  boxShadow: currentView === 'APIVisualiser' 
-                    ? '0 6px 25px rgba(0, 212, 170, 0.5)' 
-                    : '0 2px 10px rgba(255, 255, 255, 0.1)'
+                  boxShadow: (theme) => currentView === 'APIVisualiser' 
+                    ? `0 6px 25px ${theme.custom.colors.secondary}50` 
+                    : `0 2px 10px ${theme.custom.colors.border.primary}`
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -285,21 +258,22 @@ function App() {
 
           {/* Right section with action buttons and user info */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-       
-
+            {/* Theme Toggle */}
+            <ThemeToggle size="medium" />
+            
             {/* User Avatar */}
             <Avatar
               sx={{
                 width: 44,
                 height: 44,
-                background: 'linear-gradient(135deg, #00D4AA 0%, #4A90E2 100%)',
+                background: (theme) => `linear-gradient(135deg, ${theme.custom.colors.accent} 0%, ${theme.custom.colors.primary} 100%)`,
                 fontSize: '1.1rem',
                 fontWeight: 600,
-                boxShadow: '0 4px 20px rgba(0, 212, 170, 0.3)',
+                boxShadow: (theme) => `0 4px 20px ${theme.custom.colors.accent}30`,
                 cursor: 'pointer',
                 '&:hover': {
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 6px 25px rgba(0, 212, 170, 0.4)'
+                  boxShadow: (theme) => `0 6px 25px ${theme.custom.colors.accent}40`
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -309,7 +283,6 @@ function App() {
           </Box>
         </Toolbar>
       </AppBar>
-
 
       {/* Render the appropriate view based on currentView state */}
       <Box sx={{ width: '100%', height: '100%' }}>

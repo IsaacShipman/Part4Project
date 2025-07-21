@@ -26,14 +26,13 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Add, AccountTree, Api, Transform, Clear, Code } from '@mui/icons-material';
-import EndpointPanel from '../components/API-Visualiser/EndpointPanel';
 import NodeConfigurationPanel from '../components/API-Visualiser/NodeConfigurationPanel';
 import DataProcessingConfigPanel from '../components/API-Visualiser/DataProcessingConfigPanel';
 import CodeGenerationPanel from '../components/API-Visualiser/CodeGenerationPanel';
 import { DraggableFolderStructure } from '../components/API-Visualiser/DraggableFolderStructure';
 import { NodeStateProvider, useNodeState } from '../contexts/NodeStateContext';
-import { saveFlowState, loadFlowState, clearFlowState, clearNodeState } from '../utils/localStorageUtils';
-import { containerStyles, glassCardStyles } from '../styles/containerStyles';
+import { saveFlowState, clearFlowState, clearNodeState, clearAllAPIVisualizerStorage } from '../utils/localStorageUtils';
+import { getMethodColor } from '../utils/methodTypes';
 
 // Custom styled components using the app's styling patterns
 const FlowContainer = styled(Box)(({ theme }) => ({
@@ -44,16 +43,13 @@ const FlowContainer = styled(Box)(({ theme }) => ({
   marginTop: '65px',
   overflow: 'hidden',
   position: 'relative',
-  background: `
-    radial-gradient(circle at 20% 80%, rgba(6, 78, 59, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(5, 46, 22, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(7, 25, 82, 0.9) 100%)
-  `,
+  background: theme.custom.colors.background.gradient,
   backdropFilter: 'blur(20px)',
   borderRadius: '16px',
-  border: '1px solid rgba(71, 85, 105, 0.3)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -61,13 +57,21 @@ const FlowContainer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, rgba(6, 95, 70, 0.08) 0%, transparent 30%),
-      radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%)
-    `,
+    background: theme.palette.mode === 'dark'
+      ? `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}05 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}08 0%, transparent 30%),
+        radial-gradient(circle at 20% 50%, ${theme.custom.colors.primary}10 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, ${theme.custom.colors.accent}10 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, ${theme.palette.secondary.main}05 0%, transparent 50%)
+      `
+      : `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}03 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}05 0%, transparent 30%),
+        radial-gradient(circle at 20% 50%, ${theme.custom.colors.primary}05 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, ${theme.custom.colors.accent}05 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, ${theme.palette.secondary.main}03 0%, transparent 50%)
+      `,
     borderRadius: '16px',
     pointerEvents: 'none',
     zIndex: 1,
@@ -84,13 +88,18 @@ const Sidebar = styled(Paper)(({ theme }) => ({
   top: 20,
   left: 20,
   bottom: 20,
-  width: 320,
+  width: 370,
   zIndex: 1000,
-  ...glassCardStyles,
   display: 'flex',
   flexDirection: 'column',
+  background: theme.custom.colors.background.gradient,
+  backdropFilter: 'blur(20px)',
+  borderRadius: '16px',
+  border: `1px solid ${theme.custom.colors.border.primary}`,
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
   overflow: 'hidden',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -98,19 +107,24 @@ const Sidebar = styled(Paper)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, rgba(6, 95, 70, 0.08) 0%, transparent 30%)
-    `,
-    borderRadius: '12px',
+    background: theme.palette.mode === 'dark'
+      ? `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}05 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}08 0%, transparent 30%)
+      `
+      : `
+        radial-gradient(circle at 60% 60%, ${theme.custom.colors.accent}03 0%, transparent 40%),
+        radial-gradient(circle at 30% 90%, ${theme.custom.colors.accent}05 0%, transparent 30%)
+      `,
+    borderRadius: '16px',
     pointerEvents: 'none',
     zIndex: 1,
   }
 }));
 
 const SidebarHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-  borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: '12px 16px',
   display: 'flex',
   alignItems: 'center',
@@ -124,7 +138,7 @@ const SidebarHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)',
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   }
 }));
 
@@ -141,88 +155,80 @@ const NodeButton = styled(Button)(({ theme }) => ({
   width: '100%',
   marginBottom: theme.spacing(1.5),
   padding: theme.spacing(1.5, 2),
-  background: 'rgba(30, 41, 59, 0.6)',
+  background: `
+  radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+  linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+`,
   backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(148, 163, 184, 0.2)',
+  border: `1px solid ${theme.custom.colors.border.secondary}`,
   borderRadius: '12px',
-  color: '#e2e8f0',
+  color: theme.custom.colors.text.primary,
   fontWeight: 600,
   fontSize: '0.875rem',
   textTransform: 'none',
   transition: 'all 0.2s ease',
   '&:hover': {
-    background: 'rgba(59, 130, 246, 0.15)',
-    border: '1px solid rgba(59, 130, 246, 0.4)',
+    border: `1px solid ${theme.custom.colors.primary}40`,
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+    boxShadow: `0 4px 12px ${theme.custom.colors.primary}20`,
   },
   '& .MuiButton-startIcon': {
-    color: 'rgba(59, 130, 246, 0.8)',
+    color: theme.custom.colors.primary,
   }
 }));
 
 const ActionButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1, 2),
-  background: 'rgba(239, 68, 68, 0.1)',
-  border: '1px solid rgba(239, 68, 68, 0.3)',
+  background: `${theme.palette.error.main}10`,
+  border: `1px solid ${theme.palette.error.main}30`,
   borderRadius: '8px',
-  color: '#fca5a5',
+  color: theme.palette.error.main,
   fontWeight: 600,
   fontSize: '0.8rem',
   textTransform: 'none',
   transition: 'all 0.2s ease',
   '&:hover': {
-    background: 'rgba(239, 68, 68, 0.2)',
-    border: '1px solid rgba(239, 68, 68, 0.5)',
+    border: `1px solid ${theme.palette.error.main}50`,
     transform: 'translateY(-1px)',
   },
   '& .MuiButton-startIcon': {
-    color: '#fca5a5',
+    color: theme.palette.error.main,
   }
 }));
 
-const FlowCanvas = styled(Box)({
+const FlowCanvas = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '95vh',
   '& .react-flow__background': {
     backgroundColor: 'transparent',
   },
   '& .react-flow__controls': {
-    background: 'rgba(30, 41, 59, 0.95)',
+    background: theme.custom.colors.background.tertiary,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.2)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     borderRadius: '12px',
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
   },
   '& .react-flow__controls button': {
     background: 'transparent',
     border: 'none',
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     transition: 'all 0.2s ease',
     '&:hover': {
-      background: 'rgba(148, 163, 184, 0.1)',
+      background: theme.custom.colors.background.secondary,
       transform: 'scale(1.05)',
     },
   },
   '& .react-flow__minimap': {
-    background: 'rgba(30, 41, 59, 0.95)',
+    background: theme.custom.colors.background.tertiary,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.2)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     borderRadius: '12px',
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
   },
-});
+}));
 
-// Node types
-const nodeTypes = {
-  apiEndpoint: 'API Endpoint',
-  dataProcessor: 'Data Processor',
-  database: 'Database',
-  service: 'Service',
-};
 
-// Load initial state from localStorage
-const { nodes: initialNodes, edges: initialEdges } = loadFlowState();
 
 // Generate unique IDs based on timestamp and random number to avoid conflicts
 const getId = () => `node_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -230,14 +236,32 @@ const getId = () => `node_${Date.now()}_${Math.random().toString(36).substring(2
 const APIVisualiser: React.FC = () => {
   const theme = useTheme();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [panelType, setPanelType] = useState<'endpoint' | 'dataProcessing' | null>(null);
   const [showCodePanel, setShowCodePanel] = useState(false);
-  const { dispatch } = useNodeState();
+  const { dispatch, enablePersistence, disablePersistence } = useNodeState();
+
+  // Clear storage only on first load of the session
+  useEffect(() => {
+    const hasInitialized = sessionStorage.getItem('api-visualizer-initialized');
+    if (!hasInitialized) {
+      // Disable persistence during initialization
+      disablePersistence();
+      // Clear all storage on app startup
+      clearAllAPIVisualizerStorage();
+      dispatch({ type: 'CLEAR_ALL_NODES' });
+      sessionStorage.setItem('api-visualizer-initialized', 'true');
+      // Re-enable persistence after initialization
+      setTimeout(() => enablePersistence(), 100);
+    } else {
+      // Enable persistence for subsequent loads
+      enablePersistence();
+    }
+  }, [dispatch, enablePersistence, disablePersistence]);
 
   // Save flow state whenever nodes or edges change
   useEffect(() => {
@@ -300,6 +324,35 @@ const APIVisualiser: React.FC = () => {
 
   const { state } = useNodeState();
 
+  // Update node styles based on connection status
+  const updateNodeStyles = useCallback(() => {
+    setNodes(currentNodes => currentNodes.map(node => {
+      const hasData = state.testResults[node.id]?.success;
+      
+      // Get method from node data for API endpoints
+      const method = node.data.method || node.data.endpoint?.method;
+      const borderColor = getNodeBorderColor(node.data.label, method);
+      const backgroundColor = getNodeColor(node.data.label, method);
+      
+      return {
+        ...node,
+        style: {
+          ...node.style,
+          border: `2px solid ${borderColor}`,
+          backgroundColor: backgroundColor,
+          boxShadow: hasData 
+            ? `0 0 10px ${theme.palette.success.main}40` 
+            : `0 4px 12px ${borderColor}30`,
+          wordBreak: 'break-word' as const,
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }
+      };
+    }));
+  }, [theme, state.testResults]);
+
   // Clean up orphaned node state when nodes are removed
   useEffect(() => {
     const existingNodeIds = new Set(nodes.map(node => node.id));
@@ -314,38 +367,10 @@ const APIVisualiser: React.FC = () => {
     });
   }, [nodes, state.configurations, dispatch]);
 
-  // Update node styles based on connection status
-  const updateNodeStyles = useCallback(() => {
-    setNodes(currentNodes => currentNodes.map(node => {
-      const hasIncomingConnection = state.connections.some(conn => conn.targetNodeId === node.id);
-      const hasOutgoingConnection = state.connections.some(conn => conn.sourceNodeId === node.id);
-      const hasData = state.testResults[node.id]?.success;
-      
-      let borderColor = getNodeBorderColor(node.data.label);
-      let backgroundColor = getNodeColor(node.data.label);
-      
-      // Add visual indicators for connection status
-      if (hasIncomingConnection) {
-        borderColor = `${borderColor}CC`; // More transparent
-      }
-      if (hasOutgoingConnection) {
-        backgroundColor = `${backgroundColor}EE`; // Slightly lighter
-      }
-      if (hasData) {
-        borderColor = theme.palette.success.main;
-      }
-      
-      return {
-        ...node,
-        style: {
-          ...node.style,
-          border: `2px solid ${borderColor}`,
-          backgroundColor: backgroundColor,
-          boxShadow: hasData ? `0 0 10px ${theme.palette.success.main}40` : 'none'
-        }
-      };
-    }));
-  }, [theme, state.connections, state.testResults]);
+  // Update node styles when state changes
+  useEffect(() => {
+    updateNodeStyles();
+  }, [updateNodeStyles, state.testResults]);
 
   const handleClosePanel = useCallback(() => {
     setShowConfigPanel(false);
@@ -381,20 +406,44 @@ const APIVisualiser: React.FC = () => {
         
         if (parsedData.type === 'apiEndpoint' && parsedData.endpoint) {
           // Create node from endpoint data
+          const method = parsedData.endpoint.method;
+          const path = parsedData.endpoint.path;
+          
+          // Truncate path if too long
+          const maxPathLength = 40;
+          const displayPath = path.length > maxPathLength 
+            ? path.substring(0, maxPathLength) + '...' 
+            : path;
+          
           newNode = {
             id: getId(),
             type: 'default',
             position,
             data: { 
-              label: `${parsedData.endpoint.method} ${parsedData.endpoint.path}`,
-              endpoint: parsedData.endpoint
+              label: `${method} ${displayPath}`,
+              endpoint: parsedData.endpoint,
+              method: method,
+              fullPath: path
             },
             style: {
-              background: getNodeColor('API Endpoint'),
-              color: '#e0e0e0',
-              border: `1px solid ${getNodeBorderColor('API Endpoint')}`,
-              borderRadius: '8px',
-              padding: '10px',
+              background: getNodeColor('API Endpoint', method),
+              color: '#ffffff',
+              border: `2px solid ${getNodeBorderColor('API Endpoint', method)}`,
+              borderRadius: '12px',
+              padding: '12px 16px',
+              minWidth: '200px',
+              maxWidth: '300px',
+              boxShadow: `0 4px 12px ${getNodeBorderColor('API Endpoint', method)}30`,
+              backdropFilter: 'blur(8px)',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              textAlign: 'center',
+              wordBreak: 'break-word' as const,
+              lineHeight: '1.3',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '60px',
             },
           };
         } else {
@@ -409,10 +458,23 @@ const APIVisualiser: React.FC = () => {
           data: { label: `${dragData}` },
           style: {
             background: getNodeColor(dragData),
-            color: '#e0e0e0',
-            border: `1px solid ${getNodeBorderColor(dragData)}`,
-            borderRadius: '8px',
-            padding: '10px',
+            color: '#ffffff',
+            border: `2px solid ${getNodeBorderColor(dragData)}`,
+            borderRadius: '12px',
+            padding: '12px 16px',
+            minWidth: '150px',
+            maxWidth: '250px',
+            boxShadow: `0 4px 12px ${getNodeBorderColor(dragData)}30`,
+            backdropFilter: 'blur(8px)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            textAlign: 'center',
+            wordBreak: 'break-word' as const,
+            lineHeight: '1.3',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '50px',
           },
         };
       }
@@ -422,10 +484,20 @@ const APIVisualiser: React.FC = () => {
     [reactFlowInstance, setNodes]
   );
 
-  const getNodeColor = (type: string) => {
+  const getNodeColor = (type: string, method?: string) => {
+    // For API Endpoints, use the method color
+    if (type === 'API Endpoint' || type?.includes('API Endpoint')) {
+      if (method) {
+        const methodStyle = getMethodColor(method);
+        // Convert the color to a more opaque background for nodes
+        const color = methodStyle.color;
+        return `${color}20`; // 20% opacity
+      }
+      // Fallback for API endpoints without method
+      return 'rgba(59, 130, 246, 0.2)'; // Blue fallback
+    }
+    
     switch (type) {
-      case 'API Endpoint':
-        return 'rgba(27, 77, 62, 0.9)';
       case 'Data Processor':
         return 'rgba(62, 31, 62, 0.9)';
       case 'Database':
@@ -437,10 +509,18 @@ const APIVisualiser: React.FC = () => {
     }
   };
 
-  const getNodeBorderColor = (type: string) => {
+  const getNodeBorderColor = (type: string, method?: string) => {
+    // For API Endpoints, use the method color
+    if (type === 'API Endpoint' || type?.includes('API Endpoint')) {
+      if (method) {
+        const methodStyle = getMethodColor(method);
+        return methodStyle.color;
+      }
+      // Fallback for API endpoints without method
+      return '#60a5fa'; // Blue fallback
+    }
+    
     switch (type) {
-      case 'API Endpoint':
-        return '#66bb6a';
       case 'Data Processor':
         return '#f48fb1';
       case 'Database':
@@ -456,35 +536,29 @@ const APIVisualiser: React.FC = () => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
-
-  const addRandomNode = () => {
-    const types = Object.values(nodeTypes);
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    const newNode: Node = {
-      id: getId(),
-      type: 'default',
-      position: { 
-        x: Math.random() * 500 + 100, 
-        y: Math.random() * 300 + 100 
-      },
-      data: { label: randomType },
-      style: {
-        background: getNodeColor(randomType),
-        color: '#e0e0e0',
-        border: `1px solid ${getNodeBorderColor(randomType)}`,
-        borderRadius: '8px',
-        padding: '10px',
-      },
-    };
-    setNodes((nds) => nds.concat(newNode));
-  };
-
+  
   const clearAll = () => {
+    // Disable persistence during clear
+    disablePersistence();
+    
+    // Clear ReactFlow state
     setNodes([]);
     setEdges([]);
-    clearFlowState(); // Also clear from localStorage
-    clearNodeState(); // Clear node state from localStorage
-    dispatch({ type: 'CLEAR_ALL_NODES' }); // Clear node state from context
+    
+    // Clear all storage (localStorage and sessionStorage)
+    clearAllAPIVisualizerStorage();
+    
+    // Clear node state from context
+    dispatch({ type: 'CLEAR_ALL_NODES' });
+    
+    // Re-enable persistence after clear
+    setTimeout(() => enablePersistence(), 100);
+    
+    // Force a re-render by updating the state
+    setTimeout(() => {
+      setNodes([]);
+      setEdges([]);
+    }, 0);
   };
 
   const handleGenerateCode = () => {
@@ -496,9 +570,9 @@ const APIVisualiser: React.FC = () => {
       <Sidebar elevation={0}>
         <SidebarHeader>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Api sx={{ color: 'rgba(59, 130, 246, 0.8)', fontSize: 20 }} />
+            <Api sx={{ color: theme.custom.colors.primary, fontSize: 20 }} />
             <Typography variant="subtitle2" sx={{ 
-              color: 'rgba(255, 255, 255, 0.9)', 
+              color: theme.custom.colors.text.primary, 
               fontWeight: '600', 
               fontSize: '0.9rem',
               textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
@@ -514,7 +588,7 @@ const APIVisualiser: React.FC = () => {
             
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle2" sx={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+                color: theme.custom.colors.text.primary, 
                 fontWeight: '600', 
                 mb: 2,
                 fontSize: '0.85rem'
@@ -547,15 +621,15 @@ const APIVisualiser: React.FC = () => {
                   onClick={handleGenerateCode}
                   startIcon={<Code />}
                   sx={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    color: '#93c5fd',
+                    background: `${theme.custom.colors.primary}10`,
+                    border: `1px solid ${theme.custom.colors.primary}30`,
+                    color: theme.custom.colors.primary,
                     '&:hover': {
-                      background: 'rgba(59, 130, 246, 0.2)',
-                      border: '1px solid rgba(59, 130, 246, 0.5)',
+                      background: `${theme.custom.colors.primary}20`,
+                      border: `1px solid ${theme.custom.colors.primary}50`,
                     },
                     '& .MuiButton-startIcon': {
-                      color: '#93c5fd',
+                      color: theme.custom.colors.primary,
                     }
                   }}
                 >
@@ -586,7 +660,7 @@ const APIVisualiser: React.FC = () => {
             variant={BackgroundVariant.Dots} 
             gap={20} 
             size={1} 
-            color={alpha(theme.palette.text.secondary, 0.3)}
+            color={alpha(theme.custom.colors.text.muted, 0.3)}
           />
         </ReactFlow>
       </FlowCanvas>

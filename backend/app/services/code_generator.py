@@ -127,16 +127,66 @@ GITHUB_API_BASE = "https://api.github.com"
         if not selected_fields:
             return "data = response_data"
         
-        # For now, just take the first selected field for simplicity
-        # In a more advanced version, you could handle multiple fields
-        field_path = selected_fields[0]
+        # If only one field is selected, use simple bracket notation
+        if len(selected_fields) == 1:
+            field_path = selected_fields[0]
+            bracket_access = WorkflowCodeGenerator._convert_field_path_to_bracket_notation(field_path)
+            return f"data = {input_var}{bracket_access}"
         
-        # Convert field path to bracket notation
-        # e.g., "id" -> ["id"], "owner.login" -> ["owner"]["login"]
-        field_parts = field_path.split('.')
-        bracket_access = ''.join([f'["{part}"]' for part in field_parts])
+        # If multiple fields are selected, create a dictionary
+        code_parts = []
+        code_parts.append("# Extract selected fields into a dictionary")
+        code_parts.append("data = {}")
         
-        return f"data = {input_var}{bracket_access}"
+        for field_path in selected_fields:
+            bracket_access = WorkflowCodeGenerator._convert_field_path_to_bracket_notation(field_path)
+            
+            # Create a safe field name for the dictionary key
+            # Replace dots with underscores and handle special characters
+            safe_field_name = field_path.replace('.', '_').replace('-', '_').replace(' ', '_').replace('[', '_').replace(']', '_')
+            
+            # Add try-except to handle missing fields gracefully
+            code_parts.append(f"data['{safe_field_name}'] = {input_var}{bracket_access}")
+        
+        return "\n".join(code_parts)
+    
+    @staticmethod
+    def _convert_field_path_to_bracket_notation(field_path: str) -> str:
+        """Convert a field path to Python bracket notation, handling array indices."""
+        # Split by dots and brackets, but preserve the brackets
+        import re
+        parts = re.split(r'([.\[\]])', field_path)
+        parts = [part for part in parts if part]  # Remove empty strings
+        
+        bracket_access = ""
+        i = 0
+        while i < len(parts):
+            part = parts[i]
+            
+            if part == '.':
+                # Skip the dot, next part is a field name
+                i += 1
+                if i < len(parts):
+                    field_name = parts[i]
+                    bracket_access += f'["{field_name}"]'
+            elif part == '[':
+                # Next part is an array index
+                i += 1
+                if i < len(parts):
+                    index = parts[i]
+                    bracket_access += f'[{index}]'
+                    # Skip the closing bracket
+                    i += 1
+            elif part == ']':
+                # Skip closing bracket
+                pass
+            else:
+                # This is a field name (first part or after a dot)
+                bracket_access += f'["{part}"]'
+            
+            i += 1
+        
+        return bracket_access
     
     @staticmethod
     def generate_data_processing_code(node_config: Dict[str, Any], step_number: int) -> str:
@@ -232,23 +282,86 @@ processed_data = process_data(data)
         code_parts.append("# Generated workflow code")
         code_parts.append("")
         
+        # Create a mapping of node IDs to their processed data variables
+        node_data_vars = {}
+        
         # Process each node
         for i, node in enumerate(nodes):
+            node_id = node['id']
             node_config = node['data']
             node_type = node_config.get('type')
             
+            # Check if this node has input connections
+            input_connections = [conn for conn in connections if conn['targetNodeId'] == node_id]
+            
+            if input_connections:
+                # This node has inputs, so we need to prepare input data
+                code_parts.append(f"# Prepare input data for node {node_id}")
+                code_parts.append("input_data = {}")
+                
+                for conn in input_connections:
+                    source_node_id = conn['sourceNodeId']
+                    if source_node_id in node_data_vars:
+                        source_var = node_data_vars[source_node_id]
+                        code_parts.append(f"input_data['{source_node_id}'] = {source_var}")
+                
+                code_parts.append("")
+            
+            # Generate node-specific code
             if node_type == 'DATA_PROCESSING':
-                # Use the clean data processing code generator
+                # For data processing nodes, we need to modify the code to use input_data
                 node_code = WorkflowCodeGenerator.generate_data_processing_code(node_config, i + 1)
+                if input_connections:
+                    # Replace the data variable with input_data
+                    node_code = node_code.replace("data = response_data", "data = input_data")
             else:
-                # Use the clean API call code generator
+                # For API nodes, we need to modify the code to use input_data for path/query params
                 node_code = WorkflowCodeGenerator.generate_api_call_code(node_config, i + 1)
+                if input_connections:
+                    # Add code to substitute input data into path and query parameters
+                    substitution_code = []
+                    substitution_code.append("# Substitute input data into parameters")
+                    substitution_code.append("if input_data:")
+                    substitution_code.append("    for key, value in input_data.items():")
+                    substitution_code.append("        if isinstance(value, dict):")
+                    substitution_code.append("            for sub_key, sub_value in value.items():")
+                    substitution_code.append("                if isinstance(sub_value, (str, int, float)):")
+                    substitution_code.append("                    # Replace in path params")
+                    substitution_code.append("                    for param_key in list(path_params.keys()):")
+                    substitution_code.append("                        if path_params[param_key] == f'{{{sub_key}}}':")
+                    substitution_code.append("                            path_params[param_key] = str(sub_value)")
+                    substitution_code.append("                    # Replace in query params")
+                    substitution_code.append("                    for param_key in list(params.keys()):")
+                    substitution_code.append("                        if params[param_key] == f'{{{sub_key}}}':")
+                    substitution_code.append("                            params[param_key] = str(sub_value)")
+                    substitution_code.append("")
+                    
+                    # Insert the substitution code before the API call
+                    lines = node_code.split('\n')
+                    api_call_index = -1
+                    for j, line in enumerate(lines):
+                        if 'response = requests.' in line:
+                            api_call_index = j
+                            break
+                    
+                    if api_call_index != -1:
+                        lines.insert(api_call_index, '\n'.join(substitution_code))
+                        node_code = '\n'.join(lines)
             
             code_parts.append(node_code)
             code_parts.append("")
+            
+            # Store the variable name for this node's output
+            node_data_vars[node_id] = "data"
         
         # Generate final output
         code_parts.append("# Final output")
-        code_parts.append("print(data)")
+        if node_data_vars:
+            # Use the last node's data
+            last_node_id = nodes[-1]['id']
+            code_parts.append(f"result = {node_data_vars[last_node_id]}")
+            code_parts.append("print(json.dumps(result, indent=2))")
+        else:
+            code_parts.append("print(data)")
         
         return "\n".join(code_parts) 

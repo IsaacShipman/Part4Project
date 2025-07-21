@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import PythonEditor from "./CodeEditor";
 import { useFileManager } from "../../contexts/FileManagerContext";
-import { Box, Snackbar } from "@mui/material";
+import { Box, Snackbar, useTheme } from "@mui/material";
 
 interface MainEditorProps {
   code: string; // Default code to use when no file is selected
@@ -22,6 +22,7 @@ const MainEditor: React.FC<MainEditorProps> = ({
   const [saved, setSaved] = React.useState(true);
   const [showSavedMessage, setShowSavedMessage] = React.useState(false);
   const lastActiveFileIdRef = useRef(activeFileId);
+  const theme = useTheme();
 
   // Get the active file based on activeFileId
   const activeFile = standalone ? null : getActiveFile();
@@ -92,6 +93,14 @@ const MainEditor: React.FC<MainEditorProps> = ({
         onClose={() => setShowSavedMessage(false)}
         message="File saved successfully"
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            background: theme.custom.colors.background.secondary,
+            color: theme.custom.colors.text.primary,
+            border: `1px solid ${theme.custom.colors.border.secondary}`,
+            backdropFilter: 'blur(10px)',
+          }
+        }}
       />
     </Box>
   );

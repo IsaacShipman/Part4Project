@@ -1,4 +1,3 @@
-export { default as EndpointPanel } from './EndpointPanel';
 export { default as NodeConfigurationPanel } from './NodeConfigurationPanel';
 export { default as DataProcessingConfigPanel } from './DataProcessingConfigPanel';
 export { default as JsonTreeView } from './JsonTreeView';

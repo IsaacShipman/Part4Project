@@ -28,13 +28,19 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
     padding: '6px 12px',
     borderRadius: '6px',
     margin: '2px 8px',
-    background: 'rgba(30, 41, 59, 0.6)',
+    background: `
+    radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+    linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+  `,
     backdropFilter: 'blur(16px)',
-    border: '1px solid rgba(148, 163, 184, 0.1)',
+    border: `1px solid ${theme.custom.colors.border.secondary}`,
     transition: 'all 0.2s ease',
     '&:hover': {
-      background: 'rgba(59, 130, 246, 0.1)',
-      border: '1px solid rgba(59, 130, 246, 0.3)',
+      background: `
+      radial-gradient(circle at 70% 30%, ${theme.custom.colors.accent}03 0%, transparent 60%),
+      linear-gradient(45deg, ${theme.custom.colors.accent}05 0%, transparent 50%)
+    `,
+      border: `1px solid ${theme.custom.colors.primary}30`,
       transform: 'translateY(-1px)',
     },
   },
@@ -42,34 +48,34 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
-    color: '#e2e8f0',
+    color: theme.custom.colors.text.primary,
     fontSize: '0.8rem',
     fontWeight: 600,
   },
   '& .MuiListItemText-secondary': {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: theme.custom.colors.text.muted,
     fontSize: '0.7rem',
   },
 }));
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-  color: 'rgba(59, 130, 246, 0.8)',
+  color: theme.custom.colors.primary,
   minWidth: '32px',
 }));
 
 const ExpandIcon = styled(Box)(({ theme }) => ({
-  color: 'rgba(255, 255, 255, 0.6)',
+  color: theme.custom.colors.text.muted,
   transition: 'all 0.2s ease',
   '&:hover': {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: theme.custom.colors.text.primary,
     transform: 'scale(1.1)',
   },
 }));
 
 const EndpointCountChip = styled(Chip)(({ theme }) => ({
-  background: 'rgba(59, 130, 246, 0.1)',
-  border: '1px solid rgba(59, 130, 246, 0.3)',
-  color: '#93c5fd',
+  background: `${theme.custom.colors.primary}10`,
+  border: `1px solid ${theme.custom.colors.primary}30`,
+  color: theme.custom.colors.primary,
   fontWeight: 600,
   fontSize: '0.6rem',
   height: '20px',

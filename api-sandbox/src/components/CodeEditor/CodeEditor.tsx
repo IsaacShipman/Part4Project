@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import Editor from "@monaco-editor/react";
-import { Box, Typography, Paper, styled, IconButton } from "@mui/material";
+import { Box, Typography, Paper, styled, IconButton, useTheme } from "@mui/material";
 import { Code } from "lucide-react";
 import {
   PlayArrow as PlayArrowIcon,
@@ -24,15 +24,15 @@ interface CodeEditorProps {
 
 // Glassy container with backdrop blur effect
 const GlassyPaper = styled(Paper)(({ theme }) => ({
-  background:
-    "linear-gradient(135deg, rgba(15, 20, 25, 0.9) 0%, rgba(26, 35, 50, 0.95) 100%)",
+  background: theme.custom.colors.background.gradient,
   backdropFilter: "blur(20px)",
   WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(59, 130, 246, 0.2)",
+  border: `1px solid ${theme.custom.colors.border.primary}`,
   borderRadius: "12px",
   overflow: "hidden",
-  boxShadow:
-    "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+  boxShadow: theme.palette.mode === 'dark' 
+    ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+    : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
   // Remove the margin and adjust height
   margin: 0,
   display: "flex",
@@ -42,9 +42,8 @@ const GlassyPaper = styled(Paper)(({ theme }) => ({
 
 // Header with gradient
 const EditorHeader = styled(Box)(({ theme }) => ({
-  background:
-    "linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)",
-  borderBottom: "1px solid rgba(59, 130, 246, 0.3)",
+  background: `linear-gradient(90deg, ${theme.custom.colors.primary}20 0%, ${theme.custom.colors.accent}15 100%)`,
+  borderBottom: `1px solid ${theme.custom.colors.primary}30`,
   padding: "8px 16px",
   position: "relative",
   "&::after": {
@@ -54,8 +53,7 @@ const EditorHeader = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: "1px",
-    background:
-      "linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.5) 50%, transparent 100%)",
+    background: `linear-gradient(90deg, transparent 0%, ${theme.custom.colors.primary}50 50%, transparent 100%)`,
   },
 }));
 
@@ -78,102 +76,32 @@ export default function PythonEditor({
   const [editorInstance, setEditorInstance] = useState<any>(null);
   const [currentDecorations, setCurrentDecorations] = useState<string[]>([]);
   const [monacoInstance, setMonacoInstance] = useState<any>(null);
+  const theme = useTheme();
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
     // Store editor and monaco in ref for external access
 
-    
-    // Define custom theme
-    monaco.editor.defineTheme("cyberpunk-theme", {
+    // Define custom dark theme with navy background
+    monaco.editor.defineTheme("custom-dark", {
       base: "vs-dark",
       inherit: true,
-      rules: [
-        // Keywords (def, class, if, else, etc.)
-        { token: "keyword", foreground: "#ff6b9d", fontStyle: "bold" },
-        { token: "keyword.control", foreground: "#ff6b9d", fontStyle: "bold" },
-
-        // Strings
-        { token: "string", foreground: "#4ecdc4" },
-        { token: "string.quoted", foreground: "#4ecdc4" },
-
-        // Comments
-        { token: "comment", foreground: "#6c757d", fontStyle: "italic" },
-
-        // Numbers
-        { token: "number", foreground: "#ffd93d" },
-        { token: "number.float", foreground: "#ffd93d" },
-
-        // Functions and methods
-        { token: "identifier.function", foreground: "#a8e6cf" },
-        { token: "support.function", foreground: "#a8e6cf" },
-
-        // Classes
-        { token: "support.class", foreground: "#ffb3ba" },
-        { token: "entity.name.class", foreground: "#ffb3ba" },
-
-        // Variables
-        { token: "variable", foreground: "#e8e8e8" },
-        { token: "identifier", foreground: "#e8e8e8" },
-
-        // Operators
-        { token: "operator", foreground: "#ff9f43" },
-        { token: "delimiter", foreground: "#ff9f43" },
-
-        // Built-in functions
-        { token: "support.function.builtin", foreground: "#74b9ff" },
-
-        // Decorators
-        { token: "meta.decorator", foreground: "#fd79a8" },
-
-        // Types
-        { token: "support.type", foreground: "#fdcb6e" },
-
-        // Regular expressions
-        { token: "regexp", foreground: "#00b894" },
-
-        // Constants
-        { token: "constant", foreground: "#fab1a0" },
-        { token: "constant.language", foreground: "#fab1a0" },
-
-        // Imports
-        { token: "keyword.import", foreground: "#6c5ce7", fontStyle: "bold" },
-
-        // Exception keywords
-        {
-          token: "keyword.exception",
-          foreground: "#e17055",
-          fontStyle: "bold",
-        },
-      ],
+      rules: [], // Keep all default rules
       colors: {
-        "editor.background": "#0f1419",
-        "editor.foreground": "#e8e8e8",
-        "editor.lineHighlightBackground": "#1a1f2e40",
-        "editor.selectionBackground": "#264f78",
-        "editor.selectionHighlightBackground": "#264f7840",
-        "editor.findMatchBackground": "#515c6a",
-        "editor.findMatchHighlightBackground": "#515c6a40",
-        "editor.hoverHighlightBackground": "#264f7840",
-        "editor.wordHighlightBackground": "#575757",
-        "editor.wordHighlightStrongBackground": "#004972",
-        "editorCursor.foreground": "#ff6b9d",
-        "editorWhitespace.foreground": "#3b4261",
-        "editorIndentGuide.background": "#3b4261",
-        "editorIndentGuide.activeBackground": "#6c757d",
-        "editorLineNumber.foreground": "#6c757d",
-        "editorLineNumber.activeForeground": "#ff6b9d",
-        "editorGutter.background": "#0f1419",
-        "editorBracketMatch.background": "#0064001a",
-        "editorBracketMatch.border": "#4ecdc4",
-        "scrollbarSlider.background": "#3b426180",
-        "scrollbarSlider.hoverBackground": "#3b426140",
-        "scrollbarSlider.activeBackground": "#3b4261",
-        "editorSuggestWidget.background": "#1a1f2e",
-        "editorSuggestWidget.border": "#3b4261",
-        "editorSuggestWidget.foreground": "#e8e8e8",
-        "editorSuggestWidget.selectedBackground": "#264f78",
-        "editorHoverWidget.background": "#1a1f2e",
-        "editorHoverWidget.border": "#3b4261",
+        "editor.background": "#1a2332", // Navy blue background
+        "editorGutter.background": "#1a2332", // Navy blue gutter
+        "sideBar.background": "#1a2332", // Navy blue sidebar
+        "activityBar.background": "#1a2332", // Navy blue activity bar
+        "statusBar.background": "#1a2332", // Navy blue status bar
+        "titleBar.activeBackground": "#1a2332", // Navy blue title bar
+        "menu.background": "#1a2332", // Navy blue menu
+        "dropdown.background": "#1a2332", // Navy blue dropdown
+        "input.background": "#1a2332", // Navy blue input
+        "editorWidget.background": "#1a2332", // Navy blue widgets
+        "editorSuggestWidget.background": "#1a2332", // Navy blue suggestions
+        "editorHoverWidget.background": "#1a2332", // Navy blue hover
+        "debugToolBar.background": "#1a2332", // Navy blue debug toolbar
+        "panel.background": "#1a2332", // Navy blue panel
+        "terminal.background": "#1a2332", // Navy blue terminal
       },
     });
 
@@ -211,13 +139,20 @@ export default function PythonEditor({
       },
     });
 
-    // Set the custom theme
-    monaco.editor.setTheme("cyberpunk-theme");
+    // Set the appropriate theme based on current mode
+    monaco.editor.setTheme(theme.palette.mode === 'dark' ? "custom-dark" : "vs");
 
     setEditorInstance(editor);
     setMonacoInstance(monaco);
     setEditorReady(true);
   };
+
+  // Update theme when it changes
+  useEffect(() => {
+    if (monacoInstance) {
+      monacoInstance.editor.setTheme(theme.palette.mode === 'dark' ? "custom-dark" : "vs");
+    }
+  }, [monacoInstance, theme.palette.mode]);
 
   useEffect(() => {
     if (editorInstance && monacoInstance) {
@@ -241,11 +176,11 @@ export default function PythonEditor({
               className: "highlighted-error-line",
               glyphMarginClassName: "highlighted-error-glyph",
               overviewRuler: {
-                color: "#ff4757",
+                color: theme.palette.error.main,
                 position: 4, // OverviewRulerLane.Right
               },
               minimap: {
-                color: "#ff4757",
+                color: theme.palette.error.main,
                 position: 2, // MinimapPosition.Inline
               },
             },
@@ -264,46 +199,19 @@ export default function PythonEditor({
       } else {
         setCurrentDecorations([]);
       }
-
-      // Add/update CSS for error line styling
-      const style = document.createElement("style");
-      style.textContent = `
-        .highlighted-error-line {
-          background-color: rgba(255, 71, 87, 0.2) !important;
-          border-left: 4px solid #ff4757 !important;
-          animation: pulse-highlight 0.6s ease-in-out;
-        }
-        .highlighted-error-glyph {
-          background-color: #ff4757 !important;
-          width: 4px !important;
-        }
-        @keyframes pulse-highlight {
-          0% { background-color: rgba(255, 71, 87, 0.4); }
-          50% { background-color: rgba(255, 71, 87, 0.6); }
-          100% { background-color: rgba(255, 71, 87, 0.2); }
-        }
-      `;
-
-      // Remove existing error styles and add new ones
-      const existingStyle = document.getElementById("monaco-highlight-styles");
-      if (existingStyle) {
-        existingStyle.remove();
-      }
-      style.id = "monaco-highlight-styles";
-      document.head.appendChild(style);
     }
-  }, [editorInstance, monacoInstance, highlightedLine]);
+  }, [editorInstance, monacoInstance, highlightedLine, theme.palette.error.main]);
 
   return (
     <GlassyPaper elevation={0}>
       <EditorHeader>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Code size={18} color="rgba(59, 130, 246, 0.8)" />
+          <Code size={18} color={theme.custom.colors.primary} />
           <Typography
             variant="subtitle2"
             fontWeight="600"
             sx={{
-              color: "rgba(255, 255, 255, 0.9)",
+              color: theme.custom.colors.text.primary,
               textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
             }}
           >
@@ -319,18 +227,18 @@ export default function PythonEditor({
               width: 36,
               height: 36,
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+              background: `linear-gradient(135deg, ${theme.custom.colors.accent} 0%, ${theme.custom.colors.accent}80 100%)`,
               border: "1px solid rgba(255, 255, 255, 0.1)",
               color: "#FFFFFF",
-              boxShadow: "0 4px 20px rgba(16, 185, 129, 0.4)",
+              boxShadow: `0 4px 20px ${theme.custom.colors.accent}40`,
               "&:hover": {
-                background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+                background: `linear-gradient(135deg, ${theme.custom.colors.accent} 0%, ${theme.custom.colors.accent}80 100%)`,
                 transform: "translateY(-1px)",
-                boxShadow: "0 6px 25px rgba(16, 185, 129, 0.5)",
+                boxShadow: `0 6px 25px ${theme.custom.colors.accent}50`,
               },
               "&:disabled": {
-                background: "rgba(255, 255, 255, 0.02)",
-                color: "#444",
+                background: `${theme.custom.colors.background.tertiary}02`,
+                color: theme.custom.colors.text.muted,
               },
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
@@ -348,18 +256,18 @@ export default function PythonEditor({
               width: 36,
               height: 36,
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)",
+              background: `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.primary}80 100%)`,
               border: "1px solid rgba(255, 255, 255, 0.1)",
               color: "#FFFFFF",
-              boxShadow: "0 4px 20px rgba(74, 144, 226, 0.4)",
+              boxShadow: `0 4px 20px ${theme.custom.colors.primary}40`,
               "&:hover": {
-                background: "linear-gradient(135deg, #4A90E2 0%, #6BA3F0 100%)",
+                background: `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.primary}80 100%)`,
                 transform: "translateY(-1px)",
-                boxShadow: "0 6px 25px rgba(74, 144, 226, 0.5)",
+                boxShadow: `0 6px 25px ${theme.custom.colors.primary}50`,
               },
               "&:disabled": {
-                background: "rgba(255, 255, 255, 0.02)",
-                color: "#444",
+                background: `${theme.custom.colors.background.tertiary}02`,
+                color: theme.custom.colors.text.muted,
               },
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
@@ -374,9 +282,9 @@ export default function PythonEditor({
               width: 8,
               height: 8,
               borderRadius: "50%",
-              bgcolor: editorReady ? "#4ecdc4" : "#6c757d",
+              bgcolor: editorReady ? theme.custom.colors.accent : theme.custom.colors.text.muted,
               boxShadow: editorReady
-                ? "0 0 8px rgba(78, 205, 196, 0.6)"
+                ? `0 0 8px ${theme.custom.colors.accent}60`
                 : "none",
               transition: "all 0.3s ease",
             }}
@@ -394,8 +302,7 @@ export default function PythonEditor({
           onMount={handleEditorDidMount}
           options={{
             fontSize: 14,
-            fontFamily:
-              '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", monospace',
+            fontFamily: theme.custom.terminal.fontFamily,
             fontLigatures: true,
             minimap: { enabled: false },
             scrollBeyondLastLine: false,

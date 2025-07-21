@@ -1,0 +1,234 @@
+{
+    "GET /users/{username}/repos": {
+      "method": "GET",
+      "path": "/users/{username}/repos",
+      "summary": "List repositories for a user",
+      "operation_id": "repos/list-for-user",
+      "doc_url": "https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user",
+      "category": "repositories"
+    },
+    "GET /repos/{owner}/{repo}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}",
+      "summary": "Get a repository",
+      "operation_id": "repos/get",
+      "doc_url": "https://docs.github.com/en/rest/repos/repos#get-a-repository",
+      "category": "repositories"
+    },
+    "PATCH /repos/{owner}/{repo}": {
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}",
+      "summary": "Update a repository",
+      "operation_id": "repos/update",
+      "doc_url": "https://docs.github.com/en/rest/repos/repos#update-a-repository",
+      "category": "repositories"
+    },
+    "DELETE /repos/{owner}/{repo}": {
+      "method": "DELETE",
+      "path": "/repos/{owner}/{repo}",
+      "summary": "Delete a repository",
+      "operation_id": "repos/delete",
+      "doc_url": "https://docs.github.com/en/rest/repos/repos#delete-a-repository",
+      "category": "repositories"
+    },
+    "GET /repos/{owner}/{repo}/contents/{path}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "summary": "Get repository content",
+      "operation_id": "repos/get-content",
+      "doc_url": "https://docs.github.com/en/rest/repos/contents#get-repository-content",
+      "category": "contents"
+    },
+    "PUT /repos/{owner}/{repo}/contents/{path}": {
+      "method": "PUT",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "summary": "Create or update file contents",
+      "operation_id": "repos/create-or-update-file-contents",
+      "doc_url": "https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents",
+      "category": "contents"
+    },
+    "DELETE /repos/{owner}/{repo}/contents/{path}": {
+      "method": "DELETE",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "summary": "Delete a file",
+      "operation_id": "repos/delete-file",
+      "doc_url": "https://docs.github.com/en/rest/repos/contents#delete-a-file",
+      "category": "contents"
+    },
+    "GET /repos/{owner}/{repo}/readme": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/readme",
+      "summary": "Get a repository README",
+      "operation_id": "repos/get-readme",
+      "doc_url": "https://docs.github.com/en/rest/repos/contents#get-a-repository-readme",
+      "category": "contents"
+    },
+    "GET /repos/{owner}/{repo}/branches": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/branches",
+      "summary": "List branches",
+      "operation_id": "repos/list-branches",
+      "doc_url": "https://docs.github.com/en/rest/branches/branches#list-branches",
+      "category": "branches"
+    },
+    "GET /repos/{owner}/{repo}/branches/{branch}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/branches/{branch}",
+      "summary": "Get a branch",
+      "operation_id": "repos/get-branch",
+      "doc_url": "https://docs.github.com/en/rest/branches/branches#get-a-branch",
+      "category": "branches"
+    },
+    "POST /repos/{owner}/{repo}/git/refs": {
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/git/refs",
+      "summary": "Create a reference (branch)",
+      "operation_id": "git/create-ref",
+      "doc_url": "https://docs.github.com/en/rest/git/refs#create-a-reference",
+      "category": "branches"
+    },
+    "GET /repos/{owner}/{repo}/commits": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/commits",
+      "summary": "List commits",
+      "operation_id": "repos/list-commits",
+      "doc_url": "https://docs.github.com/en/rest/commits/commits#list-commits",
+      "category": "commits"
+    },
+    "GET /repos/{owner}/{repo}/commits/{ref}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/commits/{ref}",
+      "summary": "Get a commit",
+      "operation_id": "repos/get-commit",
+      "doc_url": "https://docs.github.com/en/rest/commits/commits#get-a-commit",
+      "category": "commits"
+    },
+    "POST /repos/{owner}/{repo}/git/commits": {
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/git/commits",
+      "summary": "Create a commit",
+      "operation_id": "git/create-commit",
+      "doc_url": "https://docs.github.com/en/rest/git/commits#create-a-commit",
+      "category": "commits"
+    },
+    "GET /repos/{owner}/{repo}/compare/{basehead}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/compare/{basehead}",
+      "summary": "Compare two commits",
+      "operation_id": "repos/compare-commits",
+      "doc_url": "https://docs.github.com/en/rest/commits/commits#compare-two-commits",
+      "category": "commits"
+    },
+    "GET /repos/{owner}/{repo}/commits/{commit_sha}/status": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/commits/{commit_sha}/status",
+      "summary": "Get the combined status for a specific commit",
+      "operation_id": "repos/get-combined-status-for-ref",
+      "doc_url": "https://docs.github.com/en/rest/commits/statuses#get-the-combined-status-for-a-specific-commit",
+      "category": "commits"
+    },
+    "GET /repos/{owner}/{repo}/pulls": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/pulls",
+      "summary": "List pull requests",
+      "operation_id": "pulls/list",
+      "doc_url": "https://docs.github.com/en/rest/pulls/pulls#list-pull-requests",
+      "category": "pull_requests"
+    },
+    "GET /repos/{owner}/{repo}/pulls/{pull_number}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/pulls/{pull_number}",
+      "summary": "Get a pull request",
+      "operation_id": "pulls/get",
+      "doc_url": "https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request",
+      "category": "pull_requests"
+    },
+    "POST /repos/{owner}/{repo}/pulls": {
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/pulls",
+      "summary": "Create a pull request",
+      "operation_id": "pulls/create",
+      "doc_url": "https://docs.github.com/en/rest/pulls/pulls#create-a-pull-request",
+      "category": "pull_requests"
+    },
+    "PATCH /repos/{owner}/{repo}/pulls/{pull_number}": {
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}/pulls/{pull_number}",
+      "summary": "Update a pull request",
+      "operation_id": "pulls/update",
+      "doc_url": "https://docs.github.com/en/rest/pulls/pulls#update-a-pull-request",
+      "category": "pull_requests"
+    },
+    "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge": {
+      "method": "PUT",
+      "path": "/repos/{owner}/{repo}/pulls/{pull_number}/merge",
+      "summary": "Merge a pull request",
+      "operation_id": "pulls/merge",
+      "doc_url": "https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request",
+      "category": "pull_requests"
+    },
+    "GET /repos/{owner}/{repo}/issues": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues",
+      "summary": "List repository issues",
+      "operation_id": "issues/list-for-repo",
+      "doc_url": "https://docs.github.com/en/rest/issues/issues#list-repository-issues",
+      "category": "issues"
+    },
+    "GET /repos/{owner}/{repo}/issues/{issue_number}": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}",
+      "summary": "Get an issue",
+      "operation_id": "issues/get",
+      "doc_url": "https://docs.github.com/en/rest/issues/issues#get-an-issue",
+      "category": "issues"
+    },
+    "POST /repos/{owner}/{repo}/issues": {
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/issues",
+      "summary": "Create an issue",
+      "operation_id": "issues/create",
+      "doc_url": "https://docs.github.com/en/rest/issues/issues#create-an-issue",
+      "category": "issues"
+    },
+    "PATCH /repos/{owner}/{repo}/issues/{issue_number}": {
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}",
+      "summary": "Update an issue",
+      "operation_id": "issues/update",
+      "doc_url": "https://docs.github.com/en/rest/issues/issues#update-an-issue",
+      "category": "issues"
+    },
+    "GET /repos/{owner}/{repo}/issues/{issue_number}/comments": {
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+      "summary": "List issue comments",
+      "operation_id": "issues/list-comments",
+      "doc_url": "https://docs.github.com/en/rest/issues/comments#list-issue-comments",
+      "category": "issues"
+    },
+    "GET /users/{username}": {
+      "method": "GET",
+      "path": "/users/{username}",
+      "summary": "Get a user",
+      "operation_id": "users/get-by-username",
+      "doc_url": "https://docs.github.com/en/rest/users/users#get-a-user",
+      "category": "users"
+    },
+    "GET /users/{username}/followers": {
+      "method": "GET",
+      "path": "/users/{username}/followers",
+      "summary": "List followers of a user",
+      "operation_id": "users/list-followers-for-user",
+      "doc_url": "https://docs.github.com/en/rest/users/followers#list-followers-of-a-user",
+      "category": "users"
+    },
+    "GET /users/{username}/following": {
+      "method": "GET",
+      "path": "/users/{username}/following",
+      "summary": "List the people a user follows",
+      "operation_id": "users/list-following-for-user",
+      "doc_url": "https://docs.github.com/en/rest/users/followers#list-the-people-a-user-follows",
+      "category": "users"
+    }
+  }

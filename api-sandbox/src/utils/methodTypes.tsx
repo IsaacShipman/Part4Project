@@ -1,11 +1,11 @@
 export const getMethodColor = (method: string) => {
   const methodStyles = {
-    GET: {
+    POST: {
       backgroundColor: 'rgba(59, 130, 246, 0.15)',
       color: '#60a5fa',
       border: '1px solid rgba(59, 130, 246, 0.3)'
     },
-    POST: {
+    GET: {
       backgroundColor: 'rgba(34, 197, 94, 0.15)',
       color: '#4ade80',
       border: '1px solid rgba(34, 197, 94, 0.3)'

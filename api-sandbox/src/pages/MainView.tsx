@@ -144,8 +144,10 @@ print(f"Posted with status: {response2.status_code}")`);
       setResponse(result.data.output || "Code executed successfully.");
       
       // Process intercepted API calls
+      console.log("Received API calls:", result.data.api_calls);
       if (result.data.api_calls && Array.isArray(result.data.api_calls)) {
         const calls = result.data.api_calls;
+        console.log("Processing API calls:", calls);
         setApiCalls(calls);
         saveApiCalls(calls); // Save to localStorage
         

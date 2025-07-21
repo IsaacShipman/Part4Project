@@ -1,22 +1,26 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import { Typography, useTheme } from '@mui/material';
 
 interface ErrorMessageProps {
   message: string;
 }
 
-export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => (
-  <Typography 
-    sx={{ 
-      color: '#f87171', 
-      padding: '16px',
-      textAlign: 'center',
-      background: 'rgba(239, 68, 68, 0.1)',
-      border: '1px solid rgba(239, 68, 68, 0.3)',
-      borderRadius: '8px',
-      margin: '8px'
-    }}
-  >
-    Error loading API data: {message}
-  </Typography>
-);
+export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => {
+  const theme = useTheme();
+  
+  return (
+    <Typography 
+      sx={{ 
+        color: theme.palette.error.main, 
+        padding: '16px',
+        textAlign: 'center',
+        background: `${theme.palette.error.main}10`,
+        border: `1px solid ${theme.palette.error.main}30`,
+        borderRadius: '8px',
+        margin: '8px'
+      }}
+    >
+      Error loading API data: {message}
+    </Typography>
+  );
+};

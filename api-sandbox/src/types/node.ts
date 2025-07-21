@@ -13,9 +13,11 @@ export interface DataProcessingConfiguration {
   config: {
     // For field filtering
     selectedFields?: string[];
-    // For array filtering
+    // For array filtering (legacy single field)
     filterField?: string;
-    filterValue?: string;
+    filterValue?: string; // Can be single value or comma-separated multiple values
+    // For array filtering (new multiple fields)
+    filterFields?: Array<{ field: string; value: string }>;
     // For custom code
     customCode?: string;
   };
