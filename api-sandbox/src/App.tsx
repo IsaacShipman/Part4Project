@@ -1,13 +1,16 @@
 import React, { useRef, useState } from 'react';
-import { CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Button, Stack, Avatar } from '@mui/material';
-import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon, Science as ScienceIcon, Search as SearchIcon, Notifications as NotificationsIcon, Visibility as VisibilityIcon, Api as ApiIcon } from '@mui/icons-material';
+import { CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Button, Stack, Avatar, Menu, MenuItem } from '@mui/material';
+import { PlayArrow as PlayArrowIcon, Security as SecurityIcon, Code as CodeIcon, Science as ScienceIcon, Search as SearchIcon, Notifications as NotificationsIcon, Visibility as VisibilityIcon, Api as ApiIcon, Build as BuildIcon, Dashboard as DashboardIcon } from '@mui/icons-material';
 // Import view components
 import MainView from './pages/MainView';
 import SecurityScanView from './pages/SecurityScanView';
 import APIRequestViewer from './pages/APIRequestViewer';
 import APIVisualiser from './pages/APIVisualiser';
+import EndpointGenerator from './pages/EndpointGenerator';
+import DashboardView from './pages/DashboardView';
 // Import theme components
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LoggingProvider } from './contexts/LoggingContext';
 import ThemeToggle from './components/ThemeToggle';
 
 // Animated background component
@@ -60,11 +63,26 @@ const AnimatedBackground = () => {
 function App() {
   const executeCodeRef = useRef(() => {});
   const [currentView, setCurrentView] = useState('main');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDashboardClick = () => {
+    setCurrentView('dashboard');
+    handleProfileClose();
+  };
 
   return (
     <ThemeProvider>
-      <CssBaseline />
-      <AppBar 
+      <LoggingProvider>
+        <CssBaseline />
+        <AppBar 
         position="fixed" 
         elevation={0}
         sx={{
@@ -254,6 +272,38 @@ function App() {
             >
               API Visualiser
             </Button>
+            <Button 
+              startIcon={<BuildIcon />}
+              onClick={() => setCurrentView('EndpointGenerator')}
+              sx={{ 
+                color: (theme) => currentView === 'EndpointGenerator' ? theme.custom.colors.text.primary : theme.custom.colors.text.secondary,
+                background: (theme) => currentView === 'EndpointGenerator' 
+                  ? `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.secondary} 100%)` 
+                  : 'transparent',
+                borderRadius: '12px',
+                padding: '8px 20px',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                textTransform: 'none',
+                minWidth: '120px',
+                boxShadow: (theme) => currentView === 'EndpointGenerator' 
+                  ? `0 4px 20px ${theme.custom.colors.primary}40` 
+                  : 'none',
+                '&:hover': { 
+                  background: (theme) => currentView === 'EndpointGenerator'
+                    ? `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.secondary} 100%)` 
+                    : `${theme.custom.colors.background.tertiary}50`,
+                  transform: 'translateY(-1px)',
+                  boxShadow: (theme) => currentView === 'EndpointGenerator' 
+                    ? `0 6px 25px ${theme.custom.colors.primary}50` 
+                    : `0 2px 10px ${theme.custom.colors.border.primary}`
+                },
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              Endpoint Explorer
+            
+            </Button>
           </Box>
 
           {/* Right section with action buttons and user info */}
@@ -263,6 +313,7 @@ function App() {
             
             {/* User Avatar */}
             <Avatar
+              onClick={handleProfileClick}
               sx={{
                 width: 44,
                 height: 44,
@@ -280,6 +331,39 @@ function App() {
             >
               U
             </Avatar>
+            
+            {/* Profile Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleProfileClose}
+              PaperProps={{
+                sx: {
+                  background: (theme) => theme.custom.colors.background.secondary,
+                  border: (theme) => `1px solid ${theme.custom.colors.border.primary}`,
+                  borderRadius: '12px',
+                  boxShadow: (theme) => `0 8px 32px ${theme.custom.colors.background.primary}50`,
+                  mt: 1,
+                  minWidth: 180
+                }
+              }}
+            >
+              <MenuItem 
+                onClick={handleDashboardClick}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  color: (theme) => theme.custom.colors.text.primary,
+                  '&:hover': {
+                    background: (theme) => `${theme.custom.colors.primary}10`
+                  }
+                }}
+              >
+                <DashboardIcon />
+                Dashboard
+              </MenuItem>
+            </Menu>
           </Box>
         </Toolbar>
       </AppBar>
@@ -294,10 +378,15 @@ function App() {
           <SecurityScanView />
         ) : currentView === 'APIVisualiser' ? (
           <APIVisualiser />
+        ) : currentView === 'EndpointGenerator' ? (
+          <EndpointGenerator />
+        ) : currentView === 'dashboard' ? (
+          <DashboardView />
         ) : (
           <APIRequestViewer />
         )}
       </Box>
+    </LoggingProvider>
     </ThemeProvider>
   );
 }

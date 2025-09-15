@@ -82,31 +82,40 @@ const setNestedValue = (obj: any, path: string, value: any): void => {
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
     const nextPart = parts[i + 1];
-    
-    if (nextPart.match(/^\d+$/)) {
+
+    if (!part) {
+      continue;
+    }
+
+    if (nextPart && /^\d+$/.test(nextPart)) {
       // Next part is array index
       if (!current[part]) {
-        current[part] = [];
+        (current as any)[part] = [];
       }
-      if (!current[part][parseInt(nextPart)]) {
-        current[part][parseInt(nextPart)] = [];
+      const idx = parseInt(nextPart, 10);
+      if (!Array.isArray((current as any)[part])) {
+        (current as any)[part] = [];
       }
-      current = current[part][parseInt(nextPart)];
+      if ((current as any)[part][idx] === undefined) {
+        (current as any)[part][idx] = [];
+      }
+      current = (current as any)[part][idx];
       i++; // Skip the next part since we handled it
     } else {
       // Next part is object property
       if (!current[part]) {
-        current[part] = {};
+        (current as any)[part] = {};
       }
-      current = current[part];
+      current = (current as any)[part];
     }
   }
   
   const lastPart = parts[parts.length - 1];
-  if (lastPart.match(/^\d+$/)) {
-    current[parseInt(lastPart)] = value;
+  if (!lastPart) return;
+  if (/^\d+$/.test(lastPart)) {
+    (current as any)[parseInt(lastPart, 10)] = value;
   } else {
-    current[lastPart] = value;
+    (current as any)[lastPart] = value;
   }
 };
 
@@ -207,18 +216,31 @@ const nodeStateReducer = (state: NodeState, action: NodeAction): NodeState => {
       };
       break;
 
-    case 'UPDATE_CONFIGURATION':
+    case 'UPDATE_CONFIGURATION': {
+      const existing = state.configurations[action.nodeId];
+      if (!existing) {
+        // No existing node to update; ignore to keep type safety.
+        newState = state;
+        break;
+      }
+      const updated: NodeConfiguration = {
+        ...existing,
+        ...action.config,
+        // Ensure required fields stay defined
+        id: existing.id,
+        type: existing.type,
+        outputFieldSelections: action.config.outputFieldSelections ?? existing.outputFieldSelections ?? [],
+        inputMappings: action.config.inputMappings ?? existing.inputMappings ?? {},
+      };
       newState = {
         ...state,
         configurations: {
           ...state.configurations,
-          [action.nodeId]: {
-            ...state.configurations[action.nodeId],
-            ...action.config
-          }
-        }
+          [action.nodeId]: updated,
+        },
       };
       break;
+    }
 
     case 'SET_TEST_RESULT':
       newState = {

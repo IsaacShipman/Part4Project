@@ -183,7 +183,7 @@ export default function APIFolderStructure({ onSelectEndpoint }: APIFolderStruct
                 <FolderItem 
                   key={category}
                   name={category}
-                  structure={folderStructures[category]}
+                  structure={folderStructures[category]!}
                   onSelectEndpoint={handleEndpointClick}
                   selectedEndpointId={selectedEndpointId}
                   isExpanded={expandedFolders[category] || false}

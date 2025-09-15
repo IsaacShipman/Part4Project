@@ -638,7 +638,10 @@ const DataProcessingConfigPanel: React.FC<DataProcessingConfigPanelProps> = ({ n
                       value={filterItem.field || ''}
                       onChange={(e) => {
                         const updatedFilters = [...(dataProcessingConfig?.config?.filterFields || [])];
-                        updatedFilters[index] = { ...updatedFilters[index], field: e.target.value };
+                        updatedFilters[index] = {
+  field: e.target.value,
+  value: updatedFilters[index]?.value ?? ''
+};
                         handleDataProcessingUpdate({
                           config: { ...dataProcessingConfig?.config, filterFields: updatedFilters }
                         });
@@ -652,7 +655,10 @@ const DataProcessingConfigPanel: React.FC<DataProcessingConfigPanelProps> = ({ n
                       value={filterItem.value || ''}
                       onChange={(e) => {
                         const updatedFilters = [...(dataProcessingConfig?.config?.filterFields || [])];
-                        updatedFilters[index] = { ...updatedFilters[index], value: e.target.value };
+                        updatedFilters[index] = {
+  field: e.target.value,
+  value: updatedFilters[index]?.value ?? ''
+};
                         handleDataProcessingUpdate({
                           config: { ...dataProcessingConfig?.config, filterFields: updatedFilters }
                         });

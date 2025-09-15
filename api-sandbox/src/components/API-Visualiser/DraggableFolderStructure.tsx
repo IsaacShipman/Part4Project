@@ -28,6 +28,7 @@ import { organizeEndpoints, createFolderStructures, PREDEFINED_CATEGORIES } from
 import { LoadingSpinner } from '../FolderStructure/LoadingSpinner';
 import { ErrorMessage } from '../FolderStructure/ErrorMessage';
 import { DraggableFolderItem } from './DraggableFolderItem';
+import { FolderStructure } from '../../types';
 
 const PanelContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -157,10 +158,11 @@ export const DraggableFolderStructure: React.FC = () => {
   };
 
   const categoryData = organizeEndpoints(data);
-  const folderStructures = data ? createFolderStructures(categoryData) : {};
+  const folderStructures: Record<string, FolderStructure> =
+  data ? createFolderStructures(categoryData) : {} as Record<string, FolderStructure>;
 
   return (
-
+    
       <PanelContent sx={{minHeight: '500px'}}>
         {loading && <LoadingSpinner />}
         
@@ -172,7 +174,7 @@ export const DraggableFolderStructure: React.FC = () => {
               <DraggableFolderItem 
                 key={category}
                 name={category}
-                structure={folderStructures[category]}
+                structure={folderStructures[category]!}
                 onSelectEndpoint={handleEndpointClick}
                 selectedEndpointId={selectedEndpointId}
                 isExpanded={expandedFolders[category] || false}

@@ -13,6 +13,7 @@ import Code from '@mui/icons-material/Code';
 import MainEditor from '../components/CodeEditor/MainEditor';
 import { useFileManager } from '../contexts/FileManagerContext';
 import { saveApiCalls, loadApiCalls } from '../utils/localStorageUtils';
+import zIndex from '@mui/material/styles/zIndex';
 
 
 
@@ -215,10 +216,12 @@ print(f"Posted with status: {response2.status_code}")`);
           minSize={100}
           gutterSize={6}
           style={{ height: '100%' }}
+    
+        
         >
           <Split
             sizes={isRequestPanelOpen ? [20, 60, 20] : [20, 77, 3]}
-            minSize={isRequestPanelOpen ? 50 : 30}
+            minSize={isRequestPanelOpen ? [50, 200, 220] : [50, 200, 28]}
             gutterSize={6}
             style={{ 
               display: 'flex', 
@@ -227,17 +230,19 @@ print(f"Posted with status: {response2.status_code}")`);
               padding: '10px',
             }}
           >
-  
-            <APIFolderStructure onSelectEndpoint={handleSelectEndpoint} />
-       
-            <MainEditor 
-                code={defaultCode} 
-                setCode={setDefaultCode} 
-                onExecuteCode={handleExecuteCode} 
-                standalone={false}
+            {/* Left Sidebar - API Folder Structure */}
+            <Box sx={{ minWidth: 0, minHeight: 0, overflow: 'hidden', contain: 'layout size'}}>
+              <APIFolderStructure onSelectEndpoint={handleSelectEndpoint} />
+            </Box>
+            <Box sx={{ minWidth: 0, minHeight: 0, overflow: 'hidden', contain: 'layout size'}}>
+              <MainEditor 
+                  code={defaultCode} 
+                  setCode={setDefaultCode} 
+                  onExecuteCode={handleExecuteCode} 
+                  standalone={false}
               />
-            
-         
+            </Box>
+            <Box sx={{ minWidth: 0, minHeight: 0, overflow: 'hidden', contain: 'layout size'}}>
               <RequestPanel
                 setIsOpen={setIsRequestPanelOpen}
                 requests={apiRequests.map(req => ({
@@ -250,7 +255,7 @@ print(f"Posted with status: {response2.status_code}")`);
                 apiCalls={apiCalls}
                 isOpen={isRequestPanelOpen}
               />
-          
+            </Box>
           </Split>
 
           <Box sx={{ padding: '8px', paddingTop: 0 }}>
@@ -293,7 +298,7 @@ print(f"Posted with status: {response2.status_code}")`);
             response: req.response || "No Response",
           }))}
           selectedRequestIndex={selectedRequestIndex}
-          selectedApiCall={selectedApiCall}
+          selectedApiCall={selectedApiCall || null}
         />
       </Box>
     )}

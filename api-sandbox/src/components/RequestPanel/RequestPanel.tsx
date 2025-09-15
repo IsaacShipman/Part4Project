@@ -161,22 +161,51 @@ const RequestPanel: React.FC<RequestPanelProps> = ({
   };
 
   // Collapsed panel view
-  if (!isOpen) {
+if (!isOpen) {
     return (
-      <Paper
-        elevation={0}
-        sx={panelStyles.collapsedPanel}
-        onClick={() => setIsOpen(true)}
-      >
-        <Box sx={panelStyles.collapsedContent}>
-          <ChevronLeft sx={panelStyles.collapsedIcon} />
-          {requests.length > 0 && (
-            <Box sx={panelStyles.requestBadge}>
-              {requests.length}
-            </Box>
-          )}
-        </Box>
-      </Paper>
+      <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+        <Paper
+          elevation={0}
+          onClick={() => setIsOpen(true)}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 55,
+            borderRadius: '12px 0 0 12px',
+            background: theme.custom.colors.background.secondary,
+            backdropFilter: 'blur(16px)',
+            border: `1px solid ${theme.custom.colors.border.primary}`,
+            borderRight: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+            <ChevronLeft sx={{ fontSize: 18, color: theme.custom.colors.text.muted }} />
+            {requests.length > 0 && (
+              <Box sx={panelStyles.requestBadge}>{requests.length}</Box>
+            )}
+            <Typography
+              variant="caption"
+              sx={{
+                writingMode: 'vertical-rl',
+                transform: 'rotate(180deg)',
+                color: theme.custom.colors.text.muted,
+                letterSpacing: 1,
+                fontSize: '14px',
+                mt: 0.5,
+              }}
+            >
+              Requests
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
     );
   }
 

@@ -107,13 +107,16 @@ export const USER_AGENTS = [
 // Helper function to extract path parameters from URL
 export const extractPathParameters = (url: string): string[] => {
   const regex = /\{([^}]+)\}/g;
-  const matches = [];
-  let match;
-  
+  const matches: string[] = [];
+  let match: RegExpExecArray | null;
+
   while ((match = regex.exec(url)) !== null) {
-    matches.push(match[1]);
+    const value = match[1];
+    if (typeof value === 'string') {
+      matches.push(value);
+    }
   }
-  
+
   return matches;
 };
 

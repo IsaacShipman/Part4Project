@@ -98,7 +98,11 @@ export const FileManagerProvider: React.FC<{ children: ReactNode }> = ({ childre
     saveFilesToStorage(updatedFiles);
     
     if (activeFileId === id) {
-      setActiveFileId(updatedFiles.length > 0 ? updatedFiles[0].id : null);
+      if (updatedFiles.length > 0) {
+        setActiveFileId(updatedFiles[0]!.id);
+      } else {
+        setActiveFileId(null);
+      }
     }
   };
 
