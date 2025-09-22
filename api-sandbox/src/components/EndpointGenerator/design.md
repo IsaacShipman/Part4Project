@@ -35,45 +35,15 @@ Parameter table (path/query/body) with inferred types and sample values.
 
 Example Request (curl) + one-click copy, Run (if user has provided auth) → show live response.
 
-Example Response (mocked) with “Generate TypeScript interfaces / Pydantic models” button.
-
-“Export” menu: Add to collection, Export OpenAPI fragment, Export Postman, Create mock server.
-
 Tabs inside the card: Examples | Code | Docs (link to official docs) | Errors & Pagination patterns.
-
-Footer / Actions row
-
-One-click: “Export OpenAPI”, “Generate SDK (TS)”, “Create sample repo (GitHub)”, “Mock server”.
-
-Undo / Re-generate variations (model outputs n variations).
 
 2) What the output should look like (UX principles)
 
 Structured, deterministic: Model must return a strict JSON (see schema below). UI only accepts that JSON to render — no freeform HTML parsing.
 
-Actionable code-first: Every endpoint card includes runnable snippets for several languages, plus USB: “one-click scaffold” that produces a small repo with sample code using that snippet.
-
-Editable & Recoverable: Allow users to tweak parsed params (edit path param names, set default values) and re-generate diffs between versions.
-
-Portable exports: OpenAPI/Swagger, Postman collection, and single-file snippets (index.ts, main.py) generated from the same canonical JSON.
+Actionable code-first: Every endpoint card includes runnable snippets for several languages
 
 Confidence & provenance: For each suggested endpoint show confidence and the model rationale (which doc or pattern it used), plus links to the official docs if relevant.
-
-3) Unique differentiators (what will make it stand out)
-
-Blueprint Cards — compressed, copyable JSON "blueprints" for each flow step. Users drag them to a workspace to build larger flows.
-
-One-click Project Scaffolding — generate a mini repo (TS/Express or Python/FastAPI) with routes, types, and sample tests that consume the endpoints (use templates).
-
-API Response → DB/ORM mapping — generate suggested DB schemas or ORM models (TypeORM, Prisma, SQLAlchemy) from the response schema.
-
-Mock Server + Playground — spin up a mock server with generated routes and example responses; run code snippets against that mock in-browser.
-
-Change-diff Narratives — when user changes the prompt, show a natural-language “what changed in the flow” summary and updated endpoints.
-
-Cost & Rate Estimator — estimate how many calls/writes this flow needs, warn about rate limits or pagination.
-
-Audit & Security checks — flag endpoints that require elevated scopes or return sensitive data.
 
 4) The machine-readable output schema the model should return
 

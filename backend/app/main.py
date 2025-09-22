@@ -14,6 +14,7 @@ import base64
 from app.services.security_analysis import run_security_scan
 from app.services.data_processor import DataProcessorCodeGenerator
 from app.services.code_generator import WorkflowCodeGenerator
+from app.services.endpoint_explorer import fetch_endpoints
 import requests
 from typing import Dict, Any, Optional, List, Union
 
@@ -576,6 +577,9 @@ class GenerateCodeRequest(BaseModel):
     nodes: List[Dict[str, Any]]
     connections: List[Dict[str, Any]]
 
+class EndpointGenerationRequest(BaseModel):
+    prompt: str
+
 @app.post("/security-scan")
 async def security_scan(request: SecurityScanRequest):
     try:
@@ -605,4 +609,18 @@ async def generate_workflow_code(request: GenerateCodeRequest):
             "success": False,
             "error": str(e),
             "message": "Failed to generate code"
+        }
+
+@app.post("/api/endpoints/generate")
+async def generate_endpoints(request: EndpointGenerationRequest):
+    """Generate API endpoints based on natural language description."""
+    try:
+        print(f"[INFO] Generating endpoints for prompt: {request.prompt}")
+        endpoints = fetch_endpoints(request.prompt)
+        return endpoints
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "message": "Failed to generate endpoints"
         }

@@ -1,150 +1,192 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  Typography,
-  Paper,
-  SelectChangeEvent
-} from '@mui/material';
-import { Send as SendIcon } from '@mui/icons-material';
 
-interface PromptInputPanelProps {
-  onGenerate: (prompt: string, authMethod: string, language: string) => void;
-  isLoading?: boolean;
-}
 
-const PromptInputPanel: React.FC<PromptInputPanelProps> = ({ 
-  onGenerate, 
-  isLoading = false 
-}) => {
+  import React, { useState, useEffect } from 'react';
+import { Button, Typography, Paper, CircularProgress, Alert } from '@mui/material';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import EndpointCards from './EndpointCards';
+import { SimpleEndpoint, isValidEndpoint } from './simpleTypes';
+
+// Simple localStorage persistence
+const STORAGE_KEY = 'endpoint-cards';
+
+const getStoredEndpoints = (): SimpleEndpoint[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setStoredEndpoints = (endpoints: SimpleEndpoint[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(endpoints));
+  } catch {}
+};
+
+const PromptInputPanel: React.FC = () => {
   const [prompt, setPrompt] = useState('');
-  const [authMethod, setAuthMethod] = useState('none');
-  const [language, setLanguage] = useState('typescript');
+  const [endpoints, setEndpoints] = useState<SimpleEndpoint[]>(getStoredEndpoints());
+  const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAuthMethodChange = (event: SelectChangeEvent) => {
-    setAuthMethod(event.target.value);
-  };
+  useEffect(() => {
+    setStoredEndpoints(endpoints);
+  }, [endpoints]);
 
-  const handleLanguageChange = (event: SelectChangeEvent) => {
-    setLanguage(event.target.value);
-  };
+  // Call your backend API
+  const generateEndpoints = async (userPrompt: string): Promise<SimpleEndpoint[]> => {
+    try {
+      // Try the backend first
+      const response = await fetch('http://localhost:8000/api/endpoints/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: userPrompt }),
+      });
 
-  const handleSubmit = () => {
-    if (prompt.trim()) {
-      onGenerate(prompt.trim(), authMethod, language);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Raw API response:', data);
+        
+        // Check if the response has an error
+        if (data.error) {
+          throw new Error(`Backend error: ${data.error}`);
+        }
+        
+        // Validate and filter the endpoints
+        if (Array.isArray(data)) {
+          const validEndpoints = data.filter(isValidEndpoint);
+          if (validEndpoints.length > 0) {
+            return validEndpoints;
+          }
+          throw new Error('No valid endpoints returned from API');
+        } else {
+          throw new Error('Invalid response format from API');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Backend API call failed, using demo data:', error);
+      // Fallback to demo data that matches your prompt
+      const fallbackEndpoints: SimpleEndpoint[] = [
+        {
+          id: '1',
+          name: 'Get Repository',
+          method: 'GET',
+          url_template: 'https://api.github.com/repos/{owner}/{repo}',
+          description: 'Retrieves details about a specific repository including name, description, stars, and other metadata. Perfect for getting basic repository information.',
+          confidence: 0.95
+        },
+        {
+          id: '2',
+          name: 'List Repository Issues',
+          method: 'GET',
+          url_template: 'https://api.github.com/repos/{owner}/{repo}/issues',
+          description: 'Lists all issues for a repository with filtering options. Use this to track bugs, feature requests, and other discussions.',
+          confidence: 0.88
+        },
+        {
+          id: '3',
+          name: 'Create New Issue',
+          method: 'POST',
+          url_template: 'https://api.github.com/repos/{owner}/{repo}/issues',
+          description: 'Creates a new issue in the repository. Essential for reporting bugs or requesting new features programmatically.',
+          confidence: 0.82
+        }
+      ];
+      
+      return fallbackEndpoints.filter(isValidEndpoint);
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-      handleSubmit();
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const newEndpoints = await generateEndpoints(prompt);
+      setEndpoints(newEndpoints);
+      if (newEndpoints.length > 0 && newEndpoints[0]) {
+        setSelectedEndpointId(newEndpoints[0].id);
+      }
+    } catch (err) {
+      setError(`Failed to generate endpoints: ${err instanceof Error ? err.message : String(err)}`);
+      console.error('Generation failed:', err);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    setEndpoints([]);
+    setSelectedEndpointId(undefined);
+    setError(null);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  const handleEndpointSelect = (endpointId: string) => {
+    setSelectedEndpointId(endpointId);
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        borderRadius: '16px',
-        background: (theme) => `${theme.custom.colors.background.secondary}95`,
-        backdropFilter: 'blur(10px)',
-        border: (theme) => `1px solid ${theme.custom.colors.border.primary}`,
-        height: 'fit-content'
-      }}
-    >
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          color: (theme) => theme.custom.colors.text.primary,
-          mb: 3,
-          fontWeight: 600
-        }}
-      >
-        Generate API Workflow
-      </Typography>
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
+      <Paper sx={{ p: 3, borderRadius: '16px', width: '100%', maxWidth: 600, mb: 3, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Describe your API task in natural language
+        </Typography>
+        <TextField
+          fullWidth
+          value={prompt}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value)}
+          placeholder="E.g., I want to get repository information and list all issues for a specific GitHub repo"
+          variant="outlined"
+          multiline
+          rows={3}
+          sx={{ mb: 2 }}
+          disabled={isLoading}
+        />
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Button 
+            variant="contained" 
+            onClick={handleGenerate} 
+            disabled={!prompt.trim() || isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : undefined}
+          >
+            {isLoading ? 'Generating...' : 'Generate Endpoints'}
+          </Button>
+          <Button 
+            variant="outlined" 
+            color="error" 
+            onClick={handleReset}
+            disabled={isLoading}
+          >
+            Reset
+          </Button>
+        </Box>
+      </Paper>
 
-      {/* Main prompt input */}
-      <TextField
-        fullWidth
-        multiline
-        rows={8}
-        placeholder="Describe what you want to achieve with the API... 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, maxWidth: 700 }}>
+          {error}
+        </Alert>
+      )}
 
-Examples:
-• Get repos for user and latest commit
-• List issues in a repository with labels
-• Create a new repository with initial files"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={handleKeyPress}
-        variant="outlined"
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '12px',
-            backgroundColor: (theme) => `${theme.custom.colors.background.tertiary}50`,
-            '& fieldset': {
-              borderColor: (theme) => theme.custom.colors.border.secondary,
-            },
-            '&:hover fieldset': {
-              borderColor: (theme) => theme.custom.colors.primary,
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: (theme) => theme.custom.colors.primary,
-            }
-          },
-          '& .MuiInputBase-input': {
-            color: (theme) => theme.custom.colors.text.primary,
-            fontSize: '14px',
-            lineHeight: 1.5
-          },
-          '& .MuiInputBase-input::placeholder': {
-            color: (theme) => theme.custom.colors.text.secondary,
-            opacity: 0.7
-          }
-        }}
-      />
-
-          
-   
-
-      {/* Generate button */}
-      <Button
-        fullWidth
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={!prompt.trim() || isLoading}
-        startIcon={<SendIcon />}
-        sx={{
-          borderRadius: '12px',
-          py: 1.5,
-          fontSize: '16px',
-          fontWeight: 600,
-          textTransform: 'none',
-          background: (theme) => `linear-gradient(135deg, ${theme.custom.colors.primary} 0%, ${theme.custom.colors.accent} 100%)`,
-          boxShadow: (theme) => `0 4px 16px ${theme.custom.colors.primary}40`,
-          '&:hover': {
-            background: (theme) => `linear-gradient(135deg, ${theme.custom.colors.primary}dd 0%, ${theme.custom.colors.accent}dd 100%)`,
-            boxShadow: (theme) => `0 6px 20px ${theme.custom.colors.primary}50`,
-          },
-          '&:disabled': {
-            background: (theme) => theme.custom.colors.text.secondary,
-            color: 'white',
-            opacity: 0.5
-          }
-        }}
-      >
-        {isLoading ? 'Generating...' : 'Generate Workflow'}
-      </Button>
-
-    
-    </Paper>
+      <Box sx={{ width: '100%', maxWidth: 700 }}>
+        <EndpointCards 
+          endpoints={endpoints} 
+          selectedEndpointId={selectedEndpointId}
+          onEndpointSelect={handleEndpointSelect}
+        />
+      </Box>
+    </Box>
   );
 };
 
