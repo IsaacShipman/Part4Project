@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, useTheme, Paper, alpha } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import RequestPanel from '../components/RequestPanel/RequestPanel';
+import ManualRequestPanel from '../components/RequestPanel/ManualRequestPanel';
 import JsonViewer from '../components/Console/JsonViewer';
 import EnhancedRequestViewer from '../components/APIRequestViewer/JsonViewerImproved';
-import { loadApiCalls } from '../utils/localStorageUtils';
+import { loadApiCalls, saveApiCalls } from '../utils/localStorageUtils';
 import { ApiCall } from '../types/api';
 
 // Glass-like container with backdrop blur
@@ -51,6 +52,21 @@ function APIRequestViewer() {
     }
   }, []);
 
+  // Handle new manual requests
+  const handleManualRequest = (newCall: ApiCall) => {
+    const updatedCalls = [newCall, ...apiCalls];
+    setApiCalls(updatedCalls);
+    saveApiCalls(updatedCalls);
+    // Auto-select the new request
+    setSelectedRequestIndex(0);
+  };
+
+  // Handle clearing all requests
+  const handleClearRequests = () => {
+    setApiCalls([]);
+    setSelectedRequestIndex(null);
+  };
+
   // Convert API calls to request format for RequestPanel
   const requestSummaries = apiCalls.map(call => ({
     method: call.method,
@@ -93,7 +109,11 @@ function APIRequestViewer() {
       }}
     >
     
-       
+      {/* Manual Request Panel */}
+      <ManualRequestPanel 
+        onRequestSent={handleManualRequest} 
+        onClearRequests={handleClearRequests}
+      />
 
       <Box 
         sx={{ 

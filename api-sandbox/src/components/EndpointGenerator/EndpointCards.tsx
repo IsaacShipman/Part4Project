@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   Paper,
   Chip,
   Card,
-  CardContent
+  CardContent,
+  IconButton,
+  Tooltip,
+  Snackbar,
+  Alert
 } from '@mui/material';
+import { ContentCopy as CopyIcon } from '@mui/icons-material';
 import { SimpleEndpoint, isValidEndpoint } from './simpleTypes';
 
 interface EndpointCardsProps {
@@ -20,6 +25,8 @@ const EndpointCards: React.FC<EndpointCardsProps> = ({
   selectedEndpointId,
   onEndpointSelect
 }) => {
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+
   const getMethodColor = (method: string) => {
     if (!method || typeof method !== 'string') {
       return '#6B7280'; // Default gray color for invalid methods
@@ -37,6 +44,29 @@ const EndpointCards: React.FC<EndpointCardsProps> = ({
 
   const formatUrlPath = (url: string) => {
     return url.replace('https://api.github.com', '');
+  };
+
+  const formatUrlForPython = (url: string) => {
+    // Format the URL in a way that's ready to paste into Python code
+    return `"${url}"`;
+  };
+
+  const handleCopyUrl = async (url: string, endpointName: string, event: React.MouseEvent) => {
+    // Prevent the card click event from firing
+    event.stopPropagation();
+    
+    try {
+      const formattedUrl = formatUrlForPython(url);
+      await navigator.clipboard.writeText(formattedUrl);
+      setCopyFeedback(`Copied ${endpointName} URL to clipboard`);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+      setCopyFeedback('Failed to copy URL');
+    }
+  };
+
+  const handleCloseFeedback = () => {
+    setCopyFeedback(null);
   };
 
   if (endpoints.length === 0) {
@@ -112,7 +142,7 @@ const EndpointCards: React.FC<EndpointCardsProps> = ({
             }}
           >
             <CardContent sx={{ p: 3 }}>
-              {/* Header with method and confidence */}
+              {/* Header with method and copy button */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Chip
                   label={method}
@@ -124,7 +154,21 @@ const EndpointCards: React.FC<EndpointCardsProps> = ({
                     minWidth: '60px'
                   }}
                 />
-              
+                <Tooltip title="Copy URL for Python code">
+                  <IconButton
+                    size="small"
+                    onClick={(event) => handleCopyUrl(urlTemplate, name, event)}
+                    sx={{
+                      color: (theme) => theme.custom?.colors?.text?.secondary || '#666666',
+                      '&:hover': {
+                        backgroundColor: (theme) => `${theme.custom?.colors?.primary || '#1976d2'}15`,
+                        color: (theme) => theme.custom?.colors?.primary || '#1976d2'
+                      }
+                    }}
+                  >
+                    <CopyIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
 
               {/* Endpoint name */}
@@ -170,6 +214,23 @@ const EndpointCards: React.FC<EndpointCardsProps> = ({
           </Card>
         );
       })}
+      
+      {/* Copy feedback snackbar */}
+      <Snackbar
+        open={!!copyFeedback}
+        autoHideDuration={3000}
+        onClose={handleCloseFeedback}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseFeedback} 
+          severity="success" 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {copyFeedback}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
